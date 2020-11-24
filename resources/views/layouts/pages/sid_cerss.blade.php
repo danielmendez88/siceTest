@@ -147,6 +147,23 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
+                    <label for="estado" class="control-label">Estado</label>
+                    <select class="form-control" id="estado" name="estado" required>
+                        <option value="">--SELECCIONAR--</option>
+                        @foreach ($estados as $itemEstado)
+                            <option value="{{ $itemEstado->id }}">{{ $itemEstado->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="municipio" class="control-label">Municipio</label>
+                    <select class="form-control" id="municipio" name="municipio">
+                        <option value="">--SELECCIONAR--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
                     <label for="curp_cerss" class="control-label">CURP ASPIRANTE</label>
                     <input type="text" class="form-control" id="curp_cerss" name="curp_cerss" placeholder="CURP" autocomplete="off">
                 </div>
@@ -324,7 +341,8 @@
                     },
                     anio_cerss: {
                         maxlength: 4,
-                        number: true
+                        number: true,
+                        required: true,
                     },
                     file_upload: {
                         required: true,
@@ -332,6 +350,15 @@
                         filesize: 2 //max size 2mb
                     },
                     numero_expediente_cerss: {
+                        required: true
+                    },
+                    dia_cerss: {
+                        required: true
+                    },
+                    mes_cerss: {
+                        required: true
+                    },
+                    ultimo_grado_estudios_cerss: {
                         required: true
                     }
                 },
@@ -370,6 +397,9 @@
                     },
                     numero_expediente_cerss: {
                         required: "Por favor, Ingrese el número de expediente",
+                    },
+                    ultimo_grado_estudios_cerss: {
+                        required: "Por favor, Seleccione una opción"
                     }
                 }
             });

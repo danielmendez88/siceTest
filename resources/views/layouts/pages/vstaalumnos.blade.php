@@ -142,12 +142,12 @@
                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" href="{{route('preinscripcion.cerss')}}">
                         <i class="fa fa-male" aria-hidden="true"></i>
                     </a>
-                        <b>CAPTURA DE PERFIL CON ANTECEDENTES PENALES (CERESO)</b>
+                        <b>INSCRIPCIÓN A CERSS/CERESO</b>
                     <br>
                     <a class="btn btn-success btn-circle m-1 btn-circle-sm" href="{{route('alumnos.preinscripcion')}}">
                         <i class="fa fa-male" aria-hidden="true"></i>
                     </a>
-                        <b>CAPTURA DE PERFIL SIN ANTECEDENTES PENALES</b>
+                        <b>INSCRIPCIÓN SID DE ALUMNOS</b>
                     <br>
                 </div>
                 <div class="modal-footer">

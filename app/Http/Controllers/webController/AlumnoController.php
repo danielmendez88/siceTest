@@ -80,8 +80,7 @@ class AlumnoController extends Controller
             'NIVEL SUPERIOR TERMINADO' => 'NIVEL SUPERIOR TERMINADO',
             'POSTGRADO' => 'POSTGRADO'
         ];
-        $estado = new Estado();
-        $estados = $estado->all(['id', 'nombre']);
+        $estados = DB::table('estados')->select('id', 'nombre')->get();
 
         return view('layouts.pages.sid_cerss', compact('estados', 'grado_estudio'));
     }
