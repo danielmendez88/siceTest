@@ -147,8 +147,8 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="estado" class="control-label">Estado</label>
-                    <select class="form-control" id="estado" name="estado" required>
+                    <label for="cerss_estado" class="control-label">Estado</label>
+                    <select class="form-control" id="cerss_estado" name="cerss_estado" required>
                         <option value="">--SELECCIONAR--</option>
                         @foreach ($estados as $itemEstado)
                             <option value="{{ $itemEstado->id }}">{{ $itemEstado->nombre }}</option>
@@ -156,8 +156,8 @@
                     </select>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="municipio" class="control-label">Municipio</label>
-                    <select class="form-control" id="municipio" name="municipio">
+                    <label for="cerss_municipio" class="control-label">Municipio</label>
+                    <select class="form-control" id="cerss_municipio" name="cerss_municipio">
                         <option value="">--SELECCIONAR--</option>
                     </select>
                 </div>
@@ -321,6 +321,55 @@
                     //display error message
                     return false;
                 }
+            });
+
+            $('#cerss_estado').on("change", () => {
+                var IdEst =$('#cerss_estado').val();
+                $("#cerss_estado option:selected").each( () => {
+                    var IdEst = $('#cerss_estado').val();
+                    var datos = {idEst: IdEst};
+                    var url = '/alumnos/sid/municipios';
+
+                    var request = $.ajax
+                    ({
+                        url: url,
+                        method: 'POST',
+                        data: datos,
+                        dataType: 'json'
+                    });
+
+                    /*
+                        *Esta es una parte muy importante, aquí se  tratan los datos de la respuesta
+                        *se asume que se recibe un JSON correcto con dos claves: una llamada id_curso
+                        *y la otra llamada cursos, las cuales se presentarán como value y datos de cada option
+                        *del select PARA QUE ESTO FUNCIONE DEBE SER CAPAZ DE DEVOLVER UN JSON VÁLIDO
+                    */
+
+
+                    request.done(( respuesta ) =>
+                    {
+                        if (respuesta.length < 1) {
+                            $("#cerss_municipio").empty();
+                            $("#cerss_municipio").append('<option value="" selected="selected">--SELECCIONAR--</option>');
+                        } else {
+                            if(!respuesta.hasOwnProperty('error')){
+                                $("#cerss_municipio").empty();
+                                $("#cerss_municipio").append('<option value="" selected="selected">--SELECCIONAR--</option>');
+                                $.each(respuesta, (k, v) => {
+                                    $('#cerss_municipio').append('<option value="' + v.muni + '">' + v.muni + '</option>');
+                                });
+                                $("#cerss_municipio").focus();
+                            }else{
+
+                                //Puedes mostrar un mensaje de error en algún div del DOM
+                            }
+                        }
+                    });
+                    request.fail(( jqXHR, textStatus ) =>
+                    {
+                        alert( "Hubo un error: " + textStatus );
+                    });
+                });
             });
 
             /**

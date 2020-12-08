@@ -347,8 +347,11 @@ class AlumnoController extends Controller
         $alumnoPre_update = DB::table('alumnos_pre')->WHERE('id', $idPrealumnoUpdate)->FIRST([
             'nombre', 'apellido_paterno', 'apellido_materno', 'fecha_nacimiento' , 'nacionalidad' ,
             'sexo' , 'curp', 'rfc_cerss', 'ultimo_grado_estudios', 'es_cereso', 'chk_ficha_cerss', 'ficha_cerss',
-            'nombre_cerss', 'numero_expediente', 'direccion_cerss', 'titular_cerss',
+            'nombre_cerss', 'numero_expediente', 'direccion_cerss', 'titular_cerss', 'estado', 'municipio'
         ]);
+
+        $municipios = DB::table('tbl_municipios')->get();
+        $estados = DB::table('estados')->get();
 
         if (is_null($alumnoPre_update->fecha_nacimiento)) {
             # es nulo como verdadero
@@ -362,7 +365,7 @@ class AlumnoController extends Controller
             $dia_nac_cerss = $fecha_nac[2];
         }
 
-        return view('layouts.pages.sid_cerss_update', compact('idPrealumnoUpdate', 'alumnoPre_update', 'anio_nac_cerss', 'mes_nac_cerss', 'dia_nac_cerss', 'grado_estudio_update'));
+        return view('layouts.pages.sid_cerss_update', compact('idPrealumnoUpdate', 'alumnoPre_update', 'anio_nac_cerss', 'mes_nac_cerss', 'dia_nac_cerss', 'grado_estudio_update', 'municipios', 'estados'));
     }
     /**
      * formulario número 2
@@ -1163,8 +1166,8 @@ class AlumnoController extends Controller
                 'telefono' => '',
                 'domicilio' => '',
                 'colonia' => '',
-                'estado' => '',
-                'municipio' => '',
+                'estado' => (is_null($request->get('update_estado_cerss')) ? '' : $request->get('update_estado_cerss')),
+                'municipio' => (is_null($request->get('update_municipio_cerss')) ? '' : $request->get('update_municipio_cerss')),
                 'estado_civil' => '',
                 'discapacidad' => '',
                 'medio_entero' => '',

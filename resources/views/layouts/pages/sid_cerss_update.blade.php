@@ -148,6 +148,23 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
+                    <label for="update_estado_cerss" class="control-label">Estado</label>
+                    <select class="form-control" id="update_estado_cerss" name="update_estado_cerss" required>
+                        <option value="">--SELECCIONAR--</option>
+                        @foreach ($estados as $itemEstado)
+                            <option {{ (trim($alumnoPre_update->estado) == trim($itemEstado->nombre)) ? "selected" : "" }} value="{{ $itemEstado->id }}">{{ $itemEstado->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="update_municipio_cerss" class="control-label">Municipio</label>
+                    <select class="form-control" id="update_municipio_cerss" name="update_municipio_cerss">
+                        <option value="">--SELECCIONAR--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
                     <label for="curp_cerss" class="control-label">CURP ASPIRANTE</label>
                     <input type="text" class="form-control" id="curp_cerss" name="curp_cerss" placeholder="CURP" autocomplete="off" value="{{$alumnoPre_update->curp}}">
                 </div>
@@ -305,6 +322,55 @@
                     //display error message
                     return false;
                 }
+            });
+
+            $('#update_estado_cerss').on("change", () => {
+                var IdEst =$('#update_estado_cerss').val();
+                $("#update_estado_cerss option:selected").each( () => {
+                    var IdEst = $('#update_estado_cerss').val();
+                    var datos = {idEst: IdEst};
+                    var url = '/alumnos/sid/municipios';
+
+                    var request = $.ajax
+                    ({
+                        url: url,
+                        method: 'POST',
+                        data: datos,
+                        dataType: 'json'
+                    });
+
+                    /*
+                        *Esta es una parte muy importante, aquí se  tratan los datos de la respuesta
+                        *se asume que se recibe un JSON correcto con dos claves: una llamada id_curso
+                        *y la otra llamada cursos, las cuales se presentarán como value y datos de cada option
+                        *del select PARA QUE ESTO FUNCIONE DEBE SER CAPAZ DE DEVOLVER UN JSON VÁLIDO
+                    */
+
+
+                    request.done(( respuesta ) =>
+                    {
+                        if (respuesta.length < 1) {
+                            $("#update_municipio_cerss").empty();
+                            $("#update_municipio_cerss").append('<option value="" selected="selected">--SELECCIONAR--</option>');
+                        } else {
+                            if(!respuesta.hasOwnProperty('error')){
+                                $("#update_municipio_cerss").empty();
+                                $("#update_municipio_cerss").append('<option value="" selected="selected">--SELECCIONAR--</option>');
+                                $.each(respuesta, (k, v) => {
+                                    $('#update_municipio_cerss').append('<option value="' + v.muni + '">' + v.muni + '</option>');
+                                });
+                                $("#update_municipio_cerss").focus();
+                            }else{
+
+                                //Puedes mostrar un mensaje de error en algún div del DOM
+                            }
+                        }
+                    });
+                    request.fail(( jqXHR, textStatus ) =>
+                    {
+                        alert( "Hubo un error: " + textStatus );
+                    });
+                });
             });
 
             /**
