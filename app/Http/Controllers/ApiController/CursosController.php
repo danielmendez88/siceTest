@@ -249,9 +249,9 @@ class CursosController extends Controller
                 $url_pdf_curso = $this->uploaded_file($pdf_curso, $id, 'pdf_curso_update'); #invocamos el método
                 // guardamos en la base de datos
                 $cursoUpdate = Curso::findOrfail($id);
-                $cursoUpdate->update([
-                    'pdf_curso' => $url_pdf_curso
-                ]);
+                $cursoUpdate->pdf_curso = $url_pdf_curso;
+                $cursoUpdate->save();
+
             }
 
             return response()->json(['success' => 'Curso actualizado exitosamente'], 200);
