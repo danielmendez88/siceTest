@@ -1128,6 +1128,23 @@ class AlumnoController extends Controller
 
             // obtener el usuario que agrega
             $usuario_agrega = Auth::user()->name;
+            /**
+             * checar si viene una curp y
+             * empezar a comparar para evitar duplicidad
+             */
+            $chk_alumno_registro_exit = DB::table('registro_alumnos_sice')->where('curp', $request->input('curp_cerss'))->exists();
+            if ($chk_alumno_registro_exit) {
+                # si hay registro en la consulta enviamos un mensaje de error
+                return redirect()->back()->withErrors(sprintf('LO SENTIMOS, LA CURP %s YA SE ENCUENTRA REGISTRADA', $request->input('curp_cerss')));
+            }
+            /**
+             * checamos también si el usuario no existe en la tabla alumnos_pre
+             */
+            $chk_curp_exist = DB::table('alumnos_pre')->where('curp', $request->input('curp_cerss'))->exists();
+            if ($chk_curp_exist) {
+                # si hay registro en la consulta enviamos un mensaje de error
+                return redirect()->back()->withErrors(sprintf('LO SENTIMOS, LA CURP %s YA SE ENCUENTRA REGISTRADA', $request->input('curp_cerss')));
+            }
 
             /**
              * empezamos a insertar el registro
@@ -1144,7 +1161,10 @@ class AlumnoController extends Controller
                 $fecha_nacimiento = $anio."-".$mes."-".$dia;
             }
 
-        # arreglo de datos
+            //obtener el estado
+            $nombre_estado_mod_cerrs = DB::table('estados')->where('id', $request->get('update_estado_cerss'))->get();
+
+            # arreglo de datos
             $array_update_cerss = [
 
                 'nombre' => $request->get('nombre_aspirante_cerss'),
@@ -1166,7 +1186,7 @@ class AlumnoController extends Controller
                 'telefono' => '',
                 'domicilio' => '',
                 'colonia' => '',
-                'estado' => (is_null($request->get('update_estado_cerss')) ? '' : $request->get('update_estado_cerss')),
+                'estado' => (is_null($nombre_estado_mod_cerrs[0]->nombre) ? '' : $nombre_estado_mod_cerrs[0]->nombre),
                 'municipio' => (is_null($request->get('update_municipio_cerss')) ? '' : $request->get('update_municipio_cerss')),
                 'estado_civil' => '',
                 'discapacidad' => '',
@@ -1208,16 +1228,13 @@ class AlumnoController extends Controller
                     'ficha_cerss' => $url_ficha_cerss,
                     'chk_ficha_cerss' => $chk_ficha_cerss
                 ];
-        } else {
-            $url_ficha_cerss = '';
-            $chk_ficha_cerss = false;
-        }
+            }
 
-        // vamos a actualizar el registro con el arreglo que trae diferentes variables y carga de archivos
-        DB::table('alumnos_pre')->WHERE('id', $idPreInscripcion)->update($arregloDocs);
+            // vamos a actualizar el registro con el arreglo que trae diferentes variables y carga de archivos
+            DB::table('alumnos_pre')->WHERE('id', $idPreInscripcion)->update($arregloDocs);
 
-        // limpiamos el arreglo
-        unset($arregloDocs);
+            // limpiamos el arreglo
+            unset($arregloDocs);
 
             $numeroExpediente = $request->input('numero_expediente_cerss');
             return redirect()->route('alumnos.index')

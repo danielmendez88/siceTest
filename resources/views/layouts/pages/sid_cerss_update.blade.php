@@ -160,6 +160,9 @@
                     <label for="update_municipio_cerss" class="control-label">Municipio</label>
                     <select class="form-control" id="update_municipio_cerss" name="update_municipio_cerss">
                         <option value="">--SELECCIONAR--</option>
+                        @foreach ($municipios as $itemMunicipio)
+                            <option {{ ($alumnoPre_update->municipio == $itemMunicipio->muni) ? "selected" : ""  }} value="{{$itemMunicipio->muni}}">{{ $itemMunicipio->muni }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -393,11 +396,6 @@
                         maxlength: 4,
                         number: true
                     },
-                    file_upload: {
-                        required: true,
-                        extension: "pdf",
-                        filesize: 2 //max size 2mb
-                    },
                     numero_expediente_cerss: {
                         required: true
                     }
@@ -430,10 +428,6 @@
                     },
                     motivos_eleccion_sistema_capacitacion: {
                         required: "Por favor, seleccione una opción"
-                    },
-                    file_upload: {
-                        required: "Por favor, Seleccione un archivo",
-                        extension: "Sólo se permiten pdf",
                     },
                     numero_expediente_cerss: {
                         required: "Por favor, Ingrese el número de expediente",
