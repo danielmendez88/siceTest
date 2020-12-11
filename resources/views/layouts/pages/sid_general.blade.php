@@ -81,6 +81,29 @@
                     <label for="colonia" class="control-label">Colonia: {{$Alumno->colonia}}</label>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="es_cereso" class="control-label"><b>{{($Alumno->es_cereso == true) ? 'EN EL CERESO' : ''}}</b></label>
+                </div>
+            </div>
+            @if ($Alumno->es_cereso == true)
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="es_cereso" class="control-label">EXPEDIENTE NO°: <b>{{$Alumno->numero_expediente}}</b></label>
+                    </div>
+                    <div class="form-row col-md-4">
+                        <label for="es_cereso" class="control-label">NOMBRE DEL CERESO: <b>{{$Alumno->nombre_cerss}}</b> </label>
+                    </div>
+                    <div class="form-row col-md-4">
+                        <label for="es_cereso" class="control-label">TITULAR DEL CERESO: <b>{{$Alumno->titular_cerss}}</b> </label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="direccion_cereso" class="control-label">DIRECCIÓN DEL CERESO: <b>{{$Alumno->direccion_cerss}}</b></label>
+                    </div>
+                </div>
+            @endif
             <!---->
             <hr style="border-color:dimgray">
             <div style="text-align: center;">
@@ -120,7 +143,7 @@
                         <select class="form-control" id="tipo_curso" name="tipo_curso" required>
                             <option value="">--SELECCIONAR--</option>
                             <option value="PRESENCIAL">PRESENCIAL</option>
-                            <option value="A DISTANCIA">A DISTANCIA</option>
+                            <option value="ONLINE">A DISTANCIA</option>
                         </select>
                     </div>
                 </div>
