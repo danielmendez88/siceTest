@@ -1186,7 +1186,6 @@ class AlumnoController extends Controller
                 'nombre_cerss' => $request->get('nombre_cerss'),
                 'numero_expediente' => $request->get('numero_expediente_cerss'),
                 'direccion_cerss' => $request->get('direcciones_cerss_update_'),
-                'nombre_cerss' => $request->get('nombre_cerss'),
                 'titular_cerss' => $request->get('titular_cerss_update_'),
                 'telefono' => '',
                 'domicilio' => '',

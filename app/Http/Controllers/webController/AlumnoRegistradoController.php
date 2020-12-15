@@ -227,7 +227,9 @@ class AlumnoRegistradoController extends Controller
                             'alumnos_registro.horario', 'alumnos_registro.grupo', 'alumnos_registro.tipo_curso', 'alumnos_pre.empresa_trabaja', 'alumnos_pre.puesto_empresa', 'alumnos_pre.antiguedad',
                             'alumnos_pre.direccion_empresa', 'alumnos_registro.unidad','alumnos_registro.id',
                             'cursos.nombre_curso', 'especialidades.nombre AS especialidad', 'tbl_unidades.unidad AS unidades', 'alumnos_registro.cerrs',
-                            'alumnos_registro.etnia', 'alumnos_registro.fecha', 'alumnos_pre.medio_entero', 'alumnos_pre.sistema_capacitacion_especificar', 'alumnos_registro.realizo', 'cursos.costo']);
+                            'alumnos_registro.etnia', 'alumnos_registro.fecha', 'alumnos_pre.medio_entero', 'alumnos_pre.sistema_capacitacion_especificar', 'alumnos_registro.realizo', 'cursos.costo',
+                            'alumnos_pre.nacionalidad', 'alumnos_pre.es_cereso', 'alumnos_pre.nombre_cerss', 'alumnos_pre.direccion_cerss',
+                            'alumnos_pre.titular_cerss', 'alumnos_pre.chk_ficha_cerss', 'alumnos_pre.numero_expediente']);
 
         $edad = Carbon::parse($alumnos->fecha_nacimiento)->age;
         $date = carbon::now()->toDateString();
@@ -239,9 +241,8 @@ class AlumnoRegistradoController extends Controller
         // Comentar este pathimg si se trabajara con el archivo de forma local
         $pathimg = substr($alumnos->fotografia ,33);
 
-        $pdf = PDF::loadView('layouts.pdfpages.registroalumno_cerss', compact('alumnos', 'edad','date','pathimg'));
-
-        $pdf->setPaper('A4', 'portrait');
-        return $pdf->download('documento_sid_cerrs'.$alumnos->no_control.'.pdf');
+        return PDF::loadView('layouts.pdfpages.registroalumno_cerss', compact('alumnos', 'edad','date','pathimg'))
+                ->setPaper('A4', 'portrait')
+                ->download('documento_sid_cerrs'.$alumnos->no_control.'.pdf');
     }
 }
