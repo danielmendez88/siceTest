@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ public_path('vendor/bootstrap/3.4.1/bootstrap.min.css') }}">
     <style>
         @page {
-            margin: 20px 20px 30px;
+            margin: 20px 20px 10px 20px;
         }
 
         body {
@@ -81,6 +81,9 @@
             width: 100px;
             height: 100px;
           }
+        .saltopagina{
+            page-break-after:always;
+        }
     </style>
 </head>
 <body>
@@ -92,7 +95,7 @@
                 <div class="centrados">
                 <b>SUBSECRETARIA DE EDUCACIÓN MEDIA SUPERIOR
                 DIRECCIÓN GENERAL DE CENTROS DE FORMACIÓN PARA EL TRABAJO
-                SOLICITUD DE INSCRIPCIÓN ( SID - 01 ).</b>
+                SOLICITUD DE INSCRIPCIÓN EN EL CERESO ( SID - CERSS 01 )</b>
                 </div>
             </small>
         </p>
@@ -301,16 +304,24 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" style='border-right:none; border-top:none;'>
+                    <td colspan="2" style='border-right:none; border-top:none; border-bottom:none;'>
                         <small>
                             <b>DIRECCIÓN CERSS: &nbsp;&nbsp;</b>
                             <se>{{ $alumnos->direccion_cerss }}</se>
                         </small>
                     </td>
-                    <td colspan="2" style='border-right:none; border-left:none; border-top:none;'>
+                    <td colspan="2" style='border-right:none; border-left:none; border-top:none; border-bottom:none;'>
                         <small>
                             <b>TITULAR CERSS: &nbsp;&nbsp;</b>
                             <se>{{ $alumnos->titular_cerss }}</se>
+                        </small>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" style='border-right:none; border-top:none;'>
+                        <small>
+                            <b>NACIONALIDAD: &nbsp;&nbsp;</b>
+                            <se>{{ $alumnos->nacionalidad }}</se>
                         </small>
                     </td>
                 </tr>
@@ -459,6 +470,8 @@
                 </tr>
             </tbody>
         </table>
+
+        <div clas='saltopagina'><p><p><p><p><p><p>
 
         <table class="table dashed" cellspacing="0" cellpadding="0">
             <colgroup>
