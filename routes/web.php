@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 
 //Ruta Manual
 Route::get('/user/manuales', 'webController\manualController@index')->name('manuales');
+/**
+    * prueba pdf -- DMC
+     */
 
 Route::post('/alumnos/sid/checkcursos', 'webController\AlumnoController@checkcursos');
 
@@ -296,4 +299,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reportes/formato_t_reporte/index', function () {
         return view('layouts.pages.reportes.formato_t_reporte');
     })->name('reportes.formatoT');
+    
+    //Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+    Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+    Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+    Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+    Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc');
+    Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
+    Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
+
 });

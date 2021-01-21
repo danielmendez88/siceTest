@@ -51,5 +51,9 @@ class tbl_curso extends Model
             }
         }
     }
+    public function Calificacion() 
+    {
+        return $this->belongsTo(Calificacion::class, 'idcurso');
+    }
 
 }
