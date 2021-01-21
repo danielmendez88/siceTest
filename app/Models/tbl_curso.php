@@ -61,6 +61,10 @@ class tbl_curso extends Model
             }
         }
     }
+    public function Calificacion() 
+    {
+        return $this->belongsTo(Calificacion::class, 'idcurso');
+    }
 
 	// scope TABLERO DE CONTROL .- Romelia Pérez Nangüelu
     public function scopeBusquedaTablero($query, $ubicacion, $fecha_inicio, $fecha_termino){

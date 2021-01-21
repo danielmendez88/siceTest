@@ -17,7 +17,7 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label for="inputfolio">Confirmacion de Numero de Suficiencia</label>
-                    <input id="no_suficiencia" name="no_suficiencia" value="{{$dataf->folio_validacion}}" disabled class="form-control">
+                    <input id="no_suficiencia" name="no_suficienci" value="{{$dataf->folio_validacion}}" disabled class="form-control">
                 </div>
             </div>
             <hr style="border-color:dimgray">

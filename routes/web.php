@@ -38,6 +38,9 @@ Route::get('/contrato/historial/validado/{id}', 'webController\ContratoControlle
 Route::get('/user/manuales', 'webController\manualController@index')->name('manuales');
 // checar cursos
 Route::post('/alumnos/sid/checkcursos', 'webController\AlumnoController@checkcursos')->name('alumnos.sid.checkcursos');
+/**
+* prueba pdf -- DMC
+*/
 
 //ruta Pago
 Route::post('/pago/rechazar_pago', 'webController\PagoController@rechazar_pago')->name('pago-rechazo');
@@ -382,3 +385,11 @@ Route::middleware(['auth'])->group(function () {
 Route::get('dashboard/principal', function() {
     return view('theme.principal.indice');
 });
+
+//Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc');
+Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
+Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
