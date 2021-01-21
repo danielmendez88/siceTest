@@ -1,4 +1,4 @@
-!--Creado por Julio Alcaraz-->
+<!--Creado por Julio Alcaraz-->
 @extends('theme.sivyc.layout')
 <!--llamar a la plantilla -->
 @section('title', 'APERTURAS | SIVyC Icatech')
