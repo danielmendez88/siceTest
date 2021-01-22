@@ -45,12 +45,18 @@
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
             @else  
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <input type="checkbox" id="selectAll" checked/>
-                    <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
-                </div>
-            </div>               
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <input type="checkbox" id="selectAll" checked/>
+                        <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
+                    </div>
+                    <div class="form-group col-md-9">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                            Launch demo modal
+                        </button>
+                        <button input type="submit" class="btn btn-danger">Enviar cursos validados a DTA</button> 
+                    </div>
+                </div>               
                 <div class="table-responsive" >     
                     <table  id="table-911" class="table">                
                         <thead class="thead-dark">
@@ -308,14 +314,34 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div> 
-                <button input type="submit" class="btn btn-danger">Enviar</button>          
+                </div>          
             @endif
         @else
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
         @endif
-        
+        <br>
     </div>
+    <!--MODAL-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    <!--MODAL ENDS-->
 @endsection
 @section('script_content_js')
 <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
