@@ -4,33 +4,55 @@
 @section('title', 'APERTURAS | SIVyC Icatech')
 <!--seccion-->
 @section('content')
-    <div class="container g-pt-80"> 
+    <div class="container g-pt-50">
         <div class="row">
             <h4>Reporte Formato T</h4>  
         </div>
-        <div class="row">
-            <div class="pull-left">
+        
                 {{ Form::open(['route' => 'formatot.cursos', 'method' => 'post', 'class' => 'form-inline', 'enctype' => 'multipart/form-data']) }}
-                <select class="form-control" id="turno" name="mes">
-                    <option>--SELECIONAR--</option>
-                    <option>Enero</option>
-                    <option>Febrero</option>
-                    <option>Marzo</option>
-                    <option>Abril</option>
-                    <option>Mayo</option>
-                    <option>Junio</option>
-                    <option>Julio</option>
-                    <option>Agosto</option>
-                    <option>Septiembre</option>
-                    <option>Octubre</option>
-                    <option>Noviembre</option>
-                    <option>Diciembre</option>
-                </select>
-                {{ Form::text('año', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
-                {!! Form::submit( 'BUSCAR', ['id'=>'formatot', 'class' => 'btn btn-dark', 'name' => 'submitbutton'])!!}
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <select class="form-control" id="turno" name="mes">
+                                <option>--SELECIONAR--</option>
+                                <option>Enero</option>
+                                <option>Febrero</option>
+                                <option>Marzo</option>
+                                <option>Abril</option>
+                                <option>Mayo</option>
+                                <option>Junio</option>
+                                <option>Julio</option>
+                                <option>Agosto</option>
+                                <option>Septiembre</option>
+                                <option>Octubre</option>
+                                <option>Noviembre</option>
+                                <option>Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{ Form::text('año', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            {!! Form::submit( 'BUSCAR', ['id'=>'formatot', 'class' => 'btn btn-dark', 'name' => 'submitbutton'])!!}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!--NOMBRE CERSS-->
+                        <div class="form-group col-md-4">
+                            <label for="nombre_cerss " class="control-label">NOMBRE DEL CERSS</label>
+                            <input type="text" class="form-control" id="nombre_cerss" name="nombre_cerss" autocomplete="off">
+                        </div>
+                        <!--NOMBRE CERSS END-->
+                        <div class="form-group col-md-8">
+                            <label for="direcciones_cerss " class="control-label">DIRECCIÓN DEL CERSS</label>
+                            <input type="text" class="form-control" id="direcciones_cerss " name="direcciones_cerss " autocomplete="off"/>
+                        </div>
+                    </div>
+                    
                 {!! Form::close() !!}
-            </div> 
-        </div>
+            
         <hr style="border-color:dimgray">
         @if ( isset($var_cursos) )
             @if ($var_cursos->isEmpty())
@@ -298,5 +320,7 @@
         @endif
         <button input type="submit" class="btn btn-dark">Enviar</button>
     </div>
-    <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
+@endsection
+@section('script_content_js')
+<script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
 @endsection
