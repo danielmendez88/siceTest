@@ -6,58 +6,51 @@
 @section('content')
     <div class="container g-pt-50">
         <div class="row">
-            <h4>Reporte Formato T</h4>  
+            <div class="col-lg-8 margin-tb">
+                <div>
+                    <h3><b>FORMATO T</b></h3>
+                </div>
+            </div>
         </div>
         
-                {{ Form::open(['route' => 'formatot.cursos', 'method' => 'post', 'class' => 'form-inline', 'enctype' => 'multipart/form-data']) }}
-                    <div class="form-row">
-                        <div class="form-group col-md-4">
-                            <select class="form-control" id="turno" name="mes">
-                                <option>--SELECIONAR--</option>
-                                <option>Enero</option>
-                                <option>Febrero</option>
-                                <option>Marzo</option>
-                                <option>Abril</option>
-                                <option>Mayo</option>
-                                <option>Junio</option>
-                                <option>Julio</option>
-                                <option>Agosto</option>
-                                <option>Septiembre</option>
-                                <option>Octubre</option>
-                                <option>Noviembre</option>
-                                <option>Diciembre</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-4">
-                            {{ Form::text('año', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-8">
-                            {!! Form::submit( 'BUSCAR', ['id'=>'formatot', 'class' => 'btn btn-dark', 'name' => 'submitbutton'])!!}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <!--NOMBRE CERSS-->
-                        <div class="form-group col-md-4">
-                            <label for="nombre_cerss " class="control-label">NOMBRE DEL CERSS</label>
-                            <input type="text" class="form-control" id="nombre_cerss" name="nombre_cerss" autocomplete="off">
-                        </div>
-                        <!--NOMBRE CERSS END-->
-                        <div class="form-group col-md-8">
-                            <label for="direcciones_cerss " class="control-label">DIRECCIÓN DEL CERSS</label>
-                            <input type="text" class="form-control" id="direcciones_cerss " name="direcciones_cerss " autocomplete="off"/>
-                        </div>
-                    </div>
-                    
-                {!! Form::close() !!}
+        {{ Form::open(['route' => 'formatot.cursos', 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <select class="form-control" id="turno" name="mes">
+                        <option>--SELECIONAR--</option>
+                        <option>Enero</option>
+                        <option>Febrero</option>
+                        <option>Marzo</option>
+                        <option>Abril</option>
+                        <option>Mayo</option>
+                        <option>Junio</option>
+                        <option>Julio</option>
+                        <option>Agosto</option>
+                        <option>Septiembre</option>
+                        <option>Octubre</option>
+                        <option>Noviembre</option>
+                        <option>Diciembre</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    {{ Form::text('año', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
+                </div>
+            </div>
+            {!! Form::submit( 'BUSCAR', ['id'=>'formatot', 'class' => 'btn btn-primary', 'name' => 'submitbutton'])!!}
+            
+        {!! Form::close() !!}
             
         <hr style="border-color:dimgray">
-        @if ( isset($var_cursos) )
-            @if ($var_cursos->isEmpty())
-            <div>No hay Registros para mostrar</div>
-            @else                
+        @if (isset($var_cursos) )
+            @if (is_null($var_cursos))
+            <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
+            @else  
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <input type="checkbox" id="selectAll" checked/>
+                    <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
+                </div>
+            </div>               
                 <div class="table-responsive" >     
                     <table  id="table-911" class="table">                
                         <thead class="thead-dark">
@@ -189,7 +182,7 @@
                         <tbody>
                             @foreach ($var_cursos as $datas)
                                 <tr align="center">
-                                    <td><input type="checkbox" id="cb1" value="repro" checked></td></td>
+                                    <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked/></td></td>
                                     <td>{{ $datas->unidad }}</td>
                                     <td>{{ $datas->plantel }}</td>
                                     <td>{{ $datas->espe }}</td>
@@ -315,12 +308,22 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div>             
+                </div> 
+                <button input type="submit" class="btn btn-danger">Enviar</button>          
             @endif
+        @else
+            <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
         @endif
-        <button input type="submit" class="btn btn-dark">Enviar</button>
+        
     </div>
 @endsection
 @section('script_content_js')
 <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
+<script type="text/javascript">
+    $(function(){
+        $("#selectAll").click(function() {
+            $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
+        });
+    });
+</script>
 @endsection

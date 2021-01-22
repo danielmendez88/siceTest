@@ -28,20 +28,25 @@ class ftcontroller extends Controller
     {
         $id_user = Auth::user()->id;
         //var_dump($id_user);exit;
-        $rol = DB::table('role_user')->LEFTJOIN('roles', 'roles.id', '=', 'role_user.role_id')            
-        ->WHERE('role_user.user_id', '=', $id_user)->WHERE('roles.slug', '=', 'unidad')
-        ->value('roles.slug');        
+        $rol = DB::table('role_user')
+        ->select('roles.slug')
+        ->leftjoin('roles', 'roles.id', '=', 'role_user.role_id')            
+        ->where([['role_user.user_id', '=', $id_user], ['roles.slug', '=', 'unidad']])
+        ->get();
         $_SESSION['unidades']=NULL;
         //var_dump($rol);exit;
-        if($rol=='unidad')
-        { 
-            $unidad = Auth::user()->unidad;
-            $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
-            $_SESSION['unidad'] = $unidad;             
-        }
-            //var_dump($_SESSION['unidades']);exit;
+        if (!empty($rol[0]->slug)) {
+            # si no está vacio
+            if($rol[0]->slug=='unidad')
+            { 
+                $unidad = Auth::user()->unidad;
+                $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
+                $_SESSION['unidad'] = $unidad;
+            }
+
             $años = $año;
-            $var_cursos = DB::table('tbl_cursos as c')->select('c.unidad','c.plantel','c.espe','c.curso','c.clave','c.mod','c.dura',DB::raw("case when extract(hour from to_timestamp(c.hini,'HH24:MI a.m.')::time)<14 then 'MATUTINO' else 'VESPERTINO' end as turno"),
+            $var_cursos = DB::table('tbl_cursos as c')
+                ->select('c.id AS id_tbl_cursos', 'c.unidad','c.plantel','c.espe','c.curso','c.clave','c.mod','c.dura',DB::raw("case when extract(hour from to_timestamp(c.hini,'HH24:MI a.m.')::time)<14 then 'MATUTINO' else 'VESPERTINO' end as turno"),
                 DB::raw('extract(day from c.inicio) as diai'),DB::raw('extract(month from c.inicio) as mesi'),DB::raw('extract(day from c.termino) as diat'),DB::raw('extract(month from c.termino) as mest'),DB::raw("case when EXTRACT( Month FROM c.termino) between '7' and '9' then '1' when EXTRACT( Month FROM c.termino) between '10' and '12' then '2' when EXTRACT( Month FROM c.termino) between '1' and '3' then '3' else '4' end as pfin"),
                 'c.horas','c.dia',DB::raw("concat(c.hini,' ', 'A', ' ',c.hfin) as horario"),DB::raw('count(distinct(ca.id)) as tinscritos'),DB::raw("SUM(CASE WHEN ap.sexo='FEMENINO' THEN 1 ELSE 0 END) as imujer"),DB::raw("SUM(CASE WHEN ap.sexo='MASCULINO' THEN 1 ELSE 0 END) as ihombre"),DB::raw("SUM(CASE WHEN ca.acreditado= 'X' THEN 1 ELSE 0 END) as egresado"),
                 DB::raw("SUM(CASE WHEN ca.acreditado='X' and ap.sexo='FEMENINO' THEN 1 ELSE 0 END) as emujer"),DB::raw("SUM(CASE WHEN ca.acreditado='X' and ap.sexo='MASCULINO' THEN 1 ELSE 0 END) as ehombre"),DB::raw("SUM(CASE WHEN ca.noacreditado='X' THEN 1 ELSE 0 END) as desertado"),
@@ -105,9 +110,17 @@ class ftcontroller extends Controller
                 ->WHERE('c.status', '=', 'NO REPORTADO')                
                 ->WHERE(DB::raw("extract(year from c.termino)"), '=', $años)
                 ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
-                         ,'ins.abrinscri','c.arc')
+                         ,'ins.abrinscri','c.arc', 'c.id')
                 ->distinct()->get();
-            return view('reportes.vista_formatot',compact('var_cursos'));     
+            return view('reportes.vista_formatot',compact('var_cursos')); 
+
+        } else {
+            # si se encuentra vacio
+            $var_cursos = null;
+            return view('reportes.vista_formatot',compact('var_cursos')); 
+        }
+            //var_dump($_SESSION['unidades']);exit;
+                
     }
     
 }
