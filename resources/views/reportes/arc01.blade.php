@@ -7,7 +7,7 @@
     <title>ARC01</title>
     <style>      
         body{font-family: sans-serif}
-        @page {margin: 30px 50px 10px 20px;}
+        @page {margin: 40px 20px 10px 20px;}
             header { position: fixed; left: 0px; top: 10px; right: 0px; text-align: center;}
             header h1{height:0; line-height: 14px; padding: 9px; margin: 0;}
             header h2{margin-top: 20px; font-size: 8px; border: 1px solid gray; padding: 12px; line-height: 18px; text-align: justify;}
@@ -17,27 +17,28 @@
             img.izquierdabot {position: absolute;left: 50px;width: 350px;height: 60px;}
             img.derechabot {position: absolute;right: 50px;width: 350px;height: 60px;}
             img.derecha {float: right;width: 200px;height: 60px;}
-        .tablas{border-collapse: collapse;width: 990px;}
+        .tablas{border-collapse: collapse;width: 100%;}
         .tablas tr{font-size: 8px; border: gray 1px solid; text-align: center; padding: 1px 1px;}
         .tablas th{font-size: 8px; border: gray 1px solid; text-align: center; padding: 1px 1px;}
-        .tablaf { border-collapse: collapse; width: 990px;}     
-        .tablaf tr td { font-size: 8px; text-align: center; padding: 3px;}
+        .tablaf { border-collapse: collapse; width: 100%;}     
+        .tablaf tr td { font-size: 8px; text-align: center; padding: 0px 0px;}
         .tablad { border-collapse: collapse;}     
         .tablad { font-size: 8px;border: gray 1px solid; text-align: left; padding: 2px;}
-        .tablag { border-collapse: collapse; width: 990px;}     
+        .tablag { border-collapse: collapse; width: 100%;}     
         .tablag tr td { font-size: 8px; padding: 0px;}
     </style>
 </head>
 <body>
     <div class= "container g-pt-30">
         <div id="content">
-            <img class="izquierda" src='img/logohorizontalica1.jpg'>
+            <img class="izquierda" src='img/logohorizontalica1.png'>
             <img class="derecha" src='img/chiapas.png'>
             <div id="wrappertop">
                 <div align=center><br> 
                     <font size=1><b>UNIDAD DE CAPACITACION {{ $reg_unidad->unidad }}<br/>
                     <font size=1>DEPARTAMENTO ACADEMICO</font><br/>
-                    <font size=1>SOLICITUD DE APERTURA DE CURSO</font><br/>                       
+                    <font size=1>SOLICITUD DE APERTURA DE CURSO</font><br/>
+                    <font size=1>"2021,AÑO DE LA INDEPENDENCIA"</font><br/>                       
                 </div><br><br><br>
             </div>
             <table class="tablag">
@@ -77,25 +78,25 @@
                             <th rowspan="2">NOMBRE <br>DEL<br> CURSO</th>  
                             <th rowspan="2">MOD</th>               
                             <th colspan="2">TIPO<br>DE<br>CURSO</th>       
-                            <th rowspan="2">DUR.</th>         
+                            <th rowspan="2">D<br>U<br>R</th>         
                             <th rowspan="2">INICIO</th>  
                             <th rowspan="2">TERMIN<br>O</th>             
                             <th rowspan="2">HOR<br>AS <br>DIA<br>RIAS</th>
                             <th rowspan="2">HORA<br>RIO</th>
                             <th rowspan="2">DIAS</th>
                             <th rowspan="2">CU<br>PO</th>
-                            <th colspan="2">INSCRITOS</th>       
+                            <th colspan="2">INSC<br>RITOS</th>       
                             <th rowspan="2">INSTRUCTOR</th>
                             <th rowspan="2" >CRI<br>TER<br>IO<br>DE<br>PA<br>GO</th>
                             <th rowspan="2">MUNICIPIO</th>
                             <th rowspan="2">ZO<br>NA<br>EC<br>ON<br>OM<br>ICA</th>
                             <th rowspan="2">DEPENDENCIA<br>BENEFICIADA</th>
                             <th colspan="4">TIPO DE CUOTA POR CURSO (MARCAR CON X LA OPCION)</th>       
-                            <th rowspan="2">ESPACIO FISICO<br>DONDE SE<br>IMPARTE EL<br>CURSO</th>
+                            <th rowspan="2">ESPACIO FISICO DONDE SE IMPARTE EL CURSO</th>
                             <th rowspan="2">OBSERVACIONES</th>
                         </tr>  
                         <tr> 
-                            <th >PRE<br>SEN<br>CIAL</th>                 
+                            <th >PRE<br>SEN<br>CIA<br>L</th>                 
                             <th >A <br>DIS<br>TAN<br>CIA</th> 
                             <th >F<b>E<b>M</th>   
                             <th >MA<b>S<b>C</th> 
@@ -135,7 +136,7 @@
                         @endforeach
                     </tbody>                                               
                 </table>
-            </div><br>    
+            </div> 
             <div align="left" ><style type="text/css"> BODY{ font-family: sans-serif;font-size:8px } </style><b>CRITERIO DE CONTRATACION Y PAGO</b></div>
             <table class="tablad">
                 <tr>
@@ -151,11 +152,11 @@
             <table class="tablaf">
                 <tr>
                     <td> </td><td> </td><td> </td><td> </td><td> </td>
-                    <td align="center"><b>SOLICITO</b><br><br><br><br><br><br><br><br><br></td>
+                    <td align="center"><b>SOLICITO</b><br><br><br><br><br><br><br><br></td>
                     <td> </td><td> </td><td> </td><td> </td><td> </td>                
-                    <td align="center"><b>ELABORO</b><br><br><br><br><br><br><br><br><br></td>                    
+                    <td align="center"><b>ELABORO</b><br><br><br><br><br><br><br><br></td>                    
                     <td> </td><td> </td><td> </td><td> </td><td> </td>                
-                    <td align="center"><b>Vo. Bo.</b><br><br><br><br><br><br><br><br><br></td>                
+                    <td align="center"><b>Vo. Bo.</b><br><br><br><br><br><br><br><br></td>                
                 </tr>
                 <tr>
                     <td> </td><td> </td><td> </td><td> </td><td> </td>

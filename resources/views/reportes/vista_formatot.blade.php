@@ -296,7 +296,9 @@
                 </div>             
             @endif
         @endif
-        <button input type="submit" class="btn btn-dark">Enviar</button>
+        {{ Form::open(['route' => 'memo_dta', 'method' => 'post', 'class' => 'form-inline', 'enctype' => 'multipart/form-data','target'=>'_blank']) }}
+        {!! Form::submit( 'ENVIAR', ['id'=>'formatot', 'class' => 'btn btn-dark', 'name' => 'submitbutton'])!!}
+        {!! Form::close() !!}
     </div>
     <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
 @endsection

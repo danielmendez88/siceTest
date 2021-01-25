@@ -18,11 +18,13 @@ class ftcontroller extends Controller
 
     public function cursos(Request $request)
     {
-        $año=$request->get("año");
-        if ($año)
-        {
-                return $this->busqueda($año);
-        }
+        
+        return $this->memodta();
+        //$año=$request->get("año");
+        //if ($año)
+        //{ 
+        //    return $this->busqueda($año);
+        //}
     }
     public function busqueda($año)
     {
@@ -107,7 +109,15 @@ class ftcontroller extends Controller
                 ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
                          ,'ins.abrinscri','c.arc')
                 ->distinct()->get();
-            return view('reportes.vista_formatot',compact('var_cursos'));     
+            return view('reportes.vista_formatot',compact('var_cursos'));    
+    }
+    public function memodta()
+    {
+        $pdf = PDF::loadView('reportes.memodta');
+                //return view('reportes.arc01');
+                //var_dump($pdf);exit;
+                $pdf->setpaper('letter');
+                return $pdf->stream('memo.pdf');
     }
     
 }
