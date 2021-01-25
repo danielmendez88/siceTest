@@ -310,3 +310,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reportes/memo/','ftcontroller@memodta')->name('memo_dta');
     Route::post('/reportes/munidad/','ftcontroller@munidad')->name('memo_unidad');
 });
+
+
+
+Route::get('dashboard/principal', function() {
+    return view('theme.principal.indice');
+});
+
+//Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc');
+Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
+Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
+Route::post('/reportes/vista_ft/savetodta', 'ftcontroller@store')->name('formatot.send.dta');

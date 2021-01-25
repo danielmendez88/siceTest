@@ -4,40 +4,56 @@
 @section('title', 'APERTURAS | SIVyC Icatech')
 <!--seccion-->
 @section('content')
+    <style>
+        #spinner:not([hidden]) {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #spinner::after {
+        content: "";
+        width: 80px;
+        height: 80px;
+        border: 2px solid #f3f3f3;
+        border-top: 3px solid #f25a41;
+        border-radius: 100%;
+        will-change: transform;
+        animation: spin 1s infinite linear
+        }
+
+        @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+        }
+    </style>
     <div class="container g-pt-50">
         <div class="row">
             <div class="col-lg-8 margin-tb">
                 <div>
-                    <h3><b>FORMATO T</b></h3>
+                    <h3><b>GENERACIÓN DEL FORMATO T</b></h3>
                 </div>
             </div>
         </div>
         
         {{ Form::open(['route' => 'formatot.cursos', 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
             <div class="form-row">
-                <div class="form-group col-md-6">
-                    <select class="form-control" id="turno" name="mes">
-                        <option>--SELECIONAR--</option>
-                        <option>Enero</option>
-                        <option>Febrero</option>
-                        <option>Marzo</option>
-                        <option>Abril</option>
-                        <option>Mayo</option>
-                        <option>Junio</option>
-                        <option>Julio</option>
-                        <option>Agosto</option>
-                        <option>Septiembre</option>
-                        <option>Octubre</option>
-                        <option>Noviembre</option>
-                        <option>Diciembre</option>
-                    </select>
+                <div class="form-group col-md-4">
+                    {{ Form::text('anio', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
                 </div>
                 <div class="form-group col-md-4">
-                    {{ Form::text('año', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
+                    {!! Form::submit( 'FILTRAR', ['id'=>'formatot', 'class' => 'btn btn-outline-info my-2 my-sm-0 waves-effect waves-light', 'name' => 'submitbutton'])!!}
                 </div>
             </div>
-            {!! Form::submit( 'BUSCAR', ['id'=>'formatot', 'class' => 'btn btn-primary', 'name' => 'submitbutton'])!!}
-            
         {!! Form::close() !!}
             
         <hr style="border-color:dimgray">
@@ -46,15 +62,21 @@
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
             @else  
                 <div class="form-row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-4">
                         <input type="checkbox" id="selectAll" checked/>
                         <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
                     </div>
-                    <div class="form-group col-md-9">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                            Launch demo modal
-                        </button>
-                        <button input type="submit" class="btn btn-danger">Enviar cursos validados a DTA</button> 
+                    <div class="form-group col-md-4">
+                        <button input type="button" id="generar_memo" name="generar_memo"  class="btn btn-danger">
+                           <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                            GENERAR MEMO DE VALIDACIÓN
+                        </button> 
+                    </div>
+                    <div class="form-group col-md-4">
+                        <button input type="button" id="enviardta" name="enviardta"  class="btn btn-success">
+                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                            ENVIAR CURSOS VALIDADOS A DTA
+                        </button> 
                     </div>
                 </div>               
                 <div class="table-responsive" >     
@@ -322,31 +344,171 @@
         <br>
     </div>
     <!--MODAL-->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <!-- ESTO MOSTRARÁ EL SPINNER -->
+    <div hidden id="spinner"></div>
+    <!--MODAL ENDS-->
+    <!--MODAL FORMULARIO-->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+              <h5 class="modal-title" id="enviar_cursos_dta"><b>ENVIAR  CURSOS VALIDADOS A DTA</b></h5>
             </div>
-            <div class="modal-body">
-              ...
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
+            <form id="dtaform" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="numero_memo">NÚMERO DE MEMORANDUM</label>
+                            <input type="text" class="form-control" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="memorandum_validacion">ENVIAR MEMO DE VALIDACIÓN</label>
+                            <input type="file" accept="application/pdf" class="form-control" id="memorandum_validacion" name="memorandum_validacion" placeholder="ENVIAR MEMO DE VALIDACIÓN">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="submit" class="btn btn-success" id="send_to_dta">ENVIAR</button>
+                <button type="button" id="close_btn_modal_send_dta" class="btn btn-danger">CERRAR</button>
+                </div>
+            </form>
           </div>
         </div>
     </div>
-    <!--MODAL ENDS-->
+    <!--MODAL FORMULARIO ENDS-->
 @endsection
 @section('script_content_js')
 <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
 <script type="text/javascript">
     $(function(){
+
+        document.querySelector('#spinner').setAttribute('hidden', '');
+
+        $.validator.addMethod('filesize', function (value, element, param) {
+            return this.optional(element) || (element.files[0].size <= param)
+        }, 'El TAMAÑO DEL ARCHIVO DEBE SER MENOR A {0} bytes.');
+
+        $('#dtaform').validate(); // configurar el validador
+
+        $('#enviardta').click(function(){
+            $("#exampleModalCenter").modal("show");
+            // configuracion del validador
+            $("input[id*=numero_memo]").rules('add', { required: true ,
+                messages: {
+                    required: "CAMPO REQUERIDO"
+                }
+            });
+            $("#memorandum_validacion").rules("add", { required: true, extension: "pdf", filesize: 2000000, 
+                messages: {
+                    required: "ARCHIVO REQUERIDO",
+                    accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
+                }
+            });
+        });
+
+        // Envíe los datos del formulario a través de Ajax
+        $("#send_to_dta").click(function(e){
+            e.preventDefault();
+            var _myCheckboxes = new Array();
+            $('input[name="chkcursos_list[]"]:checked').each(function() {
+                 _myCheckboxes.push(this.value);
+            });
+
+            /***
+             * memorandum_validacion
+            */
+            var memo_to_upload = $( '#memorandum_validacion' )[0].files[0];
+            var memo = $('#numero_memo').val();
+            var check_cursos = JSON.stringify(_myCheckboxes)
+            var _url = "{{route('formatot.send.dta')}}";
+            var requested = $.ajax
+            ({
+                url: _url,
+                method: 'POST',
+                data: { check_cursos: _myCheckboxes, memo: memo, upload_memo_file: memo_to_upload},
+                dataType: 'json',
+                contentType: false,
+                cache: false,
+                processData:false,
+                beforeSend: function(){
+                    document.querySelector("#spinner").removeAttribute('hidden');
+                },
+                success: function(response){ 
+                    console.log(response);
+                },
+                complete:function(data){
+                    // escondemos el modales
+                    document.querySelector('#spinner').setAttribute('hidden', '');
+                },
+                error: function(jqXHR, textStatus){
+                    //jsonValue = jQuery.parseJSON( jqXHR.responseText );
+                    //document.querySelector('#spinner').setAttribute('hidden', '');
+                    console.log(jqXHR.responseText);
+                    alert( "Hubo un error: " + jqXHR.status );
+                }
+            });
+
+            $.when(requested).then(function(data, textStatus, jqXHR ){
+                if (jqXHR.status === 200) {
+                    document.querySelector('#spinner').setAttribute('hidden', '');
+                }
+            });
+        });
+
+        $('#close_btn_modal_send_dta').click(function(){
+            $("#numero_memo").rules('remove', 'required', 'extension', 'filesize');
+            $("input[id*=numero_memo]").removeClass("error"); // workaround
+            $("#exampleModalCenter").modal("hide");
+        });
+        
+        //document.querySelector("#spinner").removeAttribute('hidden');
+        
+        $('#generar_memo').click(function(){
+            var url = "{{route('formatot.send.dta')}}";
+            var myCheckboxes = new Array();
+            $('input[name="chkcursos_list[]"]:checked').each(function() {
+                 myCheckboxes.push(this.value);
+            });
+
+            var memo = $('#numero_memo').val();
+            console.log(myCheckboxes);
+            var chk = JSON.stringify(myCheckboxes)
+            var solicitud = $.ajax
+                ({
+                    url: url,
+                    method: 'POST',
+                    data: { chk: myCheckboxes, memo: memo},
+                    dataType: 'json',
+                    beforeSend: function(){
+                        document.querySelector("#spinner").removeAttribute('hidden');
+                    },
+                    success: function(response){
+                        console.log(response);
+                    },
+                    complete:function(data){
+                        // escondemos el modales
+                        document.querySelector('#spinner').setAttribute('hidden', '');
+                    },
+                    error: function(jqXHR, textStatus){
+                        //jsonValue = jQuery.parseJSON( jqXHR.responseText );
+                        document.querySelector('#spinner').setAttribute('hidden', '');
+                        console.log(jqXHR.status);
+                        alert( "Hubo un error: " + jqXHR.status );
+                    }
+                });
+
+                $.when(solicitud).then(function(data, textStatus, jqXHR ){
+                    if (jqXHR.status === 200) {
+                        document.querySelector('#spinner').setAttribute('hidden', '');
+                    }
+                });
+            
+            
+            //console.log(sel);
+        });
+
         $("#selectAll").click(function() {
             $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
         });
