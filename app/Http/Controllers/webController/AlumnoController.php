@@ -162,6 +162,7 @@ class AlumnoController extends Controller
                 $AlumnoPreseleccion->sistema_capacitacion_especificar = ($request->input('motivos_eleccion_sistema_capacitacion') === "0") ? $request->input('sistema_capacitacion_especificar') : $request->input('motivos_eleccion_sistema_capacitacion');
                 $AlumnoPreseleccion->empresa_trabaja = $request->empresa;
                 $AlumnoPreseleccion->antiguedad = $request->antiguedad;
+                $AlumnoPreseleccion->direccion_empresa = $request->direccion_empresa;
                 $AlumnoPreseleccion->realizo = $usuario;
                 $AlumnoPreseleccion->tiene_documentacion = false;
                 $AlumnoPreseleccion->es_cereso = false;
@@ -833,8 +834,7 @@ class AlumnoController extends Controller
                         'grupo' => $request->input('grupo'),
                         'unidad' => $request->input('tblunidades'),
                         'tipo_curso' => $request->input('tipo_curso'),
-                        'realizo' => $usuario,
-                        'cerrs' => $request->input('cerrs')
+                        'realizo' => $usuario
                     ]);
 
                     $AlumnosPre->alumnos()->save($alumno);
