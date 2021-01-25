@@ -17,6 +17,9 @@ class ftcontroller extends Controller
 {
     public function index(Request $request)
     {
+        $file = 'http://localhost:8000/storage/uploadFiles/memoValidacion/1268326/1268326.pdf';
+        $comprobanteCalidadMigratoria = explode("/",$file, 5);
+        dd($comprobanteCalidadMigratoria[4]);
         return view('reportes.vista_formatot');       
     }
 
@@ -162,7 +165,7 @@ class ftcontroller extends Controller
                 # mandar un mensaje de error
                 return json_encode(['errors'=>$validator->errors()]);
             } else {
-                
+
             }
         }
         
@@ -184,15 +187,15 @@ class ftcontroller extends Controller
         return $json;
     }
 
-    protected function uploaded_memo_validacion_file($file, $memo, $name)
+    protected function uploaded_memo_validacion_file($file, $memo)
     {
         $tamanio = $file->getSize(); #obtener el tamaño del archivo del cliente
         $extensionFile = $file->getClientOriginalExtension(); // extension de la imagen
         # nuevo nombre del archivo
-        $documentFile = trim($name."_".date('YmdHis')."_".$memo.".".$extensionFile);
+        $documentFile = trim($memo.".".$extensionFile);
         //$path = $file->storeAs('/filesUpload/alumnos/'.$id, $documentFile); // guardamos el archivo en la carpeta storage
         //$documentUrl = $documentFile;
-        $path = 'alumnos/'.$id.'/'.$documentFile;
+        $path = 'memoValidacion/'.$memo.'/'.$documentFile;
         Storage::disk('mydisk')->put($path, file_get_contents($file));
         //$path = storage_path('app/filesUpload/alumnos/'.$id.'/'.$documentFile);
         $documentUrl = Storage::disk('mydisk')->url('/uploadFiles/memoValidacion/'.$memo."/".$documentFile); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
