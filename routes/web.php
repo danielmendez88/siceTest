@@ -393,3 +393,4 @@ Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_9
 Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc');
 Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
 Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
+Route::post('/reportes/vista_ft/savetodta', 'ftcontroller@store')->name('formatot.send.dta');
