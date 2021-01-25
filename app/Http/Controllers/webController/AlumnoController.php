@@ -133,6 +133,7 @@ class AlumnoController extends Controller
                 $AlumnoPreseleccion->sistema_capacitacion_especificar = ($request->input('motivos_eleccion_sistema_capacitacion') === "0") ? $request->input('sistema_capacitacion_especificar') : $request->input('motivos_eleccion_sistema_capacitacion');
                 $AlumnoPreseleccion->empresa_trabaja = $request->empresa;
                 $AlumnoPreseleccion->antiguedad = $request->antiguedad;
+                $AlumnoPreseleccion->direccion_empresa = $request->direccion_empresa;
                 $AlumnoPreseleccion->realizo = $usuario;
                 $AlumnoPreseleccion->tiene_documentacion = false;
                 $AlumnoPreseleccion->save();
@@ -586,7 +587,29 @@ class AlumnoController extends Controller
                     'cerrs' => $request->input('cerrs')
                 ]);
 
-                $AlumnosPre->alumnos()->save($alumno);
+                     /**
+                     * funcion alumnos
+                     */
+                    $alumno = new Alumno([
+                        'no_control' => $no_control_sice,
+                        'id_especialidad' => $request->input('especialidad_sid'),
+                        'id_curso' => $request->input('cursos_sid'),
+                        'horario' => $request->input('horario'),
+                        'grupo' => $request->input('grupo'),
+                        'unidad' => $request->input('tblunidades'),
+                        'tipo_curso' => $request->input('tipo_curso'),
+                        'realizo' => $usuario
+                    ]);
+
+                    $AlumnosPre->alumnos()->save($alumno);
+
+                    return redirect()->route('alumnos.inscritos')
+                        ->with('success', sprintf('¡EL CURSO ASOCIADO CON EL N° DE CONTROL %s REGISTRADO EXITOSAMENTE!', $no_control_sice));
+                } else {
+                    // FALSO PROCEDEMOS A ENVIAR UN MENSAJE DE RESTRICCIÓN AL USUARIO
+                    return redirect()->route('alumnos.presincripcion-paso2', ['id' => base64_encode($id)])
+                    ->withErrors(sprintf('LO SENTIMOS, EL CURSO ASOCIADO CON EL N° DE CONTROL %s YA FUE REGISTRADO', $no_control_sice));
+                }
 
                 return redirect('alumnos/registrados')->with('success', sprintf('ASPIRANTE VINCULADO EXITOSAMENTE A CURSO CON N° CONTROL %s', $no_control_sice));
 
