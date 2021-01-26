@@ -17,9 +17,9 @@ class ftcontroller extends Controller
 {
     public function index(Request $request)
     {
-        $file = 'http://localhost:8000/storage/uploadFiles/memoValidacion/1268326/1268326.pdf';
-        $comprobanteCalidadMigratoria = explode("/",$file, 5);
-        dd($comprobanteCalidadMigratoria[4]);
+        // $file = 'http://localhost:8000/storage/uploadFiles/memoValidacion/1268326/1268326.pdf';
+        // $comprobanteCalidadMigratoria = explode("/",$file, 5);
+        // dd($comprobanteCalidadMigratoria[4]);
         return view('reportes.vista_formatot');       
     }
 
@@ -140,7 +140,41 @@ class ftcontroller extends Controller
     {
         $fecha_ahora = Carbon::now();
         $date = $fecha_ahora->format('d-m-Y');
-        $numero_memo = $request->get('memo');
+        $numero_memo = $request->get('numero_memo');
+
+        /**
+         * vamos al cargar el archivo que se sube
+         */
+        if ($request->hasFile('memorandum_validacion')) {
+            // obtenemos el valor del archivo memo
+
+            $validator = Validator::make($request->all(), [
+                'memorandum_validacion' => 'mimes:pdf|max:2048'
+            ]);
+
+            if ($validator->fails()) {
+                # mandar un mensaje de error
+                return json_encode($validator);
+            } else {
+                /**
+                 * aquí vamos a verificar que el archivo no se encuentre guardado
+                 * previamente en el sistema de archivos del sistema de ser así se 
+                 * remplazará el archivo porel que se subirá a continuación
+                 */
+                // construcción del archivo
+                $archivo_memo = 'uploadFiles/memoValidacion/'.$numero_memo.'/'.$numero_memo.'.pdf';
+                if (Storage::exists($archivo_memo)) {
+                    #checamos si hay algún documento, de ser así, procedemos a eliminarlo
+                    Storage::delete($archivo_memo);
+                }
+
+                $archivo_memo_to_dta = $request->file('memorandum_validacion'); # obtenemos el archivo
+                $url_archivo_memo = $this->uploaded_memo_validacion_file($archivo_memo_to_dta, $numero_memo); #invocamos el método
+            }
+        } else {
+            $url_archivo_memo = null;
+        }
+
         $fechas = [
             'TURNADO_DTA' => $date
         ];
@@ -148,28 +182,13 @@ class ftcontroller extends Controller
         $memos = [
             'TURNADO_DTA' => [
                 'NUMERO' => $numero_memo,
-                'FECHA' => $date
+                'FECHA' => $date,
+                'MEMURAMDUM' => $url_archivo_memo
             ]
         ];
 
-        /**
-         * vamos al cargar el archivo que se sube
-         */
-        if ($request->hasFile('upload_memo_file')) {
-            // obtenemos el valor del archivo memo
-            $validator = Validator::make($request->all(), [
-                'upload_memo_file' => 'mimes:pdf|max:2048'
-            ]);
-
-            if ($validator->fails()) {
-                # mandar un mensaje de error
-                return json_encode(['errors'=>$validator->errors()]);
-            } else {
-
-            }
-        }
-        
-        foreach ($request->check_cursos as $item) {
+        $data = explode(",", $request->check_cursos_dta);
+        foreach ($data as $item) {
             \DB::table('tbl_cursos')
               ->where('id', $item)
               ->update(['memos' => $memos, 'fechas' => $fechas, 'turnado' => 'DTA']);
