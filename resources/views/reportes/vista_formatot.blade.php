@@ -2,8 +2,7 @@
 @extends('theme.sivyc.layout')
 <!--llamar a la plantilla -->
 @section('title', 'APERTURAS | SIVyC Icatech')
-<!--seccion-->
-@section('content')
+@section('content_script_css')
     <style>
         #spinner:not([hidden]) {
             position: fixed;
@@ -36,7 +35,11 @@
         }
         }
     </style>
+@endsection
+<!--seccion-->
+@section('content')
     <div class="container g-pt-50">
+        <div class="alert"></div>
         <div class="row">
             <div class="col-lg-8 margin-tb">
                 <div>
@@ -79,7 +82,7 @@
                         </button> 
                     </div>
                 </div>               
-                <div class="table-responsive" >     
+                <div class="table-responsive">     
                     <table  id="table-911" class="table">                
                         <thead class="thead-dark">
                             <tr align="center">
@@ -432,10 +435,15 @@
                     contentType: false,
                     processData: false,
                     beforeSend: function(){
+                        $("#exampleModalCenter").modal("hide");
                         document.querySelector("#spinner").removeAttribute('hidden');
                     },
-                    success: function(response){ 
-                        console.log(response);
+                    success: function(response){
+                        if (response === 1) {
+                            $("#dtaform").trigger("reset");
+                            $( ".alert" ).addClass( "alert-success");
+                            $(".alert").append( "<b>CURSOS VALIDADOS ENVIADOS A DIRECCIÓN TÉCNICA ACADÉMICA</b>" )
+                        }
                     },
                     complete:function(data){
                         // escondemos el modales
@@ -465,53 +473,6 @@
             $("#numero_memo").rules('remove', 'required', 'extension', 'filesize');
             $("input[id*=numero_memo]").removeClass("error"); // workaround
             $("#exampleModalCenter").modal("hide");
-        });
-        
-        //document.querySelector("#spinner").removeAttribute('hidden');
-        
-        $('#generar_memo').click(function(){
-            var url = "{{route('formatot.send.dta')}}";
-            var myCheckboxes = new Array();
-            $('input[name="chkcursos_list[]"]:checked').each(function() {
-                 myCheckboxes.push(this.value);
-            });
-
-            var memo = $('#numero_memo').val();
-            console.log(myCheckboxes);
-            var chk = JSON.stringify(myCheckboxes)
-            var solicitud = $.ajax
-                ({
-                    url: url,
-                    method: 'POST',
-                    data: { chk: myCheckboxes, memo: memo},
-                    dataType: 'json',
-                    beforeSend: function(){
-                        document.querySelector("#spinner").removeAttribute('hidden');
-                    },
-                    success: function(response){
-                        console.log(response);
-                        alert( "CURSOS VALIDADOS ENVIADOS A DTA EXITOSAMENTE! ");
-                    },
-                    complete:function(data){
-                        // escondemos el modales
-                        document.querySelector('#spinner').setAttribute('hidden', '');
-                    },
-                    error: function(jqXHR, textStatus){
-                        //jsonValue = jQuery.parseJSON( jqXHR.responseText );
-                        document.querySelector('#spinner').setAttribute('hidden', '');
-                        console.log(jqXHR.status);
-                        alert( "Hubo un error: " + jqXHR.status );
-                    }
-                });
-
-                $.when(solicitud).then(function(data, textStatus, jqXHR ){
-                    if (jqXHR.status === 200) {
-                        document.querySelector('#spinner').setAttribute('hidden', '');
-                    }
-                });
-            
-            
-            //console.log(sel);
         });
 
         $("#selectAll").click(function() {
