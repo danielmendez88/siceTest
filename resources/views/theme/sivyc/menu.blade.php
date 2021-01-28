@@ -75,6 +75,15 @@
                         <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATO T</a>
                     </div>
                 </li>
+                <!--cursos validados DTA-->
+                <li class="nav-item g-mx-5--lg dropdown">
+                    <a href="#" class="nav-link g-color-white--hover" id="navbarDropdownMenuLinkValidacion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Validación
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkValidacion">
+                        <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Cursos Enviados a DTA</a>
+                    </div>
+                </li>
 
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
