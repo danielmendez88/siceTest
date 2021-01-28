@@ -72,16 +72,16 @@
                         <a class="dropdown-item" href="https://datastudio.google.com/reporting/512e11eb-babf-4476-8827-8d4243e2c219" target="_blank">STATUS PAGO INSTRUCTORES</a>
                         <a class="dropdown-item" href="{{route('reportes.formatoT')}}">REPORTE DE FORMATO T</a>                        
                         <a class="dropdown-item" href="{{route('reportes.vista_arc')}}">APERTURA</a>
-                        <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATO T</a>
                     </div>
                 </li>
                 <!--cursos validados DTA-->
                 <li class="nav-item g-mx-5--lg dropdown">
                     <a href="#" class="nav-link g-color-white--hover" id="navbarDropdownMenuLinkValidacion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Validación
+                        Formatos
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkValidacion">
-                        <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Cursos Enviados a DTA</a>
+                        <a class="dropdown-item" href="{{route('vista_formatot')}}">Generación Formato T por Unidades</a>
+                        <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Validación DTA</a>
                     </div>
                 </li>
 

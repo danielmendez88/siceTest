@@ -70,15 +70,9 @@
                         <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
                     </div>
                     <div class="form-group col-md-4">
-                        <button input type="button" id="generar_memo" name="generar_memo"  class="btn btn-danger">
-                           <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
-                            GENERAR MEMO DE VALIDACIÓN
-                        </button> 
-                    </div>
-                    <div class="form-group col-md-4">
                         <button input type="button" id="enviardta" name="enviardta"  class="btn btn-success">
-                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
-                            ENVIAR CURSOS VALIDADOS A DTA
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            GENERAR MEMORANDUM DEL FORMATO T
                         </button> 
                     </div>
                 </div>               
@@ -355,7 +349,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="enviar_cursos_dta"><b>ENVIAR  CURSOS VALIDADOS A DTA</b></h5>
+              <h5 class="modal-title" id="enviar_cursos_dta"><b>GENERAR MEMORANDUM DE FORMATO T</b></h5>
             </div>
             <form id="dtaform" enctype="multipart/form-data" method="POST">
                 <div class="modal-body">
@@ -363,12 +357,6 @@
                         <div class="form-group col-md-12">
                             <label for="numero_memo">NÚMERO DE MEMORANDUM</label>
                             <input type="text" class="form-control" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label for="memorandum_validacion">ENVIAR MEMO DE VALIDACIÓN</label>
-                            <input type="file" accept="application/pdf" class="form-control" id="memorandum_validacion" name="memorandum_validacion" placeholder="ENVIAR MEMO DE VALIDACIÓN">
                         </div>
                     </div>
                 </div>
@@ -398,20 +386,20 @@
                 "numero_memo" : {
                     required: true
                 },
-                "memorandum_validacion": {
-                    required: true, 
-                    extension: "pdf", 
-                    filesize: 2000000
-                }
+                // "memorandum_validacion": {
+                //     required: true, 
+                //     extension: "pdf", 
+                //     filesize: 2000000
+                // }
             },
             messages: {
                 numero_memo: {
                     required: "CAMPO REQUERIDO"
                 },
-                "memorandum_validacion": {
-                    required: "ARCHIVO REQUERIDO",
-                    accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
-                }
+                // "memorandum_validacion": {
+                //     required: "ARCHIVO REQUERIDO",
+                //     accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
+                // }
             },
             submitHandler: function(form, event){
                 event.preventDefault();
