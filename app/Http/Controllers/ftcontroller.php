@@ -211,6 +211,7 @@ class ftcontroller extends Controller
                 ->WHERE('c.status', '=', 'NO REPORTADO')                
                 ->WHERE(DB::raw("extract(year from c.termino)"), '=', $anios)
                 ->WHERE(DB::raw("date_part('year', date (c.memos->'TURNADO_DTA'->>'FECHA') )"), '=', $anios)
+                ->WHERE('c.turnado', '=', 'ENFIRMA')
                 ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
                          ,'ins.abrinscri','c.arc', 'c.id')
                 ->distinct()->get();
@@ -265,7 +266,7 @@ class ftcontroller extends Controller
         // }
 
         $fechas = [
-            'TURNADO_DTA' => $date
+            'TURNADO_DTA' => $date //fecha_turnado tipo date y turnados nulos de arraque
         ];
 
         $memos = [
@@ -279,7 +280,7 @@ class ftcontroller extends Controller
         foreach ($data as $item) {
             \DB::table('tbl_cursos')
               ->where('id', $item)
-              ->update(['memos' => $memos, 'fechas' => $fechas, 'turnado' => 'DTA']);
+              ->update(['memos' => $memos, 'fechas' => $fechas, 'turnado' => 'ENFIRMA', 'status' => 'ENFIRMA']);
 
             // TURNADO_DTA:[“NUMERO”:”XXXXXX”,”FECHA”:” XXXX-XX-XX”]
             // “TURNADO_DTA”:”2021-01-28”
