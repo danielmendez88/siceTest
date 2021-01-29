@@ -63,24 +63,35 @@
         @if (isset($var_cursos) )
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
-            @else  
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <input type="checkbox" id="selectAll" checked/>
-                        <label for='selectAll'><b>SELECCIONAR/DESELECCIONAR TODO</b></label>
+            @else 
+                <form id="dtaformSendDocument" enctype="multipart/form-data" method="POST">
+                    <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
+                                    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                                    GENERAR MEMORANDUM DEL FORMATO T
+                                </button> 
+                            </div>
+                        
+                        <div class="form-group col-md-4">
+                            <button input type="button" id="enviarDTA" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
+                                <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                ENVIAR A VALIDACIÓN DE DTA
+                            </button> 
+                        </div>
                     </div>
-                    <div class="form-group col-md-4">
-                        <button input type="button" id="enviardta" name="enviardta"  class="btn btn-success">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                            GENERAR MEMORANDUM DEL FORMATO T
-                        </button> 
-                    </div>
-                </div>               
+                </form>           
                 <div class="table-responsive">     
-                    <table  id="table-911" class="table">                
+                    <table  id="table-911" class="table" style='width: 100%'>                
                         <thead class="thead-dark">
                             <tr align="center">
-                                <th scope="col">ENVIAR</th>
+                                <th scope="col">
+                                    SELECCIONAR/QUITAR
+                                    <input type="checkbox" id="selectAll" checked/>
+                                </th>
                                 <th scope="col">UNIDAD</th>
                                 <th scope="col">PLANTEL</th>
                                 <th scope="col">ESPECIALIDAD</th>
@@ -204,15 +215,15 @@
                                 <th scope="col" WIDTH="500">OBSERVACIONES</th>                                       
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="height: 300px; overflow-y: auto">
                             @foreach ($var_cursos as $datas)
                                 <tr align="center">
                                     <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked/></td></td>
                                     <td>{{ $datas->unidad }}</td>
                                     <td>{{ $datas->plantel }}</td>
                                     <td>{{ $datas->espe }}</td>
-                                    <td>{{ $datas->curso }}</td>
-                                    <td>{{ $datas->clave }}</td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->curso }}</div></td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->clave }}</div></td>
                                     <td>{{ $datas->mod }}</td>
                                     <td>{{ $datas->dura }}</td>
                                     <td>{{ $datas->turno }}</td>
@@ -222,8 +233,8 @@
                                     <td>{{ $datas->mest }}</td>
                                     <td>{{ $datas->pfin }}</td>
                                     <td>{{ $datas->horas }}</td>
-                                    <td>{{ $datas->dia }}</td>
-                                    <td>{{ $datas->horario }}</td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->dia }}</div></td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->horario }}</div></td>
                                     <td>{{ $datas->tinscritos }}</td>
                                     <td>{{ $datas->imujer }}</td>
                                     <td>{{ $datas->ihombre }}</td>
@@ -237,10 +248,10 @@
                                     <td>{{ $datas->ethombre }}</td>
                                     <td>{{ $datas->epmujer }}</td>
                                     <td>{{ $datas->ephombre }}</td>
-                                    <td>{{ $datas->cespecifico }}</td>
-                                    <td>{{ $datas->mvalida }}</td>
-                                    <td>{{ $datas->efisico }}</td>
-                                    <td>{{ $datas->nombre }}</td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->cespecifico }}</div></td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->mvalida }}</div></td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->efisico }}</div></td>
+                                    <td><div style = "width:200px; word-wrap: break-word">{{ $datas->nombre }}</div></td>
                                     <td>{{ $datas->grado_profesional }}</td>
                                     <td>{{ $datas->estatus }}</td>
                                     <td>{{ $datas->sexo }}</td>
@@ -254,7 +265,7 @@
                                     <td>{{ $datas->etnia }}</td>
                                     <td>{{ $datas->programa }}</td>
                                     <td>{{ $datas->muni }}</td>
-                                    <td>{{ $datas->depen }}</td>
+                                    <td><div style = "width:300px; word-wrap: break-word">{{ $datas->depen }}</div></td>
                                     <td>{{ $datas->cgeneral }}</td>
                                     <td>{{ $datas->sector }}</td>
                                     <td>{{ $datas->mpaqueteria }}</td>
@@ -328,7 +339,7 @@
                                     <td>{{ $datas->naesh8 }}</td>
                                     <td>{{ $datas->naesm9 }}</td>
                                     <td>{{ $datas->naesh9 }}</td>
-                                    <td WIDTH="500">{{ $datas->tnota }}</td>                      
+                                    <td><div style = "width:800px; word-wrap: break-word">{{ $datas->tnota }}</div></td>                      
                                 </tr>
                             @endforeach
                         </tbody>
@@ -349,14 +360,13 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="enviar_cursos_dta"><b>GENERAR MEMORANDUM DE FORMATO T</b></h5>
+              <h5 class="modal-title" id="enviar_cursos_dta"><b>AGJUNTAR Y ENVIAR A VALIDACIÓN DTA</b></h5>
             </div>
             <form id="dtaform" enctype="multipart/form-data" method="POST">
                 <div class="modal-body">
                     <div class="form-row">
                         <div class="form-group col-md-12">
-                            <label for="numero_memo">NÚMERO DE MEMORANDUM</label>
-                            <input type="text" class="form-control" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
+                            <input type="file" name="cargar_archivo_formato_t" id="cargar_archivo_formato_t" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -381,6 +391,19 @@
             return this.optional(element) || (element.files[0].size <= param)
         }, 'El TAMAÑO DEL ARCHIVO DEBE SER MENOR A {0} bytes.');
 
+        $('#dtaformSendDocument').validate({
+            rules: {
+                numero_memo : {
+                    required: true
+                },
+            },
+            messages: {
+                numero_memo: {
+                    required: "CAMPO REQUERIDO"
+                },
+            }
+        });
+        // 
         $('#dtaform').validate({
             rules: {
                 "numero_memo" : {
@@ -393,9 +416,7 @@
                 // }
             },
             messages: {
-                numero_memo: {
-                    required: "CAMPO REQUERIDO"
-                },
+                
                 // "memorandum_validacion": {
                 //     required: "ARCHIVO REQUERIDO",
                 //     accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
@@ -453,7 +474,7 @@
             }
         }); // configurar el validador
 
-        $('#enviardta').click(function(){
+        $('#enviarDTA').click(function(){
             $("#exampleModalCenter").modal("show");
         });
 
