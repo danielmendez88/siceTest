@@ -401,6 +401,54 @@
                 numero_memo: {
                     required: "CAMPO REQUERIDO"
                 },
+                submitHandler: function(forms, e){
+                    e.preventDefault();
+                    var check_cursos = new Array();
+                    $('input[name="chkcursos_list[]"]:checked').each(function() {
+                        check_cursos.push(this.value);
+                    });
+                    /***
+                    * memorandum_validacion
+                    */
+                    var formData = new FormData(form);
+                    formData.append("check_cursos_dta", check_cursos);
+                    var _url = "{{route('formatot.send.dta')}}";
+
+                    var requested = $.ajax
+                    ({
+                        url: _url,
+                        method: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function(){
+                            document.querySelector("#spinner").removeAttribute('hidden');
+                        },
+                        success: function(response){
+                            if (response === 1) {
+                                $("#dtaformSendDocument").trigger("reset");
+                                $( ".alert" ).addClass( "alert-warning");
+                                $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA</b>" )
+                            }
+                        },
+                        complete:function(data){
+                            // escondemos el modales
+                            document.querySelector('#spinner').setAttribute('hidden', '');
+                        },
+                        error: function(jqXHR, textStatus){
+                            console.log(jqXHR.responseText);
+                            alert( "Hubo un error: " + jqXHR.status );
+                        }
+                    });
+
+                    $.when(requested).then(function(data, textStatus, jqXHR ){
+                        if (jqXHR.status === 200) {
+                            document.querySelector('#spinner').setAttribute('hidden', '');
+                        }
+                    });
+                }
             }
         });
         // 
