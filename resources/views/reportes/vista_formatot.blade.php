@@ -64,33 +64,34 @@
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
             @else 
-                <form id="dtaformSendDocument" enctype="multipart/form-data" method="POST">
+                <form id="dtaformGetDocument" method="POST">
                     <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
-                                    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
-                                    GENERAR MEMORANDUM DEL FORMATO T
-                                </button> 
-                            </div>
-                        
+                        <div class="form-group col-md-4">
+                            <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
+                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                                GENERAR MEMORANDUM DEL FORMATO T
+                            </button> 
+                        </div>
                         <div class="form-group col-md-4">
                             <button input type="button" id="enviarDTA" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
                                 <i class="fa fa-paper-plane" aria-hidden="true"></i>
                                 ENVIAR A VALIDACIÓN DE DTA
                             </button> 
-                        </div>
+                        </div> 
                     </div>
-                </form>           
+                </form>  
                 <div class="table-responsive">     
                     <table  id="table-911" class="table" style='width: 100%'>                
                         <thead class="thead-dark">
                             <tr align="center">
                                 <th scope="col">
-                                    SELECCIONAR/QUITAR
-                                    <input type="checkbox" id="selectAll" checked/>
+                                    <div style = "width:100px; word-wrap: break-word">
+                                        SELECCIONAR/QUITAR
+                                        <input type="checkbox" id="selectAll" checked/>
+                                    </div>
                                 </th>
                                 <th scope="col">UNIDAD</th>
                                 <th scope="col">PLANTEL</th>
@@ -360,9 +361,9 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="enviar_cursos_dta"><b>AGJUNTAR Y ENVIAR A VALIDACIÓN DTA</b></h5>
+              <h5 class="modal-title" id="enviar_cursos_dta"><b>ADJUNTAR Y ENVIAR A VALIDACIÓN DTA</b></h5>
             </div>
-            <form id="dtaform" enctype="multipart/form-data" method="POST">
+            <form id="formSendDta" enctype="multipart/form-data" method="POST">
                 <div class="modal-body">
                     <div class="form-row">
                         <div class="form-group col-md-12">
@@ -391,15 +392,17 @@
             return this.optional(element) || (element.files[0].size <= param)
         }, 'El TAMAÑO DEL ARCHIVO DEBE SER MENOR A {0} bytes.');
 
-        $('#dtaformSendDocument').validate({
-            rules: {
-                numero_memo : {
-                    required: true
+        $('#generarMemoAFirma').click(function(){
+            $('#dtaformGetDocument').validate({
+                rules: {
+                    numero_memo : {
+                        required: true
+                    },
                 },
-            },
-            messages: {
-                numero_memo: {
-                    required: "CAMPO REQUERIDO"
+                messages: {
+                    numero_memo: {
+                        required: "CAMPO REQUERIDO"
+                    },
                 },
                 submitHandler: function(forms, e){
                     e.preventDefault();
@@ -410,7 +413,7 @@
                     /***
                     * memorandum_validacion
                     */
-                    var formData = new FormData(form);
+                    var formData = new FormData(forms);
                     formData.append("check_cursos_dta", check_cursos);
                     var _url = "{{route('formatot.send.dta')}}";
 
@@ -428,9 +431,9 @@
                         },
                         success: function(response){
                             if (response === 1) {
-                                $("#dtaformSendDocument").trigger("reset");
+                                $("#dtaformGetDocument").trigger("reset");
                                 $( ".alert" ).addClass( "alert-warning");
-                                $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA</b>" )
+                                $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA PARA ENVÍO A VALIDACIÓN A DTA</b>" )
                             }
                         },
                         complete:function(data){
@@ -449,86 +452,83 @@
                         }
                     });
                 }
-            }
+             });
         });
         // 
-        $('#dtaform').validate({
-            rules: {
-                "numero_memo" : {
-                    required: true
+        
+        $('#send_to_dta').click(function(){
+            $('#formSendDta').validate({
+                rules: {
+                    "cargar_archivo_formato_t": {
+                        required: true, 
+                        extension: "pdf", 
+                        filesize: 2000000
+                    }
                 },
-                // "memorandum_validacion": {
-                //     required: true, 
-                //     extension: "pdf", 
-                //     filesize: 2000000
-                // }
-            },
-            messages: {
-                
-                // "memorandum_validacion": {
-                //     required: "ARCHIVO REQUERIDO",
-                //     accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
-                // }
-            },
-            submitHandler: function(form, event){
-                event.preventDefault();
-                var check_cursos = new Array();
-                $('input[name="chkcursos_list[]"]:checked').each(function() {
-                    check_cursos.push(this.value);
-                });
-                /***
-                * memorandum_validacion
-                */
-                var formData = new FormData(form);
-                formData.append("check_cursos_dta", check_cursos);
-                var _url = "{{route('formatot.send.dta')}}";
-                var requested = $.ajax
-                ({
-                    url: _url,
-                    method: 'POST',
-                    data: formData,
-                    dataType: 'json',
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    beforeSend: function(){
-                        $("#exampleModalCenter").modal("hide");
-                        document.querySelector("#spinner").removeAttribute('hidden');
-                    },
-                    success: function(response){
-                        if (response === 1) {
-                            $("#dtaform").trigger("reset");
-                            $( ".alert" ).addClass( "alert-success");
-                            $(".alert").append( "<b>CURSOS VALIDADOS ENVIADOS A DIRECCIÓN TÉCNICA ACADÉMICA</b>" )
+                messages: {
+                    "cargar_archivo_formato_t": {
+                        required: "ARCHIVO REQUERIDO",
+                        accept: "SÓLO SE ACEPTAN DOCUMENTOS PDF"
+                    }
+                },
+                submitHandler: function(form, event){
+                    event.preventDefault();
+                    var check_cursos = new Array();
+                    $('input[name="chkcursos_list[]"]:checked').each(function() {
+                        check_cursos.push(this.value);
+                    });
+                    /***
+                    * cargar_archivo_formato_t
+                    */
+                    var formData = new FormData(form);
+                    formData.append("check_cursos_dta", check_cursos);
+                    var _url = "{{route('formatot.send.dta')}}";
+                    var requested = $.ajax
+                    ({
+                        url: _url,
+                        method: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function(){
+                            $("#exampleModalCenter").modal("hide");
+                            document.querySelector("#spinner").removeAttribute('hidden');
+                        },
+                        success: function(response){
+                            if (response === 1) {
+                                $("#dtaform").trigger("reset");
+                                $( ".alert" ).addClass( "alert-success");
+                                $(".alert").append( "<b>CURSOS VALIDADOS ENVIADOS A DIRECCIÓN TÉCNICA ACADÉMICA</b>" )
+                            }
+                        },
+                        complete:function(data){
+                            // escondemos el modales
+                            document.querySelector('#spinner').setAttribute('hidden', '');
+                        },
+                        error: function(jqXHR, textStatus){
+                            //jsonValue = jQuery.parseJSON( jqXHR.responseText );
+                            //document.querySelector('#spinner').setAttribute('hidden', '');
+                            console.log(jqXHR.responseText);
+                            alert( "Hubo un error: " + jqXHR.status );
                         }
-                    },
-                    complete:function(data){
-                        // escondemos el modales
-                        document.querySelector('#spinner').setAttribute('hidden', '');
-                    },
-                    error: function(jqXHR, textStatus){
-                        //jsonValue = jQuery.parseJSON( jqXHR.responseText );
-                        //document.querySelector('#spinner').setAttribute('hidden', '');
-                        console.log(jqXHR.responseText);
-                        alert( "Hubo un error: " + jqXHR.status );
-                    }
-                });
+                    });
 
-                $.when(requested).then(function(data, textStatus, jqXHR ){
-                    if (jqXHR.status === 200) {
-                        document.querySelector('#spinner').setAttribute('hidden', '');
-                    }
-                });
-            }
-        }); // configurar el validador
+                    $.when(requested).then(function(data, textStatus, jqXHR ){
+                        if (jqXHR.status === 200) {
+                            document.querySelector('#spinner').setAttribute('hidden', '');
+                        }
+                    });
+                }
+            }); // configurar el validador
+        });
 
         $('#enviarDTA').click(function(){
             $("#exampleModalCenter").modal("show");
         });
 
         $('#close_btn_modal_send_dta').click(function(){
-            $("#numero_memo").rules('remove', 'required', 'extension', 'filesize');
-            $("input[id*=numero_memo]").removeClass("error"); // workaround
             $("#exampleModalCenter").modal("hide");
         });
 
