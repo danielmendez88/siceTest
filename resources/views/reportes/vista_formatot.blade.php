@@ -47,9 +47,17 @@
                 </div>
             </div>
         </div>
-        
+
         {{ Form::open(['route' => 'formatot.cursos', 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
             <div class="form-row">
+                <div class="form-group col-md-4">
+                    <select name="" id="" class="form-control">
+                        <option value="">--SELECCIONAR MES--</option>
+                        @foreach ($meses as $mun => $month)
+                            <option value="{{ $mun }}">{{ $month }}</option>
+                        @endforeach 
+                    </select>
+                </div>
                 <div class="form-group col-md-4">
                     {{ Form::text('anio', null , ['class' => 'form-control  mr-sm-1', 'placeholder' => 'AÑO A REPORTAR']) }}
                 </div>
@@ -66,21 +74,27 @@
             @else 
                 <form id="dtaformGetDocument" method="POST">
                     <div class="form-row">
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
-                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
-                                GENERAR MEMORANDUM DEL FORMATO T
+                                <i class="fa fa-file-pdf-o fa-2x" aria-hidden="true"></i>
+                                GENERAR MEMORANDUM
                             </button> 
                         </div>
-                        <div class="form-group col-md-4">
-                            <button input type="button" id="enviarDTA" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
-                                <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                        <div class="form-group col-md-3">
+                            <button input type="button" id="enviarDTA" style="{{ $enFirma->isEmpty() ? 'display: none' : '' }}" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
+                                <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>
                                 ENVIAR A VALIDACIÓN DE DTA
                             </button> 
-                        </div> 
+                        </div>
+                        <div class="form-group col-md-3">
+                            <button type="button" id="mod_format" name="mod_format" style="{{ $enFirma->isEmpty() ? 'display: none' : '' }}"  class="btn btn-warning my-2 my-sm-0 waves-effect waves-light">
+                                <i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i>
+                                Modificar Campos
+                            </button>
+                        </div>
                     </div>
                 </form>  
                 <div class="table-responsive">     
@@ -90,7 +104,7 @@
                                 <th scope="col">
                                     <div style = "width:100px; word-wrap: break-word">
                                         SELECCIONAR/QUITAR
-                                        <input type="checkbox" id="selectAll" checked/>
+                                        <input type="checkbox" id="selectAll" checked {{ $enFirma->isEmpty() ? '' : 'disabled'  }}/>
                                     </div>
                                 </th>
                                 <th scope="col">UNIDAD</th>
@@ -219,7 +233,7 @@
                         <tbody style="height: 300px; overflow-y: auto">
                             @foreach ($var_cursos as $datas)
                                 <tr align="center">
-                                    <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked/></td></td>
+                                    <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked {{ $datas->estadocurso == 'EN_FIRMA' ? 'disabled' : '' }}/></td></td>
                                     <td>{{ $datas->unidad }}</td>
                                     <td>{{ $datas->plantel }}</td>
                                     <td>{{ $datas->espe }}</td>
@@ -385,6 +399,11 @@
 <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
 <script type="text/javascript">
     $(function(){
+        //$('input[type=checkbox]').attr('disabled', 'disabled'); //disable
+
+        $('#mod_format').on('click', function name() {
+            $('input[type=checkbox]').removeAttr('disabled');
+        });
 
         document.querySelector('#spinner').setAttribute('hidden', '');
 
@@ -426,15 +445,21 @@
                         cache: false,
                         contentType: false,
                         processData: false,
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
                         beforeSend: function(){
                             document.querySelector("#spinner").removeAttribute('hidden');
                         },
                         success: function(response){
-                            if (response === 1) {
-                                $("#dtaformGetDocument").trigger("reset");
-                                $( ".alert" ).addClass( "alert-warning");
-                                $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA PARA ENVÍO A VALIDACIÓN A DTA</b>" )
-                            }
+                            $("#dtaformGetDocument").trigger("reset");
+                            $( ".alert" ).addClass( "alert-warning");
+                            $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA PARA ENVÍO A VALIDACIÓN A DTA</b>" )
+                            var blob = new Blob([response]);
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = "Sample.pdf";
+                            link.click();
                         },
                         complete:function(data){
                             // escondemos el modales
