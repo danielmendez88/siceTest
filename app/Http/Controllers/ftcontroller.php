@@ -113,8 +113,14 @@ class ftcontroller extends Controller
     public function memodta()
     {
         $pdf = PDF::loadView('reportes.memodta');
-                $pdf->setpaper('letter');
-                return $pdf->stream('memo.pdf');
+        $pdf->setpaper('letter');
+        return $pdf->stream('memo.pdf');
+    }
+    public function munidad()
+    {
+        $pdf = PDF::loadView('reportes.memounidad');
+        $pdf->setpaper('letter');
+        return $pdf->stream('munidad.pdf');
     }
     
 }

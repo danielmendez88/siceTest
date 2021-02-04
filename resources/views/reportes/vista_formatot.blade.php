@@ -296,7 +296,7 @@
                 </div>             
             @endif
         @endif
-        {{ Form::open(['route' => 'memo_dta', 'method' => 'post', 'class' => 'form-inline', 'enctype' => 'multipart/form-data','target'=>'_blank']) }}
+        {{ Form::open(['route' => 'memo_unidad', 'method' => 'post', 'class' => 'form-inline', 'enctype' => 'multipart/form-data','target'=>'_blank']) }}
         {!! Form::submit( 'ENVIAR', ['id'=>'formatot', 'class' => 'btn btn-dark', 'name' => 'submitbutton'])!!}
         {!! Form::close() !!}
     </div>
