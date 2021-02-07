@@ -56,7 +56,7 @@ return [
         ],
         'mydisk' => [
             'driver' => 'local',
-            'root' => storage_path('app/filesUpload'),
+            'root' => storage_path('app'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'private'
         ],
