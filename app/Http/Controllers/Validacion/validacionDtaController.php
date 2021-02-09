@@ -13,9 +13,11 @@ class validacionDtaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $unidades = $request->get('busqueda_unidad');
+
         $cursos_validar = DB::table('tbl_cursos as c')
         ->select('c.id AS id_tbl_cursos', 'c.unidad','c.plantel','c.espe','c.curso','c.clave','c.mod','c.dura',DB::raw("case when extract(hour from to_timestamp(c.hini,'HH24:MI a.m.')::time)<14 then 'MATUTINO' else 'VESPERTINO' end as turno"),
         DB::raw('extract(day from c.inicio) as diai'),DB::raw('extract(month from c.inicio) as mesi'),DB::raw('extract(day from c.termino) as diat'),DB::raw('extract(month from c.termino) as mest'),DB::raw("case when EXTRACT( Month FROM c.termino) between '7' and '9' then '1' when EXTRACT( Month FROM c.termino) between '10' and '12' then '2' when EXTRACT( Month FROM c.termino) between '1' and '3' then '3' else '4' end as pfin"),
@@ -77,15 +79,18 @@ class validacionDtaController extends Controller
             $join->on('ca.matricula','=','ins.matricula');
         })
         ->JOIN('tbl_unidades as u', 'u.unidad', '=', 'c.unidad')
-        ->WHERE('c.status', '=', 'NO REPORTADO')                
+        ->WHERE('u.ubicacion', '=', $unidades)
+        ->WHERE('c.status', '=', 'EN_FIRMA')                
         ->WHERE(DB::raw("extract(year from c.termino)"), '=', '2021')
         ->WHERE('c.turnado', '=', 'DTA')
         ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
                  ,'ins.abrinscri','c.arc', 'c.id')
         ->distinct()->get();
 
+        $unidades = DB::table('tbl_unidades')->select('unidad', 'ubicacion')->get();
+
         //dd($cursos_validar);
-        return view('reportes.vista_validaciondta', compact('cursos_validar')); 
+        return view('reportes.vista_validaciondta', compact('cursos_validar', 'unidades')); 
     }
 
     /**
