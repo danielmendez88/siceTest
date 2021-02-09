@@ -62,7 +62,7 @@
                         @endcan
                         <a class="dropdown-item" href="{{route('convenios.index')}}">Convenios</a>
                         <a class="dropdown-item" href="{{route('cerss.inicio')}}">CERSS</a>
-                        
+
                         @can('areas.inicio')
                             <a class="dropdown-item" href="{{route('areas.inicio')}}">Áreas</a>
                         @endcan
@@ -71,7 +71,7 @@
                         @endcan
                         @can('instituto.inicio')
                             <a class="dropdown-item" href="{{route('instituto.inicio')}}">Acerca del instituto</a>
-                        @endcan  
+                        @endcan
                     </div>
                 </li>
                 @can('tablero.metas.index')
@@ -103,7 +103,10 @@
                         @can('reportes.cursos')
                             <a class="dropdown-item" href="{{route('reportes.cursos.index')}}">CURSOS AUTORIZADOS</a>
                         @endcan
-                        <a class="dropdown-item" href="{{route('planeacion.reporte')}}">Planeación</a>
+                        @can('planeacion.reporte')
+                            <a class="dropdown-item" href="{{route('planeacion.reporte')}}">PLANEACIÓN</a>
+                        @endcan
+                        {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATOT</a> --}}
                     </div>
                 </li>
             </ul>
