@@ -434,6 +434,7 @@ class supreController extends Controller
             $risr[$i] = $this->numberFormat(round($cadwell->importe_total * 0.10, 2));
             $riva[$i] = $this->numberFormat(round($cadwell->importe_total * 0.1066, 2));
 
+            $iva[$i] = $this->numberFormat($cadwell->iva);
             $cantidad[$i] = $this->numberFormat($cadwell->importe_total);
 
             $hm = $cadwell->hombre+$cadwell->mujer;
@@ -450,7 +451,7 @@ class supreController extends Controller
 
         //dd($data);
 
-        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad'));
+        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad','iva'));
         $pdf->setPaper('legal', 'Landscape');
         return $pdf->download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
 
