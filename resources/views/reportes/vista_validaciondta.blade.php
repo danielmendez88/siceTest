@@ -26,6 +26,10 @@
         animation: spin 1s infinite linear
         }
 
+        table tr td {
+            border: 1px solid #ccc;
+        }
+
         @keyframes spin {
             from {
                 transform: rotate(0deg);
@@ -65,11 +69,12 @@
                 <div class="pull-left">
                     <h2>VALIDACIÓN DE CURSOS</h2>
 
-                    {!! Form::open(['route' => 'alumnos.index', 'method' => 'GET', 'class' => 'form-inline' ]) !!}
-                        <select name="busqueda_aspirante" class="form-control mr-sm-2" id="busqueda_aspirante">
-                            <option value="">BUSCAR POR TIPO</option>
-                            <option value="curp_aspirante">CURP</option>
-                            <option value="nombre_aspirante">NOMBRE</option>
+                    {!! Form::open(['route' => 'validacion.cursos.enviados.dta', 'method' => 'GET', 'class' => 'form-inline' ]) !!}
+                        <select name="busqueda_unidad" class="form-control mr-sm-2" id="busqueda_unidad">
+                            <option value="">-- BUSQUEDA POR UNIDAD --</option>
+                            @foreach ($unidades as $itemUnidades)
+                                <option value="{{ $itemUnidades->ubicacion }}">{{ $itemUnidades->unidad }}</option>
+                            @endforeach
                         </select>
                         
                         <button class="btn btn-outline-info my-2 my-sm-0" type="submit">BUSCAR</button>
@@ -82,12 +87,30 @@
             </div>
         </div>
         <hr style="border-color:dimgray">
+            <form id="dtaformSendDocument" enctype="multipart/form-data" method="POST">
+                <div class="form-row">
+                    <div class="form-group mb-2">
+                        <button input type="submit" id="enviardta" name="enviardta"  class="btn btn-danger">
+                            <i class="fa fa-retweet fa-2x" aria-hidden="true"></i>&nbsp;
+                            REGRESAR A LA UNIDAD
+                        </button>
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <button input type="submit" id="enviardta" name="enviardta"  class="btn btn-success">
+                            <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>&nbsp;
+                            ENVIAR A PLANEACIÓN
+                        </button> 
+                    </div>
+                </div>        
+            </form> 
             <div class="table-responsive container-fluid">
-                <table  id="table-instructor" class="table table-bordered table-responsive-md Datatables">
+                <table  id="table-instructor" class="table" style='width: 100%'>
                     <caption>CURSOS VALIDADOS ENVIADOS A DIRECCIÓN TÉCNICA ACADÉMICA</caption>
                     <thead>
                         <tr align="center">
-                            <th scope="col">ENVIAR</th>
+                            <th scope="col">SELECCIONAR/QUITAR &nbsp;
+                                <input type="checkbox" id="selectAll"/>
+                            </th>
                             <th scope="col">UNIDAD</th>
                             <th scope="col">PLANTEL</th>
                             <th scope="col">ESPECIALIDAD</th>
@@ -208,18 +231,19 @@
                             <th scope="col">NAESCOLH8</th>
                             <th scope="col">NAESCOLM9</th>
                             <th scope="col">NAESCOLH9</th>
-                            <th scope="col" WIDTH="500">OBSERVACIONES</th>                                       
+                            <th scope="col" style="width:50%">OBSERVACIONES</th>
+                            <th scope="col" style="width: 50%">COMENTARIOS</th>                                    
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="height: 300px; overflow-y: auto">
                         @foreach ($cursos_validar as $datas)
                             <tr align="center">
-                                <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked/></td></td>
+                                <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}"/></td></td>
                                 <td>{{ $datas->unidad }}</td>
                                 <td>{{ $datas->plantel }}</td>
                                 <td>{{ $datas->espe }}</td>
-                                <td>{{ $datas->curso }}</td>
-                                <td>{{ $datas->clave }}</td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->curso }}</div></td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->clave }}</div></td>
                                 <td>{{ $datas->mod }}</td>
                                 <td>{{ $datas->dura }}</td>
                                 <td>{{ $datas->turno }}</td>
@@ -229,8 +253,8 @@
                                 <td>{{ $datas->mest }}</td>
                                 <td>{{ $datas->pfin }}</td>
                                 <td>{{ $datas->horas }}</td>
-                                <td>{{ $datas->dia }}</td>
-                                <td>{{ $datas->horario }}</td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->dia }}</div></td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->horario }}</div></td>
                                 <td>{{ $datas->tinscritos }}</td>
                                 <td>{{ $datas->imujer }}</td>
                                 <td>{{ $datas->ihombre }}</td>
@@ -244,10 +268,10 @@
                                 <td>{{ $datas->ethombre }}</td>
                                 <td>{{ $datas->epmujer }}</td>
                                 <td>{{ $datas->ephombre }}</td>
-                                <td>{{ $datas->cespecifico }}</td>
-                                <td>{{ $datas->mvalida }}</td>
-                                <td>{{ $datas->efisico }}</td>
-                                <td>{{ $datas->nombre }}</td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->cespecifico }}</div></td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->mvalida }}</div></td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->efisico }}</div></td>
+                                <td><div style = "width:200px; word-wrap: break-word">{{ $datas->nombre }}</div></td>
                                 <td>{{ $datas->grado_profesional }}</td>
                                 <td>{{ $datas->estatus }}</td>
                                 <td>{{ $datas->sexo }}</td>
@@ -261,7 +285,7 @@
                                 <td>{{ $datas->etnia }}</td>
                                 <td>{{ $datas->programa }}</td>
                                 <td>{{ $datas->muni }}</td>
-                                <td>{{ $datas->depen }}</td>
+                                <td><div style = "width:300px; word-wrap: break-word">{{ $datas->depen }}</div></td>
                                 <td>{{ $datas->cgeneral }}</td>
                                 <td>{{ $datas->sector }}</td>
                                 <td>{{ $datas->mpaqueteria }}</td>
@@ -335,13 +359,14 @@
                                 <td>{{ $datas->naesh8 }}</td>
                                 <td>{{ $datas->naesm9 }}</td>
                                 <td>{{ $datas->naesh9 }}</td>
-                                <td WIDTH="500">{{ $datas->tnota }}</td>                      
+                                <td><div style = "width:900px; word-wrap: break-word">{{ $datas->tnota }}</div></td>
+                                <td><textarea name="comentarios[]" id="" cols="45" rows="3"></textarea></td>                
                             </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="122">
+                            <td colspan="123">
                                
                             </td>
                         </tr>
