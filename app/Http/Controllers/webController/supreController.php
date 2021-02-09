@@ -382,7 +382,6 @@ class supreController extends Controller
         }
         else if ($request->filtro == 'curso')
         {
-            dd('entro');
             $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
                            'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
                            'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
@@ -432,8 +431,10 @@ class supreController extends Controller
 
         foreach($data as $cadwell)
         {
-            $risr[$i] = $cadwell->importe_total * 0.10;
-            $riva[$i] = $cadwell->importe_total * 0.1066;
+            $risr[$i] = $this->numberFormat(round($cadwell->importe_total * 0.10, 2));
+            $riva[$i] = $this->numberFormat(round($cadwell->importe_total * 0.1066, 2));
+
+            $cantidad[$i] = $this->numberFormat($cadwell->importe_total);
 
             $hm = $cadwell->hombre+$cadwell->mujer;
             if ($hm < 10)
@@ -449,7 +450,7 @@ class supreController extends Controller
 
         //dd($data);
 
-        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva'));
+        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad'));
         $pdf->setPaper('legal', 'Landscape');
         return $pdf->download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
 
@@ -684,5 +685,13 @@ class supreController extends Controller
             echo json_encode($response);
             exit;
         }
+    }
+
+    protected function numberFormat($numero)
+    {
+        $part = explode(".", $numero);
+        $part[0] = number_format($part['0']);
+        $cadwell = implode(".", $part);
+        return ($cadwell);
     }
 }
