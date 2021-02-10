@@ -40,14 +40,14 @@
         <img class="izquierda" src='img/logohorizontalica1.png'>
         <img class="derecha" src='img/chiapas.png'>
         @if($reg_cursos[0]->unidad=="COMITAN" || $reg_cursos[0]->unidad=="OCOSINGO" || $reg_cursos[0]->unidad=="SAN CRISTOBAL" || $reg_cursos[0]->unidad=="TUXTLA" || $reg_cursos[0]->unidad=="CATAZAJA" || $reg_cursos[0]->unidad=="YAJALON" || $reg_cursos[0]->unidad=="JIQUIPILAS" || $reg_cursos[0]->unidad=="REFORMA" || $reg_cursos[0]->unidad=="TAPACHULA" || $reg_cursos[0]->unidad=="TONALA" || $reg_cursos[0]->unidad=="VILLAFLORES")
-            @php
-                $nombre_unidad= "UNIDAD DE CAPACITACION"
-            @endphp
-        @else
-            @php
-                $nombre_unidad= "ACCION MOVIL"
-            @endphp
-        @endif  
+                @php
+                    $nombre_unidad= "UNIDAD DE CAPACITACION"
+                @endphp
+            @else
+                @php
+                    $nombre_unidad= "ACCION MOVIL"
+                @endphp
+            @endif 
             <div id="wrappertop">
                 <div align=center><br> 
                     <font size=1><b>{{ $nombre_unidad }} {{ $reg_cursos[0]->unidad }}<br/>
@@ -74,7 +74,7 @@
                         <td><b>ASUNTO: SOLICITUD DE REPROGRAMACION O CANCELACION DE CURSO</b></td>
                         <td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>
                         <td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>
-                        <td align="right"><b>{{ $reg_unidad->unidad }},CHIAPAS; {{$fecha_memo }}</b></td>                        
+                        <td align="right"><b>{{ $reg_cursos[0]->unidad }},CHIAPAS; {{$fecha_memo }}</b></td>                        
                     </tr>
                     <tr>
                         <td><b>CC. ARCHIVO MINUTARIO</b></td>                        

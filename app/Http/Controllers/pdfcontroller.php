@@ -101,12 +101,18 @@ class pdfcontroller extends Controller
                 $unidad = Auth::user()->unidad;
                 $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
                 $unidades = DB::table('tbl_unidades')->where('ubicacion',$unidad)->pluck('unidad');
-                if(count($unidades)==0) $unidades =[$unidad];       
-                    $_SESSION['unidades'] = $unidades; 
-                $_SESSION['unidad'] = $unidad;             
+                if(count($unidades)==0) 
+                {
+                    $unidades =[$unidad];
+                    $_SESSION['unidad'] = $unidades;
+                }
+                else
+                {
+                    $_SESSION['unidad'] = $unidad;             
+                }
             }
             $fecha_memo=date('d-m-yy',strtotime($fecha_termino));
-            $reg_cursos = DB::table('tbl_cursos')->SELECT('id','nombre','clave','mvalida','mod','curso','inicio','termino','dura',
+            $reg_cursos = DB::table('tbl_cursos')->SELECT('id','unidad','nombre','clave','mvalida','mod','curso','inicio','termino','dura',
             'efisico','opcion','motivo','nmunidad','observaciones','realizo','tcapacitacion');
             if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);                
                 $reg_cursos=$reg_cursos->WHERE('nmunidad', '=', $memo_apertura)->orderby('espe')->get();
@@ -116,7 +122,7 @@ class pdfcontroller extends Controller
             }
             else
             {
-                $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
+                $reg_unidad=DB::table('tbl_unidades')->select('dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
                 'pvinculacion')->where('unidad',$_SESSION['unidad'])->first();
                 $pdf = PDF::loadView('reportes.arc02',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura'));
                 $pdf->setpaper('letter','landscape');
