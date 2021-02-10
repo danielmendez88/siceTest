@@ -105,9 +105,9 @@
             </div>
             
             <br><br><br>
-            <div class="table-responsive-sm">
+            <div class="form-row">
                 <table class="tablas">
-                    <tbody>
+                    <thead>
                         <tr>
                             <th> ARC02 </th>
                             <td> </td>
@@ -117,8 +117,8 @@
                             <th rowspan="2">MOD</th>               
                             <th colspan="2">TIPO<br>DE<br>CURSO</th>       
                             <th rowspan="2">DUR.</th>
-                            <th rowspan="2">CLAVE DEL CURSO</th>
-                            <th rowspan="2">NUM. DE MEMORANDUM DE AUT. DE CURSO</th>
+                            <th rowspan="2">CLAVE<br>DEL<br>CURSO</th>
+                            <th rowspan="2">NUM. DE <br>MEMORANDUM<br>DE AUT. DE<br>CURSO</th>
                             <th rowspan="2">INSTRUCTOR</th>
                             <th rowspan="2">INICIO </th>  
                             <th rowspan="2">TERMINO</th>                    
@@ -127,26 +127,28 @@
                             <th rowspan="2">SOLICITA</th>
                             <th rowspan="2">OBSERVACIONES</th>
                         </tr>  
+                    </thead>
+                    <tbody>
                         <tr> 
                             <th >PRE<br>SEN<br>CIAL</th>                 
                             <th >A <br>DIS<br>TAN<br>CIA</th> 
                         </tr>
                         @foreach($reg_cursos as $a)         
                             <tr>
-                                <th>{{ $a->curso }}</th>
-                                <th>{{ $a->mod }}</th>                           
-                                <th>@if($a->tcapacitacion=="PRESENCIAL"){{ "X" }}@endif</th>
-                                <th>@if($a->tcapacitacion=="A DISTANCIA"){{ "X" }}@endif</th>
-                                <th>{{ $a->dura }}</th>
-                                <th style="width:10%;">{{ $a->clave }}</th>
-                                <th>{{ $a->mvalida }}</th>
-                                <th>{{ $a->nombre }}</th>    
-                                <th>{{ $a->inicio }}</th>                           
-                                <th>{{ $a->termino }}</th>                           
-                                <th style="width:5%;">{{ $a->efisico }}</th>
-                                <th>{{ $a->motivo }}</th>
-                                <th>{{ $a->realizo }}</th>                           
-                                <th>{{ $a->observaciones }}</th>                           
+                                <th WIDTH="7%">{{ $a->curso }}</th>
+                                <th WIDTH="2%">{{ $a->mod }}</th>                           
+                                <th WIDTH="2%">@if($a->tcapacitacion=="PRESENCIAL"){{ "X" }}@endif</th>
+                                <th WIDTH="2%">@if($a->tcapacitacion=="A DISTANCIA"){{ "X" }}@endif</th>
+                                <th WIDTH="2%">{{ $a->dura }}</th>
+                                <th WIDTH="10%">{{ $a->clave }}</th>
+                                <th WIDTH="10%">{{ $a->mvalida }}</th>
+                                <th WIDTH="7%">{{ $a->nombre }}</th>    
+                                <th WIDTH="5%">{{ $a->inicio }}</th>                           
+                                <th WIDTH="5%">{{ $a->termino }}</th>                           
+                                <th WIDTH="7%">{{ $a->efisico }}</th>
+                                <th WIDTH="7%">{{ $a->motivo }}</th>
+                                <th WIDTH="7%">{{ $a->realizo }}</th>                           
+                                <th WIDTH="27%">{{ $a->observaciones }}</th>                           
                             </tr> 
                         @endforeach
                     </tbody>                                               
