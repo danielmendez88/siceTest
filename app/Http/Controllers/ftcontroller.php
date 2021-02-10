@@ -295,14 +295,12 @@ class ftcontroller extends Controller
      */
     public function store(Request $request)
     {
-        //dd($request);
         if (isset($_POST['generarMemoAFirma'])) 
         {
             # vamos a checar sólo a los checkbox checados como propiedad
             if (!empty($_POST['chkcursos_list'])) {
                 $fecha_ahora = Carbon::now();
                 $date = $fecha_ahora->format('Y-m-d'); // fecha
-                $fecha_nueva=$fecha_ahora->format('d-m-Y');
                 $numero_memo = $request->get('numero_memo'); // número de memo
 
                 $memos = [
@@ -317,29 +315,13 @@ class ftcontroller extends Controller
                         ->where('id', $value)
                         ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
                 }
-                $total=count($_POST['chkcursos_list']);                
-                $id_user = Auth::user()->id;
-                $rol = DB::table('role_user')->select('roles.slug')->leftjoin('roles', 'roles.id', '=', 'role_user.role_id') 
-                ->where([['role_user.user_id', '=', $id_user], ['roles.slug', '=', 'unidad']])->get();
-                if($rol[0]->slug=='unidad')
-                { 
-                $unidad = Auth::user()->unidad;
-                $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
-                $_SESSION['unidad'] = $unidad;
-                }
-                $mes=date("m");
-                $reg_cursos=DB::table('tbl_cursos')->select(db::raw("sum(case when extract(month from termino) = ".$mes." then 1 else 0 end) as tota"),'unidad','curso','mod','inicio','termino',db::raw("sum(hombre + mujer) as cupo"),'nombre','clave','ciclo',
-                            'memos->TURNADO_EN_FIRMA->FECHA as fecha')
-                ->where('memos->TURNADO_EN_FIRMA->NUMERO',$numero_memo)
-                ->groupby('unidad','curso','mod','inicio','termino','nombre','clave','ciclo','memos->TURNADO_EN_FIRMA->FECHA')->get();
-                $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
-                'pvinculacion','jcyc','pjcyc')->where('unidad',$_SESSION['unidad'])->first();
-                $pdf = PDF::loadView('reportes.memodta',compact('reg_cursos','reg_unidad','numero_memo','total','fecha_nueva'));
-                return $pdf->stream('apertura.pdf');
+
                 /**
                  * GENERAMOS UNA REDIRECCIÓN HACIA EL INDEX
                  */
-                //return redirect()->route('formatot.send.dta')->with('success', sprintf('GENERACIÓN DE DOCUMENTO MEMORANDUM PARA ESPERA DE FIRMA!'));
+                return redirect()->route('formatot.send.dta')
+                        ->with('success', sprintf('GENERACIÓN DE DOCUMENTO MEMORANDUM PARA ESPERA DE FIRMA!'));
+
             }
         }
 

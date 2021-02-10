@@ -76,12 +76,11 @@
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
             @else 
-<<<<<<< HEAD
                 <form id="dtaformGetDocument" method="POST" enctype="multipart/form-data" action="{{ route('formatot.send.dta') }}">
                 @csrf
-=======
                 <form id="dtaformGetDocument" method="POST" enctype="multipart/form-data">
->>>>>>> 506b85e... modificaciones de vista_formatot.blade.php
+                <form id="dtaformGetDocument" method="POST" enctype="multipart/form-data" action="{{ route('formatot.send.dta') }}">
+                    @csrf
                     <div class="form-row">
                         <div class="form-group col-md-3">
                             <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
@@ -237,12 +236,10 @@
                                     <th scope="col">NAESCOLH9</th>
                                     <th scope="col" WIDTH="500">OBSERVACIONES</th>                                       
                                 </tr>
-<<<<<<< HEAD
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-=======
                             </thead>
                             <tbody style="height: 300px; overflow-y: auto">
                                 @foreach ($var_cursos as $datas)
@@ -374,7 +371,6 @@
                             </tbody>
                         </table>
                     </div>
->>>>>>> 506b85e... modificaciones de vista_formatot.blade.php
                 </form>          
             @endif
         @else
