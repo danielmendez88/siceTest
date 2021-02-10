@@ -39,7 +39,11 @@
 <!--seccion-->
 @section('content')
     <div class="container g-pt-50">
-        <div class="alert"></div>
+        @if ($message = Session::get('success'))
+            <div class="alert alert-warning">
+                <p>{{ $message }}</p>
+            </div>
+        @endif
         <div class="row">
             <div class="col-lg-8 margin-tb">
                 <div>
@@ -72,7 +76,8 @@
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
             @else 
-                <form id="dtaformGetDocument" method="POST" enctype="multipart/form-data">
+                <form id="dtaformGetDocument" method="POST" enctype="multipart/form-data" action="{{ route('formatot.send.dta') }}">
+                    @csrf
                     <div class="form-row">
                         <div class="form-group col-md-3">
                             <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
@@ -422,61 +427,61 @@
                     numero_memo: {
                         required: "CAMPO REQUERIDO"
                     },
-                },
-                submitHandler: function(forms, e){
-                    e.preventDefault();
-                    var check_cursos = new Array();
-                    $('input[name="chkcursos_list[]"]:checked').each(function() {
-                        check_cursos.push(this.value);
-                    });
-                    /***
-                    * memorandum_validacion
-                    */
-                    var formData = new FormData(forms);
-                    formData.append("check_cursos_dta", check_cursos);
-                    var _url = "{{route('formatot.send.dta')}}";
-
-                    var requested = $.ajax
-                    ({
-                        url: _url,
-                        method: 'POST',
-                        data: formData,
-                        dataType: 'json',
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        beforeSend: function(){
-                            document.querySelector("#spinner").removeAttribute('hidden');
-                        },
-                        success: function(response){
-                            $("#dtaformGetDocument").trigger("reset");
-                            $( ".alert" ).addClass( "alert-warning");
-                            $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA PARA ENVÍO A VALIDACIÓN A DTA</b>" )
-                            var blob = new Blob([response]);
-                            var link = document.createElement('a');
-                            link.href = window.URL.createObjectURL(blob);
-                            link.download = "Sample.pdf";
-                            link.click();
-                        },
-                        complete:function(data){
-                            // escondemos el modales
-                            document.querySelector('#spinner').setAttribute('hidden', '');
-                        },
-                        error: function(jqXHR, textStatus){
-                            console.log(jqXHR.responseText);
-                            alert( "Hubo un error: " + jqXHR.status );
-                        }
-                    });
-
-                    $.when(requested).then(function(data, textStatus, jqXHR ){
-                        if (jqXHR.status === 200) {
-                            document.querySelector('#spinner').setAttribute('hidden', '');
-                        }
-                    });
                 }
+                // ,submitHandler: function(forms, e){
+                //     e.preventDefault();
+                //     var check_cursos = new Array();
+                //     $('input[name="chkcursos_list[]"]:checked').each(function() {
+                //         check_cursos.push(this.value);
+                //     });
+                //     /***
+                //     * memorandum_validacion
+                //     */
+                //     var formData = new FormData(forms);
+                //     formData.append("check_cursos_dta", check_cursos);
+                //     var _url = "{{route('formatot.send.dta')}}";
+
+                //     var requested = $.ajax
+                //     ({
+                //         url: _url,
+                //         method: 'POST',
+                //         data: formData,
+                //         dataType: 'json',
+                //         cache: false,
+                //         contentType: false,
+                //         processData: false,
+                //         xhrFields: {
+                //             responseType: 'blob'
+                //         },
+                //         beforeSend: function(){
+                //             document.querySelector("#spinner").removeAttribute('hidden');
+                //         },
+                //         success: function(response){
+                //             $("#dtaformGetDocument").trigger("reset");
+                //             $( ".alert" ).addClass( "alert-warning");
+                //             $(".alert").append( "<b>DOCUMENTO DE MEMORANDUM CREADO EXITOSAMENTE, EN ESPERA DE FIRMA PARA ENVÍO A VALIDACIÓN A DTA</b>" )
+                //             var blob = new Blob([response]);
+                //             var link = document.createElement('a');
+                //             link.href = window.URL.createObjectURL(blob);
+                //             link.download = "Sample.pdf";
+                //             link.click();
+                //         },
+                //         complete:function(data){
+                //             // escondemos el modales
+                //             document.querySelector('#spinner').setAttribute('hidden', '');
+                //         },
+                //         error: function(jqXHR, textStatus){
+                //             console.log(jqXHR.responseText);
+                //             alert( "Hubo un error: " + jqXHR.status );
+                //         }
+                //     });
+
+                //     $.when(requested).then(function(data, textStatus, jqXHR ){
+                //         if (jqXHR.status === 200) {
+                //             document.querySelector('#spinner').setAttribute('hidden', '');
+                //         }
+                //     });
+                // }
              });
         });
         // 

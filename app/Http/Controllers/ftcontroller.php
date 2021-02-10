@@ -166,6 +166,37 @@ class ftcontroller extends Controller
         } else {
             $url_archivo_memo = null;
         }
+
+        if (!empty($_POST['check_cursos_dta'])) {
+            # vamos a checar sólo a los checkbox checados como propiedad
+            if (!empty($_POST['check_cursos_dta'])) {
+                $fecha_ahora = Carbon::now();
+                $date = $fecha_ahora->format('Y-m-d'); // fecha
+                $numero_memo = $request->get('numero_memo'); // número de memo
+
+                $memos_DTA = [
+                    'NUMERO' => $numero_memo,
+                    'FECHA' => $date
+                ];
+                # sólo obtenemos a los que han sido chequeados para poder continuar con la actualización
+                foreach($_POST['check_cursos_dta'] as $key => $value){
+                    \DB::table('tbl_cursos')
+                        ->where('id', $value)
+                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 'status' => 'TURNADO_DTA', 'turnado' => 'DTA']);
+                }
+
+                /**
+                 * GENERAMOS UNA REDIRECCIÓN HACIA EL INDEX
+                 */
+                return redirect()->route('formatot.send.dta')
+                        ->with('success', sprintf('GENERACIÓN DE DOCUMENTO MEMORANDUM PARA ESPERA DE FIRMA!'));
+
+            }
+        }
+        /**
+         * TURNADO_DTA:[“NUMERO”:”XXXXXX”,”FECHA”:” XXXX-XX-XX”],
+         */
+
         // $id_user = Auth::user()->id;
         // $rol = DB::table('role_user')
         // ->select('roles.slug')
@@ -263,22 +294,36 @@ class ftcontroller extends Controller
      */
     public function store(Request $request)
     {
-        $fecha_ahora = Carbon::now();
-        $date = $fecha_ahora->format('Y-m-d'); // fecha
-        $numero_memo = $request->get('numero_memo'); // número de memo
 
-        $memos = [
-            'TURNADO_EN_FIRMA' => [
-                'NUMERO' => $numero_memo,
-                'FECHA' => $date
-            ]
-        ];
+        if (isset($_POST['generarMemoAFirma'])) 
+        {
+            # vamos a checar sólo a los checkbox checados como propiedad
+            if (!empty($_POST['chkcursos_list'])) {
+                $fecha_ahora = Carbon::now();
+                $date = $fecha_ahora->format('Y-m-d'); // fecha
+                $numero_memo = $request->get('numero_memo'); // número de memo
 
-        $data = explode(",", $request->check_cursos_dta);
-        foreach ($data as $item) {
-            \DB::table('tbl_cursos')
-              ->where('id', $item)
-              ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
+                $memos = [
+                    'TURNADO_EN_FIRMA' => [
+                        'NUMERO' => $numero_memo,
+                        'FECHA' => $date
+                    ]
+                ];
+                # sólo obtenemos a los que han sido chequeados para poder continuar con la actualización
+                foreach($_POST['chkcursos_list'] as $key => $value){
+                    \DB::table('tbl_cursos')
+                        ->where('id', $value)
+                        ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
+                }
+
+                /**
+                 * GENERAMOS UNA REDIRECCIÓN HACIA EL INDEX
+                 */
+                return redirect()->route('formatot.send.dta')
+                        ->with('success', sprintf('GENERACIÓN DE DOCUMENTO MEMORANDUM PARA ESPERA DE FIRMA!'));
+
+            }
+        }
 
             // TURNADO_DTA:[“NUMERO”:”XXXXXX”,”FECHA”:” XXXX-XX-XX”]
             // “TURNADO_DTA”:”2021-01-28”
@@ -287,10 +332,6 @@ class ftcontroller extends Controller
              * TURNADO_PLANEACION[“NUMERO”:”XXXXXX”,FECHA:”XXXX-XX-XX”], 
              * TUNADO_UNIDAD:[“NUMERO”:”XXXXXX”,FECHA:”XXXX-XX-XX”]}
              */
-        }
-
-        $json = json_encode(1);
-        return $json;
     }
 
     protected function uploaded_memo_validacion_file($file, $memo)
