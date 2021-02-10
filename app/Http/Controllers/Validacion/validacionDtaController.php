@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Validacion;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class validacionDtaController extends Controller
 {
@@ -80,7 +81,7 @@ class validacionDtaController extends Controller
         })
         ->JOIN('tbl_unidades as u', 'u.unidad', '=', 'c.unidad')
         ->WHERE('u.ubicacion', '=', $unidades)
-        ->WHERE('c.status', '=', 'EN_FIRMA')                
+        ->WHERE('c.status', '=', 'ENVIADO_DTA')                
         ->WHERE(DB::raw("extract(year from c.termino)"), '=', '2021')
         ->WHERE('c.turnado', '=', 'DTA')
         ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
@@ -137,7 +138,7 @@ class validacionDtaController extends Controller
                                     ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_UNIDAD}','".json_encode($memos_unidad)."'::jsonb)"), 'status' => 'NO REPORTADO', 'observaciones_formato_t' => $observaciones]);
                             }
                             return redirect()->route('validacion.cursos.enviados.dta')
-                                ->with('success', sprintf('CURSOS REGRESADOS A UNIDAD CON COMENTARIOS PARA REVISIÓN!'));
+                                ->with('success', sprintf('CURSOS REGRESADOS A UNIDAD CON COMENTARIOS PARA REVISIÓN!'));;
                         }
                     break;
                 case 'EnviarPlaneacion':
