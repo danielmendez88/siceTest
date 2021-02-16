@@ -106,7 +106,7 @@
                         @can('planeacion.reporte')
                             <a class="dropdown-item" href="{{route('planeacion.reporte')}}">PLANEACIÓN</a>
                         @endcan
-                        {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATOT</a> --}}
+                        <!-- {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATOT</a> --}} -->
                     </div>
                 </li>
             </ul>
