@@ -190,17 +190,10 @@ class ftcontroller extends Controller
                  */
                 # sólo obtenemos a los que han sido chequeados para poder continuar con la actualización
                 $data = explode(",", $cursoschk);
-                $comentario_unidad = explode(",", $_POST['comentarios_unidad']); // obtenemos los comentarios
-                foreach(array_combine($data, $comentario_unidad) as $key => $comentariosUnidad){
-                    $comentarios_envio_dta = [
-                        'OBSERVACION_UNIDAD' =>  $comentariosUnidad
-                    ];
+                foreach($data as $key){
                     \DB::table('tbl_cursos')
                         ->where('id', $key)
-                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 
-                        'status' => 'TURNADO_DTA', 
-                        'turnado' => 'DTA',
-                        'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACION_UNIDAD_DTA}', '".json_encode($comentarios_envio_dta)."'::jsonb)")]);
+                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 'status' => 'TURNADO_DTA', 'turnado' => 'DTA']);
                 }
 
                 /**
@@ -315,10 +308,6 @@ class ftcontroller extends Controller
      */
     public function store(Request $request)
     {
-<<<<<<< HEAD
-=======
-        
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
         if (isset($_POST['generarMemoAFirma'])) 
         {
             
@@ -342,6 +331,7 @@ class ftcontroller extends Controller
                         \DB::table('tbl_cursos')
                             ->where('id', $value)
                             ->update(['memos' => $memos, 'status' => 'EN_FIRMA', 'turnado' => 'UNIDAD']);
+                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
                     }
 
                     /**
@@ -352,7 +342,7 @@ class ftcontroller extends Controller
                 } catch (QueryException  $th) {
                     //throw $th;
                     return back()->withErrors([$ex->getMessage()]);
-                }
+                    return back()->withErrors(['msgError', $ex->getMessage()]);                }
 
             } else {
                 return back()->withInput()->withErrors(['ERROR AL MOMENTO DE GUARDAR LOS REGISTROS, SE DEBE DE ESTAR SELECCIONADOS LOS CHECKBOX CORRESPONDIENTES']);

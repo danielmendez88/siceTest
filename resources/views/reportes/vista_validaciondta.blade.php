@@ -96,6 +96,7 @@
             <form id="formSendDtaTo" method="POST" action="{{ route('enviar.cursos.validacion.dta') }}">
                 @csrf
                 <div class="form-row">
+<<<<<<< HEAD
                     <div class="form-group col-md-8 mb-2">
                         <input type="text" name="filterClaveCurso" id="filterClaveCurso" class="form-control" placeholder="BUSQUEDA POR CLAVE DE CURSO">
                     </div>
@@ -138,6 +139,20 @@
                             </div>
                         @endif
                     @endcan
+=======
+                    <div class="form-group mx-sm-3 mb-2">
+                        <button input type="submit" id="validarEnDta" name="validarEnDta" value="EnviarPlaneacion"  class="btn btn-success">
+                            <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>&nbsp;
+                            ENVIAR A PLANEACIÓN
+                        </button> 
+                    </div>
+                    <div class="form-group mb-2">
+                        <button input type="submit" id="validarEnDta" name="validarEnDta" value="RegresarUnidad"  class="btn btn-danger">
+                            <i class="fa fa-retweet fa-2x" aria-hidden="true"></i>&nbsp;
+                            REGRESAR A LA UNIDAD
+                        </button>
+                    </div>
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     
                 </div>        
             
@@ -399,8 +414,12 @@
                                     <td>{{ $datas->naesm9 }}</td>
                                     <td>{{ $datas->naesh9 }}</td>
                                     <td><div style = "width:900px; word-wrap: break-word">{{ $datas->tnota }}</div></td>
+<<<<<<< HEAD
                                     <td><div style="width: 300px; word-wrap: break-word">{{ $datas->observaciones_unidad }}</div></td>
                                     <td><textarea name="comentarios_enlaces[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3"></textarea></td>                
+=======
+                                    <td><textarea name="comentarios[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3"></textarea></td>                
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                                 </tr>
                             @endforeach
                         </tbody>
@@ -468,6 +487,7 @@
             $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
         });
 
+<<<<<<< HEAD
         $('#send_to_dta').click(function(){
             $('#formSendUnity').validate({
                 rules: {
@@ -550,6 +570,8 @@
             }); // configurar el validador
         });
 
+=======
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
         // var checkChecked = function() {
         //     $("input:checkbox").each(function() {
         //         if ($(this).is(":checked")) {
@@ -565,6 +587,7 @@
         // }
 
         // $( "input[type=checkbox]" ).on( "click", checkChecked );
+<<<<<<< HEAD
 
         /*
         * modificaciones de datos en filtro
@@ -575,6 +598,8 @@
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
             });
         });
+=======
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
     });
 </script>
 @endsection

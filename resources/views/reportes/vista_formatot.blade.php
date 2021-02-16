@@ -78,6 +78,7 @@
         {!! Form::close() !!}
             
         <hr style="border-color:dimgray">
+<<<<<<< HEAD
         @if (count($var_cursos) > 0)
             <form id="dtaformGetDocument" method="POST" action="{{ route('formatot.send.dta') }}" target="_blank">
                 @csrf
@@ -93,15 +94,38 @@
                     </div>
                     @if ($enFirma->count() > 0)
                         <div class="form-group mb-2 mb-2">
+=======
+        @if (isset($var_cursos) )
+            @if (is_null($var_cursos))
+            <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
+            @else 
+                <form id="dtaformGetDocument" method="POST" action="{{ route('formatot.send.dta') }}" target="_blank">
+                    @csrf
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
+                                <i class="fa fa-file-pdf-o fa-2x" aria-hidden="true"></i>
+                                GENERAR MEMORANDUM
+                            </button> 
+                        </div>
+                        <div class="form-group col-md-3">
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                             <button input type="button" id="enviarDTA" style="{{ $enFirma->isEmpty() ? 'display: none' : '' }}" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
                                 <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>
                                 ENVIAR A VALIDACIÓN DE DTA
                             </button> 
                         </div>
+<<<<<<< HEAD
                     @endif
                     
                     @if ($retornoUnidad->count() > 0)
                         <div class="form-group mb-2 mb-2">
+=======
+                        <div class="form-group col-md-3">
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                             <button type="button" id="mod_format" name="mod_format" style="{{ $retornoUnidad->isEmpty() ? 'display: none' : '' }}"  class="btn btn-warning my-2 my-sm-0 waves-effect waves-light">
                                 <i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i>
                                 Modificar Campos
@@ -248,6 +272,7 @@
                         <tbody style="height: 300px; overflow-y: auto">
                             @foreach ($var_cursos as $datas)
                                 <tr align="center">
+<<<<<<< HEAD
                                     <td><input type="checkbox" id="cb1" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" checked {{ $datas->estadocurso == 'RETORNO_UNIDAD' ? 'disabled' : '' }}/></td></td>
                                     <td>{{ $datas->unidad }}</td>
                                     <td>{{ $datas->plantel }}</td>
@@ -374,6 +399,135 @@
                                         <textarea name="comentarios_unidad[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3"></textarea>
                                     </td>
                                     <td><div style = "width:600px; word-wrap: break-word">{{ $datas->observaciones_enlaces }}</div></td>                    
+=======
+                                    <th scope="col">
+                                        <div style = "width:100px; word-wrap: break-word">
+                                            SELECCIONAR/QUITAR
+                                            <input type="checkbox" id="selectAll" checked {{ $retornoUnidad->isEmpty() ? '' : 'disabled'  }}/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">UNIDAD</th>
+                                    <th scope="col">PLANTEL</th>
+                                    <th scope="col">ESPECIALIDAD</th>
+                                    <th scope="col">CURSO</th>
+                                    <th scope="col">CLAVE</th>
+                                    <th scope="col">MOD</th>
+                                    <th scope="col">DURA</th>
+                                    <th scope="col">TURNO</th>
+                                    <th scope="col">DIAI</th>
+                                    <th scope="col">MESI</th>
+                                    <th scope="col">DIAT</th>
+                                    <th scope="col">MEST</th>
+                                    <th scope="col">PERI</th>
+                                    <th scope="col">HORAS</th>
+                                    <th scope="col">DIAS</th>
+                                    <th scope="col">HORARIO</th>
+                                    <th scope="col">INSCRITOS</th>
+                                    <th scope="col">FEM</th>
+                                    <th scope="col">MAS</th>
+                                    <th scope="col">EGRESADO</th>
+                                    <th scope="col">EMUJER</th>
+                                    <th scope="col">EHOMBRE</th>
+                                    <th scope="col">DESER</th>
+                                    <th scope="col">COSTO</th>
+                                    <th scope="col">TOTAL</th>
+                                    <th scope="col">ETMUJER</th>
+                                    <th scope="col">ETHOMBRE</th>
+                                    <th scope="col">EPMUJER</th>
+                                    <th scope="col">EPHOMBRE</th>
+                                    <th scope="col">ESPECIFICO</th>
+                                    <th scope="col">MVALIDA</th>
+                                    <th scope="col">ESPACIO FISICO</th>
+                                    <th scope="col">INSTRUCTOR</th>
+                                    <th scope="col">ESCOLARIDAD</th>
+                                    <th scope="col">DOCUMENTO</th>
+                                    <th scope="col">SEXO</th>
+                                    <th scope="col">MEMO VALIDACION</th>
+                                    <th scope="col">MEMO EXONERACION</th>
+                                    <th scope="col">TRABAJAN</th>
+                                    <th scope="col">NO TRABAJAN</th>
+                                    <th scope="col">DISCAPACITADOS</th>
+                                    <th scope="col">MIGRANTE</th>
+                                    <th scope="col">INDIGENA</th>
+                                    <th scope="col">ETNIA</th>
+                                    <th scope="col">PROGRAMA</th>
+                                    <th scope="col">MUNICIPIO</th>
+                                    <th scope="col">DEPENDENCIA BENEFICIADA</th>
+                                    <th scope="col">GENERAL</th>
+                                    <th scope="col">SECTOR</th>
+                                    <th scope="col">VALIDACION PAQUETERIA</th>
+                                    <th scope="col">IEDADM1</th>
+                                    <th scope="col">IEDADH1</th>
+                                    <th scope="col">IEDADM2</th>
+                                    <th scope="col">IEDADH2</th>
+                                    <th scope="col">IEDADM3</th>
+                                    <th scope="col">IEDADH3</th>
+                                    <th scope="col">IEDADM4</th>
+                                    <th scope="col">IEDADH4</th>
+                                    <th scope="col">IEDADM5</th>
+                                    <th scope="col">IEDADH5</th>
+                                    <th scope="col">IEDADM6</th>
+                                    <th scope="col">IEDADH6</th>
+                                    <th scope="col">IEDADM7</th>
+                                    <th scope="col">IEDADH7</th>
+                                    <th scope="col">IEDADM8</th>
+                                    <th scope="col">IEDADH8</th>
+                                    <th scope="col">IESCOLM1</th>
+                                    <th scope="col">IESCOLH1</th>
+                                    <th scope="col">IESCOLM2</th>
+                                    <th scope="col">IESCOLH2</th>
+                                    <th scope="col">IESCOLM3</th>
+                                    <th scope="col">IESCOLH3</th>
+                                    <th scope="col">IESCOLM4</th>
+                                    <th scope="col">IESCOLH4</th>
+                                    <th scope="col">IESCOLM5</th>
+                                    <th scope="col">IESCOLH5</th>
+                                    <th scope="col">IESCOLM6</th>
+                                    <th scope="col">IESCOLH6</th>
+                                    <th scope="col">IESCOLM7</th>
+                                    <th scope="col">IESCOLH7</th>
+                                    <th scope="col">IESCOLM8</th>
+                                    <th scope="col">IESCOLH8</th>
+                                    <th scope="col">IESCOLM9</th>
+                                    <th scope="col">IESCOLH9</th>
+                                    <th scope="col">AESCOLM1</th>
+                                    <th scope="col">AESCOLH1</th>
+                                    <th scope="col">AESCOLM2</th>
+                                    <th scope="col">AESCOLH2</th>
+                                    <th scope="col">AESCOLM3</th>
+                                    <th scope="col">AESCOLH3</th>
+                                    <th scope="col">AESCOLM4</th>
+                                    <th scope="col">AESCOLH4</th>
+                                    <th scope="col">AESCOLM5</th>
+                                    <th scope="col">AESCOLH5</th>
+                                    <th scope="col">AESCOLM6</th>
+                                    <th scope="col">AESCOLH6</th>
+                                    <th scope="col">AESCOLM7</th>
+                                    <th scope="col">AESCOLH7</th>
+                                    <th scope="col">AESCOLM8</th>
+                                    <th scope="col">AESCOLH8</th>
+                                    <th scope="col">AESCOLM9</th>
+                                    <th scope="col">AESCOLH9</th>
+                                    <th scope="col">NAESCOLM1</th>
+                                    <th scope="col">NAESCOLH1</th>
+                                    <th scope="col">NAESCOLM2</th>
+                                    <th scope="col">NAESCOLH2</th>
+                                    <th scope="col">NAESCOLM3</th>
+                                    <th scope="col">NAESCOLH3</th>
+                                    <th scope="col">NAESCOLM4</th>
+                                    <th scope="col">NAESCOLH4</th>
+                                    <th scope="col">NAESCOLM5</th>
+                                    <th scope="col">NAESCOLH5</th>
+                                    <th scope="col">NAESCOLM6</th>
+                                    <th scope="col">NAESCOLH6</th>
+                                    <th scope="col">NAESCOLM7</th>
+                                    <th scope="col">NAESCOLH7</th>
+                                    <th scope="col">NAESCOLM8</th>
+                                    <th scope="col">NAESCOLH8</th>
+                                    <th scope="col">NAESCOLM9</th>
+                                    <th scope="col">NAESCOLH9</th>
+                                    <th scope="col" WIDTH="500">OBSERVACIONES</th>                                       
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                                 </tr>
                             @endforeach
                         </tbody>
@@ -659,10 +813,13 @@
                         check_cursos.push(this.value);
                     });
 
+<<<<<<< HEAD
                     $('textarea[name="comentarios_unidad[]"]').each(function(){
                         comentario_unidad.push(this.value);
                     });
 
+=======
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     var numero_memo = $('#numero_memo').val();
                     /***
                     * cargar_archivo_formato_t
@@ -670,7 +827,10 @@
                     var formData = new FormData(form);
                     formData.append("check_cursos_dta", check_cursos);
                     formData.append("numero_memo", numero_memo);
+<<<<<<< HEAD
                     formData.append("comentarios_unidad", comentario_unidad);
+=======
+>>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     var _url = "{{route('formatot.seguimiento.paso2')}}";
                     var requested = $.ajax
                     ({
