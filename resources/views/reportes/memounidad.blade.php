@@ -7,41 +7,75 @@
     <title>FORMATO T</title>
     <style>      
         body{font-family: sans-serif}
-        @page {margin: 30px 50px 10px 50px;}
-            header { position: fixed; left: 0px; top: 10px; right: 0px; text-align: center;}
-            header h1{height:0; line-height: 14px; padding: 9px; margin: 0;}
-            header h2{margin-top: 20px; font-size: 8px; border: 1px solid gray; padding: 12px; line-height: 18px; text-align: justify;}
-            footer {position:fixed;   left:0px;   bottom:-170px;   height:150px;   width:100%;}
-            footer .page:after { content: counter(page, sans-serif);}
-            img.izquierda {float: left;width: 200px;height: 60px;}
-            img.izquierdabot {position: absolute;left: 50px;width: 350px;height: 60px;}
-            img.derechabot {position: absolute;right: 50px;width: 350px;height: 60px;}
-            img.derecha {float: right;width: 200px;height: 60px;}
+        @page {margin: 20px 50px 120px 50px;size: letter;}
+        header { position: fixed; left: 0px; top: 30px; right: 0px;text-align: center;width:100%;line-height: 30px;}
+        img.izquierda {float: left;width: 200px;height: 60px;}
+        img.izquierdabot {position:fixed;left: 50px;width: 350px;height: 60px;}
+        img.derechabot {position:fixed;right: 50px;width: 350px;height: 60px;}
+        img.derecha {float: right;width: 200px;height: 60px;}
         .tablas{border-collapse: collapse;width: 100%;}
-        .tablas tr,th{font-size: 8px; border: gray 1px solid; text-align: center; padding: 2px;}
-        .tablaf { border-collapse: collapse; width: 990px;}     
-        .tablaf tr td { font-size: 8px; text-align: center; padding: 0px;}
-        .tablaj { border-collapse: collapse;}     
-        .tablaj { font-size: 8px;border: gray 1px solid; text-align: left; padding: 0px;}
-        .tablag { border-collapse: collapse; width: 100%;}     
+        .tablas tr,th{font-size: 8px; border: gray 1px solid; text-align: center; padding: 2px;} 
+        .tablad { border-collapse: collapse;position:fixed;margin-top:930px;margin-left:10px;}     
+        .tablad { font-size: 8px;border: gray 1px solid; text-align: left; padding: 2px;}
+        .tablag { border-collapse: collapse; width: 100%;table-layout: relative;}     
         .tablag tr td { font-size: 8px; padding: 0px;}
-        .tablad { width: 170px;border-spacing: -6px;}     
-        .tablad tr td{ font-size: 8px;text-align: right;padding: 0px;}
-        div.ex1 {background-color: gray;width: 170px;height: 55px;overflow: hidden;}
+        footer { position:fixed;left:0px;bottom:0px;height:0px;width:100%;}
+        footer .page:after { content: counter(page, sans-serif);}   
+        .contenedor {  
+        position:RELATIVE;
+        top:120px;  
+        width:100%;   
+        margin:auto;
+        
+        /* Propiedad que ha sido agreda*/
+        
+        }  
     }
     </style>
 </head>
 <body>
-    <div class= "container g-pt-30">
-        <div id="content">
-        <img class="izquierda" src='img/logohorizontalica1.png'>
-        <img class="derecha" src='img/chiapas.png'>
-        <br><br><br><br>
-            <div id="wrappertop">
-                <div align="center" style="font-size:11px;"><br>
-                    <dd><b>"2021,AÑO DE LA INDEPENDENCIA"<b><dd>
-                </div> <br><br>
-            </div>
+<header>
+            <img class="izquierda" src='img/logohorizontalica1.png'>
+            <img class="derecha" src='img/chiapas.png'>
+            <br>
+            <h6>"2021, AÑO DE LA INDEPENDENCIA"</h6>
+    </header>
+    <footer>  
+        <script type="text/php">
+            if (isset($pdf)) 
+            {
+                $x = 275;
+                $y = 725;
+                $text = "Hoja {PAGE_NUM} de {PAGE_COUNT}";
+                $font = "Arial";
+                $size = 11;
+                $color = array(0,0,0);
+                $word_space = 0.0;  //  default
+                $char_space = 0.0;  //  default
+                $angle = 0.0;   //  default
+                $pdf->page_text($x, $y, $text, $font, $size, $color, $word_space, $char_space, $angle);
+            }
+        </script>
+        
+        <table class="tablad" bgcolor="black">
+                <tr>
+                    <td colspan="4" style="color:white;"><b>AV. PASO LIMON NO. 1581 JUNTO AL COLEGIO LAURELES </b></td>
+                </tr> 
+                <tr>
+                    <td colspan="4" style="color:white;"><b>COL. COMISION FEDERAL DE ELECTRICIDAD C.P. 29049.</b></td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="color:white;"><b>TUXTLA GUTIERREZ, CHIAPAS</b></td>
+                </tr>
+        </table>
+               
+        <img class="derecha" src='img/icatech-imagen.png'>
+    </footer>
+    <div class= "contenedor">
+        <div align=right style="font-size:11px;"><b>DIRECCION TECNICA ACADEMICA</b></div>
+        <div align=right style="font-size:11px;"><b>MEMORANDUM NO. {{ $numero_memo }}</b></div>                        
+        <div align=right style="font-size:11px;"><b>{{ $reg_unidad->unidad }}, CHIAPAS; {{ $fecha_nueva }}</b></div>                        
+        <br><br>
             <table class="tablag">
                 <body>
                     <tr>

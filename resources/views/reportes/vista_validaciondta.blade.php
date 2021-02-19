@@ -14,7 +14,6 @@
             justify-content: center;
             align-items: center;
         }
-
         #spinner::after {
         content: "";
         width: 80px;
@@ -25,11 +24,9 @@
         will-change: transform;
         animation: spin 1s infinite linear
         }
-
         table tr td {
             border: 1px solid #ccc;
         }
-
         @keyframes spin {
             from {
                 transform: rotate(0deg);
@@ -38,7 +35,6 @@
                 transform: rotate(360deg);
             }
         }
-
         @media all and (max-width:500px){
             table{
                 width:100%;
@@ -96,7 +92,6 @@
             <form id="formSendDtaTo" method="POST" action="{{ route('enviar.cursos.validacion.dta') }}">
                 @csrf
                 <div class="form-row">
-<<<<<<< HEAD
                     <div class="form-group col-md-8 mb-2">
                         <input type="text" name="filterClaveCurso" id="filterClaveCurso" class="form-control" placeholder="BUSQUEDA POR CLAVE DE CURSO">
                     </div>
@@ -139,20 +134,6 @@
                             </div>
                         @endif
                     @endcan
-=======
-                    <div class="form-group mx-sm-3 mb-2">
-                        <button input type="submit" id="validarEnDta" name="validarEnDta" value="EnviarPlaneacion"  class="btn btn-success">
-                            <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>&nbsp;
-                            ENVIAR A PLANEACIÓN
-                        </button> 
-                    </div>
-                    <div class="form-group mb-2">
-                        <button input type="submit" id="validarEnDta" name="validarEnDta" value="RegresarUnidad"  class="btn btn-danger">
-                            <i class="fa fa-retweet fa-2x" aria-hidden="true"></i>&nbsp;
-                            REGRESAR A LA UNIDAD
-                        </button>
-                    </div>
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     
                 </div>        
             
@@ -414,12 +395,8 @@
                                     <td>{{ $datas->naesm9 }}</td>
                                     <td>{{ $datas->naesh9 }}</td>
                                     <td><div style = "width:900px; word-wrap: break-word">{{ $datas->tnota }}</div></td>
-<<<<<<< HEAD
                                     <td><div style="width: 300px; word-wrap: break-word">{{ $datas->observaciones_unidad }}</div></td>
                                     <td><textarea name="comentarios_enlaces[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3"></textarea></td>                
-=======
-                                    <td><textarea name="comentarios[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3"></textarea></td>                
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                                 </tr>
                             @endforeach
                         </tbody>
@@ -466,28 +443,21 @@
 <script src="{{ asset('js/scripts/datepicker-es.js') }}"></script>
 <script type="text/javascript">
     $(function(){
-
         document.querySelector('#spinner').setAttribute('hidden', '');
-
         $.validator.addMethod('filesize', function (value, element, param) {
             return this.optional(element) || (element.files[0].size <= param)
         }, 'El TAMAÑO DEL ARCHIVO DEBE SER MENOR A {0} bytes.');
-
         $('#enviardta').click(function(){
             $("#exampleModalCenter").modal("show");
         });
-
         $('#close_btn_modal_send_dta').click(function(){
             $("#numero_memo").rules('remove', 'required', 'extension', 'filesize');
             $("input[id*=numero_memo]").removeClass("error"); // workaround
             $("#exampleModalCenter").modal("hide");
         });
-
         $("#selectAll").click(function() {
             $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
         });
-
-<<<<<<< HEAD
         $('#send_to_dta').click(function(){
             $('#formSendUnity').validate({
                 rules: {
@@ -510,11 +480,9 @@
                     $('input[name="chkcursos[]"]:checked').each(function() {
                         check_cursos.push(this.value);
                     });
-
                     $('textarea[name="comentarios_enlaces[]"]').each(function(){
                         comentario_retorno.push(this.value);
                     });
-
                     var numero_memo = $('#num_memo').val();
                     /***
                     * cargar_archivo_formato_t
@@ -560,7 +528,6 @@
                             alert( "Hubo un error: " + jqXHR.status );
                         }
                     });
-
                     $.when(requested).then(function(data, textStatus, jqXHR ){
                         if (jqXHR.status === 200) {
                             document.querySelector('#spinner').setAttribute('hidden', '');
@@ -569,13 +536,9 @@
                 }
             }); // configurar el validador
         });
-
-=======
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
         // var checkChecked = function() {
         //     $("input:checkbox").each(function() {
         //         if ($(this).is(":checked")) {
-
         //             $('#comentario_'+$(this).attr("id")).prop('disabled', true);
         //             console.log($(this).attr("id"));
         //         } else {
@@ -585,10 +548,7 @@
         //     // var n = $( "input:checked" ).length;
         //     // alert( n + (n === 1 ? " is" : " are") + " checked!" );
         // }
-
         // $( "input[type=checkbox]" ).on( "click", checkChecked );
-<<<<<<< HEAD
-
         /*
         * modificaciones de datos en filtro
         */
@@ -598,8 +558,6 @@
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
             });
         });
-=======
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
     });
 </script>
 @endsection

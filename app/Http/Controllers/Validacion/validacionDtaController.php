@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Validacion;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -238,7 +237,7 @@ class validacionDtaController extends Controller
         // variables y creación de la fecha de retorno
         $fecha_actual = Carbon::now();
         $date = $fecha_actual->format('Y-m-d'); // fecha
-        //dd($_POST['comentarios']);
+        //dd($request->num_memo);
         $validacion = $request->get('validarEnDta');
         if (isset($validacion)) {
             # hacemos un switch
@@ -250,7 +249,6 @@ class validacionDtaController extends Controller
                     $turnado_revision_dta = [
                         'FECHA' => $date
                     ];
-<<<<<<< HEAD
 
                     if (!empty($_POST['chkcursos'])) {
                         # entramos al loop
@@ -266,35 +264,6 @@ class validacionDtaController extends Controller
                                     'status' => 'REVISION_DTA', 
                                     'turnado' => 'REVISION_DTA',
                                     'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACIONES_REVISION_DTA}', '".json_encode($observaciones_revision_dta)."'::jsonb)")]);
-=======
-                    //dd($memos_unidad);
-                    # code...
-                        if (!empty($request->get('chkcursos'))) {
-                            # también tenemos que checar que los comentarios no se encuentren varios
-                            // remueve vacios
-                           $filter =  array_filter($_POST['comentarios']);
-                            if (!empty($filter)) {
-                                # entramos a realizar las acciones en esta parte del código
-                                 # checamos lo que hay
-                                foreach ($_POST['chkcursos'] as $key => $value) {
-                                    $observaciones = [
-                                        'OBSERVACION_RETORNO' =>  $_POST['comentarios'][$key]
-                                    ];
-                                    # hacemos un loop - status RETORNO_UNIDAD
-                                    \DB::table('tbl_cursos')
-                                        ->where('id', $value)
-                                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_UNIDAD}','".json_encode($memos_unidad)."'::jsonb)"), 'status' => 'RETORNO_UNIDAD', 'observaciones_formato_t' => $observaciones]);
-                                }
-                                return redirect()->route('validacion.cursos.enviados.dta')
-                                    ->with('success', sprintf('CURSOS REGRESADOS A UNIDAD CON COMENTARIOS PARA REVISIÓN!'));
-                            } else {
-                                # regresamos y mandamos el mensaje de erro en base a los comentarios
-                                return back()->withInput()->withErrors(['NO PUEDE REALIZAR ESTA OPERACIÓN, DEBIDO A QUE NO SE HAN ENVIADO COMENTARIOS DE LOS CURSOS QUE SE REGRESAN A LA UNIDAD!']);
-                            }
-                        } else {
-                            # regresamos y mandamos un mensaje de error
-                            return back()->withInput()->withErrors(['NO PUEDE REALIZAR ESTA OPERACIÓN, DEBIDO A QUE NO SE HAN SELECCIONADO CURSOS!']);
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                         }
                         return redirect()->route('validacion.cursos.enviados.dta')
                                 ->with('success', sprintf('CURSOS ENVIADOS A PLANEACIÓN PARA REVISIÓN!'));
@@ -307,10 +276,29 @@ class validacionDtaController extends Controller
                      # entramos a un loop y antes checamos que se haya seleccionado cursos para realizar esta operacion
                      if (!empty($_POST['chkcursos'])) {
                          # si no están vacios enviamos a un loop
-                         foreach ($_POST['chkcursos'] as $key => $value) {
-                             # aqui vas a generar el documento pdf Julio del memorandum de devolución para las unidades
-                             dd($value);
+                         foreach ($_POST['chkcursos'] as $key => $value) { 
+                            # aqui vas a generar el documento pdf Julio del memorandum de devolución para las unidades
+                             //dd($value);
                          }
+                        $total=count($_POST['chkcursos_list']);                
+                        $id_user = Auth::user()->id;
+                        $rol = DB::table('role_user')->select('roles.slug')->leftjoin('roles', 'roles.id', '=', 'role_user.role_id') 
+                        ->where([['role_user.user_id', '=', $id_user], ['roles.slug', '=', 'unidad']])->get();
+                        if($rol[0]->slug=='unidad')
+                        { 
+                        $unidad = Auth::user()->unidad;
+                        $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
+                        $_SESSION['unidad'] = $unidad;
+                        }
+                        $mes=date("m");
+                        $reg_cursos=DB::table('tbl_cursos')->select(db::raw("sum(case when extract(month from termino) = ".$mes." then 1 else 0 end) as tota"),'unidad','curso','mod','inicio','termino',db::raw("sum(hombre + mujer) as cupo"),'nombre','clave','ciclo',
+                                    'memos->TURNADO_EN_FIRMA->FECHA as fecha')
+                        ->where('memos->TURNADO_EN_FIRMA->NUMERO',$numero_memo)
+                        ->groupby('unidad','curso','mod','inicio','termino','nombre','clave','ciclo','memos->TURNADO_EN_FIRMA->FECHA')->get();
+                        $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
+                        'pvinculacion','jcyc','pjcyc')->where('unidad',$_SESSION['unidad'])->first();
+                        $pdf = PDF::loadView('reportes.memodta',compact('reg_cursos','reg_unidad','numero_memo','total','fecha_nueva'));
+                        return $pdf->stream('Memo_Unidad.pdf');
                      } else {
                          # hay cursos vacios, regresamos y mandamos un mensaje de error
                          return back()->withInput()->withErrors(['NO PUEDE REALIZAR ESTA OPERACIÓN, DEBIDO A QUE NO SE HAN SELECCIONADO CURSOS!']);
@@ -343,10 +331,7 @@ class validacionDtaController extends Controller
         if (isset($validacion)) {
             switch ($validacion) {
                 case 'EnviarPlaneacion':
-<<<<<<< HEAD
                     # enviar a planeación
-=======
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     # en esta parte del código tenemos que envíar a planeación
                     // TURNADO_PLANEACION[“NUMERO”:”XXXXXX”,FECHA:”XXXX-XX-XX”]
                     $turnado_planeacion = [
@@ -355,7 +340,6 @@ class validacionDtaController extends Controller
                     if (!empty($request->get('chkcursos'))) {
                         # checamos que la variable no se encuentre vacia
                         foreach ($_POST['chkcursos'] as $key => $value) {
-<<<<<<< HEAD
                             $observaciones_revision_a_planeacion = [
                                 'OBSERVACION_REVISION_A_PLANEACION' =>  $_POST['comentarios'][$key]
                             ];
@@ -399,24 +383,11 @@ class validacionDtaController extends Controller
                     } else {
                         # hay cursos vacios, regresamos y mandamos un mensaje de error
                         return back()->withInput()->withErrors(['NO PUEDE REALIZAR ESTA OPERACIÓN, DEBIDO A QUE NO SE HAN SELECCIONADO CURSOS!']);
-=======
-                            # entremos en el loop
-                            \DB::table('tbl_cursos')
-                                    ->where('id', $value)
-                                    ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_PLANEACION}','".json_encode($turnado_planeacion)."'::jsonb)"), 'status' => 'TURNADO_PLANEACION']);
-                        }
-                        return redirect()->route('validacion.cursos.enviados.dta')
-                                ->with('success', sprintf('CURSOS ENVIADOS A PLANEACIÓN PARA REVISIÓN!'));
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     }
                     break;
                 
                 default:
-<<<<<<< HEAD
                     # por defecto
-=======
-                    # break
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                     break;
             }
         }

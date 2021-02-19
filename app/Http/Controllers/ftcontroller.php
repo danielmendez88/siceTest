@@ -7,7 +7,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -287,10 +286,17 @@ class ftcontroller extends Controller
                  */
                 # sólo obtenemos a los que han sido chequeados para poder continuar con la actualización
                 $data = explode(",", $cursoschk);
-                foreach($data as $key){
+                $comentario_unidad = explode(",", $_POST['comentarios_unidad']); // obtenemos los comentarios
+                foreach(array_combine($data, $comentario_unidad) as $key => $comentariosUnidad){
+                    $comentarios_envio_dta = [
+                        'OBSERVACION_UNIDAD' =>  $comentariosUnidad
+                    ];
                     \DB::table('tbl_cursos')
                         ->where('id', $key)
-                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 'status' => 'TURNADO_DTA', 'turnado' => 'DTA']);
+                        ->update(['memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 
+                        'status' => 'TURNADO_DTA', 
+                        'turnado' => 'DTA',
+                        'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACION_UNIDAD_DTA}', '".json_encode($comentarios_envio_dta)."'::jsonb)")]);
                 }
 
                 /**
@@ -405,6 +411,7 @@ class ftcontroller extends Controller
      */
     public function store(Request $request)
     {
+        
         if (isset($_POST['generarMemoAFirma'])) 
         {
             
@@ -415,6 +422,7 @@ class ftcontroller extends Controller
                     //aqui generamos las consultas pertinentes
                     $fecha_ahora = Carbon::now();
                     $date = $fecha_ahora->format('Y-m-d'); // fecha
+                    $fecha_nueva=$fecha_ahora->format('d-m-Y');
                     $numero_memo = $request->get('numero_memo'); // número de memo
 
                     $memos = [
@@ -427,10 +435,27 @@ class ftcontroller extends Controller
                     foreach($_POST['chkcursos_list'] as $key => $value){
                         \DB::table('tbl_cursos')
                             ->where('id', $value)
-                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA', 'turnado' => 'UNIDAD'])
-                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
+                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA', 'turnado' => 'UNIDAD']);
                     }
-
+                    $total=count($_POST['chkcursos_list']);                
+                    $id_user = Auth::user()->id;
+                    $rol = DB::table('role_user')->select('roles.slug')->leftjoin('roles', 'roles.id', '=', 'role_user.role_id') 
+                    ->where([['role_user.user_id', '=', $id_user], ['roles.slug', '=', 'unidad']])->get();
+                    if($rol[0]->slug=='unidad')
+                    { 
+                    $unidad = Auth::user()->unidad;
+                    $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
+                    $_SESSION['unidad'] = $unidad;
+                    }
+                    $mes=date("m");
+                    $reg_cursos=DB::table('tbl_cursos')->select(db::raw("sum(case when extract(month from termino) = ".$mes." then 1 else 0 end) as tota"),'unidad','curso','mod','inicio','termino',db::raw("sum(hombre + mujer) as cupo"),'nombre','clave','ciclo',
+                                'memos->TURNADO_EN_FIRMA->FECHA as fecha')
+                    ->where('memos->TURNADO_EN_FIRMA->NUMERO',$numero_memo)
+                    ->groupby('unidad','curso','mod','inicio','termino','nombre','clave','ciclo','memos->TURNADO_EN_FIRMA->FECHA')->get();
+                    $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
+                    'pvinculacion','jcyc','pjcyc')->where('unidad',$_SESSION['unidad'])->first();
+                    $pdf = PDF::loadView('reportes.memodta',compact('reg_cursos','reg_unidad','numero_memo','total','fecha_nueva'));
+                    return $pdf->stream('Memo_DTA.pdf');
                     /**
                      * GENERAMOS UNA REDIRECCIÓN HACIA EL INDEX
                      */
@@ -439,7 +464,7 @@ class ftcontroller extends Controller
                 } catch (QueryException  $th) {
                     //throw $th;
                     return back()->withErrors([$ex->getMessage()]);
-                    return back()->withErrors(['msgError', $ex->getMessage()]);                }
+                }
 
             } else {
                 return back()->withInput()->withErrors(['ERROR AL MOMENTO DE GUARDAR LOS REGISTROS, SE DEBE DE ESTAR SELECCIONADOS LOS CHECKBOX CORRESPONDIENTES']);
