@@ -103,6 +103,11 @@
                     </div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group col-md-8 mb-3">
+                        <input type="text" class="form-control mr-sm-1" name="num_memo_devolucion" id="num_memo_devolucion" placeholder="NÚMERO DE MEMORANDUM PARA REGRESO A UNIDAD">
+                    </div>
+                </div>
+                <div class="form-row">
 
                     @can('envio.revision.dta')
                         <div class="form-group mb-2">
@@ -458,6 +463,21 @@
         $("#selectAll").click(function() {
             $("input[type=checkbox]").prop("checked", $(this).prop("checked"));
         });
+        
+        // VALIDACIONES
+        $('#formSendDtaTo').validate({
+            rules: {
+                num_memo_devolucion : {
+                    required: true
+                },
+            },
+            messages: {
+                num_memo_devolucion: {
+                    required: "CAMPO REQUERIDO"
+                },
+            }
+        });
+
         $('#send_to_dta').click(function(){
             $('#formSendUnity').validate({
                 rules: {
@@ -484,6 +504,7 @@
                         comentario_retorno.push(this.value);
                     });
                     var numero_memo = $('#num_memo').val();
+                    var num_memo_devolucion = $('#num_memo_devolucion').val();
                     /***
                     * cargar_archivo_formato_t
                     */
@@ -491,6 +512,7 @@
                     formData.append("check_cursos_dta", check_cursos);
                     formData.append("numero_memo", numero_memo);
                     formData.append("comentarios_enlaces", comentario_retorno);
+                    formData.append("numero_memo_devolucion", num_memo_devolucion);
                     var _url = "{{route('dta.send.unity')}}";
                     var requested = $.ajax
                     ({
