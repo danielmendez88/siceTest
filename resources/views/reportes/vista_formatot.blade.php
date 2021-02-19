@@ -78,23 +78,6 @@
         {!! Form::close() !!}
             
         <hr style="border-color:dimgray">
-<<<<<<< HEAD
-        @if (count($var_cursos) > 0)
-            <form id="dtaformGetDocument" method="POST" action="{{ route('formatot.send.dta') }}" target="_blank">
-                @csrf
-                <div class="form-row">
-                    <div class="form-group col-md-3 mb-2">
-                        <input type="text" class="form-control mr-sm-1" name="numero_memo" id="numero_memo" placeholder="NÚMERO DE MEMORANDUM">
-                    </div>
-                    <div class="form-group mb-2">
-                        <button input type="submit" id="generarMemoAFirma" name="generarMemoAFirma"  class="btn btn-danger my-2 my-sm-0 waves-effect waves-light">
-                            <i class="fa fa-file-pdf-o fa-2x" aria-hidden="true"></i>
-                            GENERAR MEMORANDUM
-                        </button> 
-                    </div>
-                    @if ($enFirma->count() > 0)
-                        <div class="form-group mb-2 mb-2">
-=======
         @if (isset($var_cursos) )
             @if (is_null($var_cursos))
             <h2><b>NO HAY REGISTROS PARA MOSTRAR</b></h2>
@@ -112,20 +95,12 @@
                             </button> 
                         </div>
                         <div class="form-group col-md-3">
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                             <button input type="button" id="enviarDTA" style="{{ $enFirma->isEmpty() ? 'display: none' : '' }}" name="enviarDTA"  class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
                                 <i class="fa fa-paper-plane fa-2x" aria-hidden="true"></i>
                                 ENVIAR A VALIDACIÓN DE DTA
                             </button> 
                         </div>
-<<<<<<< HEAD
-                    @endif
-                    
-                    @if ($retornoUnidad->count() > 0)
-                        <div class="form-group mb-2 mb-2">
-=======
                         <div class="form-group col-md-3">
->>>>>>> 43cbc96... modificaciones en controlador validacion dtb y formato T
                             <button type="button" id="mod_format" name="mod_format" style="{{ $retornoUnidad->isEmpty() ? 'display: none' : '' }}"  class="btn btn-warning my-2 my-sm-0 waves-effect waves-light">
                                 <i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i>
                                 Modificar Campos

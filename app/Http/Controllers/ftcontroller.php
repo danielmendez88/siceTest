@@ -330,7 +330,7 @@ class ftcontroller extends Controller
                     foreach($_POST['chkcursos_list'] as $key => $value){
                         \DB::table('tbl_cursos')
                             ->where('id', $value)
-                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA', 'turnado' => 'UNIDAD']);
+                            ->update(['memos' => $memos, 'status' => 'EN_FIRMA', 'turnado' => 'UNIDAD'])
                             ->update(['memos' => $memos, 'status' => 'EN_FIRMA']);
                     }
 
