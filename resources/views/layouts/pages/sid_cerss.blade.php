@@ -348,7 +348,7 @@
                 $("#cerss_estado option:selected").each( () => {
                     var IdEst = $('#cerss_estado').val();
                     var datos = {idEst: IdEst};
-                    var url = '/alumnos/sid/municipios';
+                    var url = "{{route('alumnos.sid.municipios')}}";
 
                     var request = $.ajax
                     ({
