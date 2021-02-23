@@ -27,18 +27,18 @@ class supreController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-   /* public function solicitud_supre_inicio(Request $request) {
+    public function solicitud_supre_inicio(Request $request) {
         /**
          * parametros de busqueda
          */
-      /*  $busqueda_suficiencia = $request->get('busquedaporSuficiencia');
+        $busqueda_suficiencia = $request->get('busquedaporSuficiencia');
         $tipoSuficiencia = $request->get('tipo_suficiencia');
 
         $supre = new supre();
         $data = $supre::BusquedaSupre($tipoSuficiencia, $busqueda_suficiencia)->where('id', '!=', '0')->latest()->get();
 
         return view('layouts.pages.vstasolicitudsupre', compact('data'));
-    }*/
+    }
 
     public function frm_formulario() {
         $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();

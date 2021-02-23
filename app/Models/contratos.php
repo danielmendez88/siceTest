@@ -29,10 +29,14 @@ class contratos extends Model
      * scope de busqueda por contratos
      */
 <<<<<<< HEAD
+<<<<<<< HEAD
     public function scopeBusquedaPorContrato($query, $tipo, $buscar)
 =======
    /* public function scopeBusquedaPorContrato($query, $tipo, $buscar, $tipo_status)
 >>>>>>> f0b380b... 23022021 02 fixing
+=======
+    public function scopeBusquedaPorContrato($query, $tipo, $buscar, $tipo_status)
+>>>>>>> 15fc9c3... 23022021 03 fixing02
     {
         if (!empty($tipo)) {
             # se valida el tipo
@@ -60,10 +64,14 @@ class contratos extends Model
      * busqueda scope por pagos
      */
 <<<<<<< HEAD
+<<<<<<< HEAD
     public function scopeBusquedaPorPagos($query, $tipo, $buscar)
 =======
    /* public function scopeBusquedaPorPagos($query, $tipo, $buscar, $tipo_status)
 >>>>>>> f0b380b... 23022021 02 fixing
+=======
+    public function scopeBusquedaPorPagos($query, $tipo, $buscar, $tipo_status)
+>>>>>>> 15fc9c3... 23022021 03 fixing02
     {
         if (!empty($tipo)) {
             # se valida el tipo
