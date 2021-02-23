@@ -59,7 +59,7 @@
                 @endif
                 <div class="form-group col-md-3">
                     <label for="inputliquido" class="control-label">Importe Liquido en Factura</label>
-                    <input type="text" name="liquid" id="liquid" class="form-control" required>
+                    <input type="text" name="liquido" id="liquido" class="form-control" required>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="inputarch_asistencia" class="control-label">Lista de asistencia</label>
@@ -112,15 +112,15 @@
             <div class="form-row">
                 <div class="form-group col-md-4">
                     <label for="inputnombre_banco" class="control-label">Nombre de Banco</label>
-                    <input type="text" name="nombre_banco" id="nombre_banco" class="form-control" disabled>
+                    <input type="text" name="nombre_banco" id="nombre_banco" class="form-control" value="{{$bancario->banco}}" disabled>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="inputnumero_cuenta" class="control-label">Número de Cuenta</label>
-                    <input type="text" name="numero_cuenta" id="numero_cuenta" class="form-control" disabled>
+                    <input type="text" name="numero_cuenta" id="numero_cuenta" class="form-control" value="{{$bancario->no_cuenta}}" disabled>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="inputclabe" class="control-label">Clabe Interbancaria</label>
-                    <input type="text" name="clabe" id="clabe" class="form-control" disabled>
+                    <input type="text" name="clabe" id="clabe" class="form-control" value="{{$bancario->interbancaria}}" disabled>
                 </div>
             </div>
             <hr style="border-color:dimgray">
@@ -181,6 +181,7 @@
 @section('script_content_js')
 <script src="{{ asset("js/validate/autocomplete.js") }}"></script>
 @endsection
+<<<<<<< HEAD
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
     $(function(){
@@ -208,3 +209,5 @@
         });
     });
 </script>
+=======
+>>>>>>> 15fc9c3e41a5cd9e2d35f9d214038976ed3ca805

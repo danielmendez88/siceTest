@@ -139,6 +139,7 @@ class CursosController extends Controller
             $cursos->rango_criterio_pago_minimo = trim($request->criterio_pago_minimo);
             $cursos->rango_criterio_pago_maximo = trim($request->criterio_pago_maximo);
             $cursos->unidades_disponible = $unidades;
+            $cursos->estado = TRUE;
             $cursos->save();
 
             # ==================================
@@ -292,6 +293,7 @@ class CursosController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $cursos = new curso();
         // modificacion de un recurso guardado
         if (isset($id)) {
             $cursos = new curso();
@@ -332,6 +334,21 @@ class CursosController extends Controller
             ];
 
             $cursos->WHERE('id', '=', $id)->UPDATE($array);
+            if($request->estado != NULL)
+            {
+                $cursos->WHERE('id', '=', $id)
+                ->UPDATE(['estado' => TRUE,
+                          'rango_criterio_pago_minimo' => trim($request->criterio_pago_minimo_edit),
+                          'rango_criterio_pago_maximo' => trim($request->criterio_pago_maximo_edit)]);
+            }
+            else
+            {
+                $cursos->WHERE('id', '=', $id)
+                ->UPDATE(['estado' => FALSE,
+                          'rango_criterio_pago_minimo' => trim($request->criterio_pago_minimo_edit),
+                          'rango_criterio_pago_maximo' => trim($request->criterio_pago_maximo_edit)]);
+            }
+
             # ==================================
             # Aquí modificamos el curso con id
             # ==================================

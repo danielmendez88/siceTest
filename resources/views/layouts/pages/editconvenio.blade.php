@@ -262,7 +262,7 @@
                                                     checked
                                                 @endif
                                             @endforeach
-                                        @endif 
+                                        @endif
                                     name="unidades[]"
                                     id="check + {{ $unidad->id }}">
                                 <label class="custom-control-label"

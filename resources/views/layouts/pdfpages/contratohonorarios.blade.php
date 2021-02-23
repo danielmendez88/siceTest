@@ -76,7 +76,7 @@
                         <br><dd>I.5 De acuerdo a las necesidades de <b>“EL ICATECH”</b>, se requiere contar con los servicios de una persona física con conocimientos en {{$especialidad->nombre}}, por lo que se ha determinado llevar a cabo la Contratación por Honorarios en la modalidad de horas curso de <b>"EL PRESTADOR DE SERVICIOS"</b>.</dd>
                         <br><dd>I.6 Para los efectos del presente contrato se cuenta con el Dictamen de autorización de habilidades como instructor según memorándum que se agrega al presente instrumento como <b>Anexo I</b>, emitido por la Dirección Técnica Académica de <b>“EL ICATECH”</b>.</dd>
                         <br><dd>I.7 Para los efectos del presente contrato se cuenta con la clave de grupo que se agrega al presente instrumento como <b>Anexo II</b>, emitido por la Dirección Técnica Académica de <b>“EL ICATECH”</b>.</dd>
-                        <br><dd>I.8 Para los efectos del presente contrato se cuenta con la suficiencia presupuestal, que se agrega al presente instrumento como <b>Anexo III</b>, emitido por la Dirección de Planeación de <b>“EL ICATECH”</b>.</dd>
+                        <br><dd>I.8 Para los efectos del presente contrato se cuenta con la suficiencia presupuestal, conforme al presupuesto de egresos autorizado, que se agrega al presente instrumento como <b>Anexo III</b>, emitido por la Dirección de Planeación de <b>“EL ICATECH”</b>.</dd>
                         <br><dd>I.9 Para los efectos del presente Contrato señala como su domicilio legal, el ubicado en la 14 poniente norte, número 239, Colonia Moctezuma, C. P. 29030, en la Ciudad de Tuxtla Gutiérrez, Chiapas.</dd>
                     </dl>
                     <br><dl><dt>II.Declara <b>"EL PRESTADOR DE SERVICIOS"</b> que:</dt>

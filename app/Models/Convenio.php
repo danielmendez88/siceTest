@@ -12,7 +12,7 @@ class Convenio extends Model
 
     protected $fillable = [
         'id', 'no_convenio', 'tipo_sector', 'institucion', 'fecha_firma', 'fecha_vigencia',
-        'archivo_convenio', 'tipo_convenio', 'poblacion', 'municipio', 'nombre_titular', 'nombre_firma', 'nombre_enlace', 
+        'archivo_convenio', 'tipo_convenio', 'poblacion', 'municipio', 'nombre_titular', 'nombre_firma', 'nombre_enlace',
         'telefono_enlace', 'direccion', 'telefono', 'status',
         'activo', 'sector', 'unidades', 'correo_institucion', 'correo_enlace', 'id_estado'
     ];

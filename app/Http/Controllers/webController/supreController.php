@@ -11,6 +11,8 @@ use App\ProductoStock;
 use App\Models\cursoValidado;
 use App\Models\supre_directorio;
 use App\Models\directorio;
+use App\Models\contratos;
+use App\Models\contrato_directorio;
 use App\Models\criterio_pago;
 use App\Models\tbl_unidades;
 use Illuminate\Http\Request;
@@ -33,9 +35,10 @@ class supreController extends Controller
          */
         $busqueda_suficiencia = $request->get('busquedaporSuficiencia');
         $tipoSuficiencia = $request->get('tipo_suficiencia');
+        $tipoStatus = $request->get('tipo_status');
 
         $supre = new supre();
-        $data = $supre::BusquedaSupre($tipoSuficiencia, $busqueda_suficiencia)->where('id', '!=', '0')->latest()->get();
+        $data = $supre::BusquedaSupre($tipoSuficiencia, $busqueda_suficiencia, $tipoStatus)->where('id', '!=', '0')->latest()->get();
 
         return view('layouts.pages.vstasolicitudsupre', compact('data'));
     }
@@ -364,6 +367,7 @@ class supreController extends Controller
     public function planeacion_reportepdf(Request $request)
     {
         $i = 0;
+        set_time_limit(0);
 
         if ($request->filtro == "general")
         {
@@ -429,6 +433,7 @@ class supreController extends Controller
                            ->GET();
         }
 
+
         foreach($data as $cadwell)
         {
             $risr[$i] = $this->numberFormat(round($cadwell->importe_total * 0.10, 2));
@@ -449,11 +454,10 @@ class supreController extends Controller
             $i++;
         }
 
-        //dd($data);
 
         $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad','iva'));
         $pdf->setPaper('legal', 'Landscape');
-        return $pdf->download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
+        return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
 
     }
 

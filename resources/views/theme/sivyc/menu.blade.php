@@ -62,7 +62,10 @@
                         @endcan
                         <a class="dropdown-item" href="{{route('convenios.index')}}">Convenios</a>
                         <a class="dropdown-item" href="{{route('cerss.inicio')}}">CERSS</a>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 15fc9c3e41a5cd9e2d35f9d214038976ed3ca805
                         @can('areas.inicio')
                             <a class="dropdown-item" href="{{route('areas.inicio')}}">Áreas</a>
                         @endcan
@@ -70,6 +73,9 @@
                             <a class="dropdown-item" href="{{route('especialidades.inicio')}}">Especialidades</a>
                         @endcan
                         <a class="dropdown-item" href="{{route('exoneraciones.inicio')}}">Exoneraciones</a>
+                        @can('unidades.index')
+                            <a class="dropdown-item" href="{{route('unidades.inicio')}}">Unidades</a>
+                        @endcan
                         @can('instituto.inicio')
                             <a class="dropdown-item" href="{{route('instituto.inicio')}}">Acerca del instituto</a>
                         @endcan
@@ -101,6 +107,12 @@
                         Reportes
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        {{-- <a class="dropdown-item" href="https://datastudio.google.com/reporting/7c518e16-99ea-4cb2-8509-7064c0604e00" target="_blank">CURSOS VS OBJETIVOS</a>
+                        <a class="dropdown-item" href="https://datastudio.google.com/reporting/512e11eb-babf-4476-8827-8d4243e2c219" target="_blank">STATUS PAGO INSTRUCTORES</a> --}}
+                        {{-- <a class="dropdown-item" href="{{route('reportes.formatoT')}}">REPORTE DE FORMATO T</a>                         --}}
+                        @can('academicos.arc')
+                            <a class="dropdown-item" href="{{route('reportes.vista_arc')}}">APERTURA</a>
+                        @endcan
                         @can('reportes.cursos')
                             <a class="dropdown-item" href="{{route('reportes.cursos.index')}}">CURSOS AUTORIZADOS</a>
                         @endcan

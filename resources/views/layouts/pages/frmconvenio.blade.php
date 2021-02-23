@@ -135,7 +135,7 @@
                 <!--nombre_enlace-->
                 <div class="form-group col">
                     <label for="nombre_enlace" class="control-label">NOMBRE DEL ENLACE</label>
-                    <input type='text' id="nombre_enlace" name="nombre_enlace" 
+                    <input type='text' id="nombre_enlace" name="nombre_enlace"
                     placeholder="NOMBRE DEL ENLACE" class="form-control">
                 </div>
                 <!--telefono del enlace-->

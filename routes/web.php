@@ -45,7 +45,7 @@ Route::post('/Convenios/alta-baja/save','webController\ConveniosController@alta_
 
 // Ruta Supre busqueda & misc
 Route::post('/supre/busqueda/curso', 'webController\suprecontroller@getcursostats');
-Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios');
+Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios')->name('alumnos.sid.municipios');
 Route::post('/supre/validacion/upload_doc','webController\SupreController@doc_valsupre_upload')->name('doc-valsupre-guardar');
 Route::get('/supre/eliminar/{id}', 'webController\SupreController@delete')->name('eliminar-supre');
 
@@ -393,6 +393,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inscripcion/grupos', 'InscripcionController\grupoController@show')->name('inscripcion.grupos');
     */
 
+    Route::get('reportes/formato_t_reporte/index', function () {
+        return view('layouts.pages.reportes.formato_t_reporte');
+    })->name('reportes.formatoT');
+
+    //Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+    Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+    Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+    Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+    Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc')->Middleware('can:academicos.arc');
+    Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
+    Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
+    Route::post('/reportes/memo/','ftcontroller@memodta')->name('memo_dta');
 });
 
 /*SUPERVISION ESCOLAR Y ENCUESTA RPN*/

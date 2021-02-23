@@ -22,4 +22,32 @@ class Unidad extends Model
     {
         return $this->hasMany(User::class, 'id');
     }
+
+    public function scopeBusquedaUnidad($query, $tipo, $buscar)
+    {
+        if (!empty($tipo)) {
+            # si tipo no es vacio se hace la busqueda
+            if (!empty(trim($buscar))) {
+                # empezamos
+                switch ($tipo) {
+                    case 'unidad':
+                        # el tipo
+                        return $query->WHERE('unidad', '=', $buscar);
+                        break;
+                    case 'cct':
+                        # unidad de capacitacion
+                        return $query->WHERE('cct', 'LIKE', $buscar);
+                        break;
+                    case 'director':
+                        # fecha
+                        return $query->WHERE('dunidad', 'LIKE', $buscar);
+                        break;
+                    case 'ubicacion':
+                        # fecha
+                        return $query->WHERE('ubicacion', '=', $buscar);
+                        break;
+                }
+            }
+        }
+    }
 }

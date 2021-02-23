@@ -6,6 +6,24 @@ $(function(){
         }
     });
 
+<<<<<<< HEAD
+=======
+    $("#mod-datosBancarios").click(function(e){
+        e.preventDefault();
+        $.ajax({
+            success: function(){
+                $('#arch_bancario').prop("disabled", false)
+                $('#arch_bancario').prop("required", true)
+                $('#nombre_banco').prop("disabled", false)
+                $('#nombre_banco').prop("required", true)
+                $('#numero_cuenta').prop("disabled", false)
+                $('#numero_cuenta').prop("required", true)
+                $('#clabe').prop("disabled", false)
+                $('#clabe').prop("required", true)
+            }
+        });
+    });
+>>>>>>> 15fc9c3e41a5cd9e2d35f9d214038976ed3ca805
     //autocomplete
     $( "#nombre_director" ).autocomplete({
     source: function( request, response ) {

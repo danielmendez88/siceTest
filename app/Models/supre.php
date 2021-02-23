@@ -50,11 +50,21 @@ class supre extends Model
                         break;
                     case 'unidad_capacitacion':
                         # unidad de capacitacion
-                        return $query->WHERE('unidad_capacitacion', '=', $buscar);
+                        if (!empty($tipo_status)) {
+                            return $query->WHERE('unidad_capacitacion', '=', $buscar)->WHERE('tabla_supre.status', '=', $tipo_status);
+                        }
+                        else {
+                            return $query->WHERE('unidad_capacitacion', '=', $buscar);
+                        }
                         break;
                     case 'fecha':
                         # fecha
-                        return $query->WHERE('fecha', '=', $buscar);
+                        if (!empty($tipo_status)) {
+                            return $query->WHERE('fecha', '=', $buscar)->WHERE('tabla_supre.status', '=', $tipo_status);
+                        }
+                        else {
+                            return $query->WHERE('fecha', '=', $buscar);
+                        }
                         break;
                 }
             }

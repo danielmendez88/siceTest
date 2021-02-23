@@ -366,8 +366,8 @@ class InstructorController extends Controller
 
         $modInstructor = instructor::find($request->id);
 
-        $old = $modInstructor->nombre . ' ' . $modInstructor->apellidoPaterno . ' ' . $modInstructor->apellidoMaterno;
-        $new = $request->nombre . ' ' . $request->apellido_paterno . ' ' . $request->apellido_materno;
+        $old = $modInstructor->apellidoPaterno . ' ' . $modInstructor->apellidoMaterno . ' ' . $modInstructor->nombre;
+        $new = $request->apellido_paterno . ' ' . $request->apellido_materno . ' ' . $request->nombre;
 
         $modInstructor->nombre = trim($request->nombre);
         $modInstructor->apellidoPaterno = trim($request->apellido_paterno);
@@ -825,7 +825,7 @@ class InstructorController extends Controller
         }
         if($this->checkComparator($request->chk_villa_corzo) == TRUE)
         {
-            array_push($unidades, 'VILLA_CORZO');
+            array_push($unidades, 'VILLA CORZO');
         }
         if($this->checkComparator($request->chk_cacahoatan) == TRUE)
         {
