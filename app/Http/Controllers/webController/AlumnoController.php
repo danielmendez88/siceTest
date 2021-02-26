@@ -1020,9 +1020,9 @@ class AlumnoController extends Controller
         //$path = $file->storeAs('/filesUpload/alumnos/'.$id, $documentFile); // guardamos el archivo en la carpeta storage
         //$documentUrl = $documentFile;
         $path = 'alumnos/'.$id.'/'.$documentFile;
-        Storage::disk('mydisk')->put($path, file_get_contents($file));
+        Storage::disk('custom_folder_1')->put($path, file_get_contents($file));
         //$path = storage_path('app/filesUpload/alumnos/'.$id.'/'.$documentFile);
-        $documentUrl = Storage::disk('mydisk')->url('/uploadFiles/alumnos/'.$id."/".$documentFile); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
+        $documentUrl = Storage::disk('custom_folder_1')->url('/uploadFiles/alumnos/'.$id."/".$documentFile); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
         return $documentUrl;
     }
 
