@@ -485,7 +485,7 @@ $(function(){
         var IdEst =$('#estado').val();
         $("#estado option:selected").each( () => {
             var IdEst = $('#estado').val();
-            var datos = {idEst: IdEst};
+            var datos = {idEst: IdEst, _token: "{{ csrf_token() }}"};
             var url = '/alumnos/sid/municipios';
 
             var request = $.ajax
