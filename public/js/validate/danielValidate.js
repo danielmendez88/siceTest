@@ -468,11 +468,6 @@ $(function(){
 
 
 
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 15fc9c3e41a5cd9e2d35f9d214038976ed3ca805
 
     // hacemos que los input sean mayusculos
     $('input[type=text]').val (function () {
@@ -484,7 +479,6 @@ $(function(){
     })
 
 
-<<<<<<< HEAD
     
 
     $('#estado').on("change", () => {
@@ -535,8 +529,6 @@ $(function(){
             });
         });
     });
-=======
->>>>>>> 15fc9c3e41a5cd9e2d35f9d214038976ed3ca805
 
     /**
      * cambios select dependientes
