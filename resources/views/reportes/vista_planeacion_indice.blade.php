@@ -526,6 +526,7 @@
                         formData.append("checkCursos", chkCursos);
                         formData.append("numero_memo", numero_memo);
                         formData.append("comentarios_planeacion", comentarioPlaneacionDTA);
+                        formData.append("_token", "{{ csrf_token() }}");
                         var _url = "{{route('planeacion.send.to.dta')}}";
                         var requested = $.ajax
                         ({

@@ -525,6 +525,7 @@
                     formData.append("check_cursos_dta", check_cursos);
                     formData.append("numero_memo", numero_memo);
                     formData.append("comentarios_unidad", comentario_unidad);
+                    formData.append("_token", "{{ csrf_token() }}");
                     var _url = "{{route('formatot.seguimiento.paso2')}}";
                     var requested = $.ajax
                     ({
