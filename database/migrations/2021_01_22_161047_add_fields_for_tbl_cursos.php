@@ -14,7 +14,7 @@ class AddFieldsForTblCursos extends Migration
     public function up()
     {
         Schema::table('tbl_cursos', function (Blueprint $table) {
-            //
+            // modificaciones en turnados
             $table->jsonb('memos')->nullable();
             $table->jsonb('observaciones_formato_t')->nullable();
             $table->date('fecha_turnado')->nullable();
