@@ -123,7 +123,15 @@
                     </div>
                 </li>
                 {{-- modificaciones en el curso del menu --}}
-                
+                <li class="nav-item g-mx-5--lg dropdown">
+                    <a href="#" class="nav-link g-color-white--hover" id="navbarDropdownMenuLinkValidacion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Formatos
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkValidacion">
+                        <a class="dropdown-item" href="{{route('vista_formatot')}}">Generación Formato T por Unidades</a>
+                        <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Validación DTA</a>
+                    </div>
+                </li>
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
                 <li class="nav-item g-mx-5--lg">
