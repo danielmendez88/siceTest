@@ -33,7 +33,7 @@ class ftcontroller extends Controller
         $meses = array(1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio', 7 => 'Julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'diciembre');
         $enFirma = DB::table('tbl_cursos')->where('status', '=', 'EN_FIRMA')->get();
         $retornoUnidad = DB::table('tbl_cursos')->where('status', 'RETORNO_UNIDAD')->get();
-        //var_dump($rol);exit;
+        var_dump($rol);exit;
         if (!empty($rol[0]->slug)) {
             # si no está vacio
             if($rol[0]->slug=='unidad')
