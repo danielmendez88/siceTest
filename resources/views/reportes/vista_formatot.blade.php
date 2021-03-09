@@ -1,4 +1,4 @@
-!--Creado por Julio Alcaraz-->
+<!--Creado por Julio Alcaraz-->
 @extends('theme.sivyc.layout')
 <!--llamar a la plantilla -->
 @section('title', 'APERTURAS | SIVyC Icatech')
@@ -49,7 +49,11 @@
             </div>
         @endif
         <div class="row">
-            <h4>Reporte Formato T</h4>  
+            <div class="col-lg-8 margin-tb">
+                <div>
+                    <h3><b>GENERACIÓN DEL FORMATO T</b></h3>
+                </div>
+            </div>
         </div>
 
         {{ Form::open(['route' => 'vista_formatot', 'method' => 'post', 'enctype' => 'multipart/form-data']) }}

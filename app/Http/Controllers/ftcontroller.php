@@ -7,7 +7,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +32,7 @@ class ftcontroller extends Controller
         $meses = array(1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio', 7 => 'Julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'diciembre');
         $enFirma = DB::table('tbl_cursos')->where('status', '=', 'EN_FIRMA')->get();
         $retornoUnidad = DB::table('tbl_cursos')->where('status', 'RETORNO_UNIDAD')->get();
-        var_dump($rol);exit;
+        //var_dump($rol);exit;
         if (!empty($rol[0]->slug)) {
             # si no está vacio
             if($rol[0]->slug=='unidad')
@@ -124,33 +123,38 @@ class ftcontroller extends Controller
 
     public function cursos(Request $request)
     {
-        $año=$request->get("año");
-        if ($año)
-        { 
-            return $this->busqueda($año);
+        $anio=$request->get("anio");
+        if ($anio)
+        {
+            return $this->busqueda($anio);
         }
     }
-    public function busqueda($año)
+    public function busqueda($anio)
     {
         $id_user = Auth::user()->id;
         //var_dump($id_user);exit;
-        $rol = DB::table('role_user')->LEFTJOIN('roles', 'roles.id', '=', 'role_user.role_id')            
-        ->WHERE('role_user.user_id', '=', $id_user)->WHERE('roles.slug', '=', 'unidad')
-        ->value('roles.slug');        
+        $rol = DB::table('role_user')
+        ->select('roles.slug')
+        ->leftjoin('roles', 'roles.id', '=', 'role_user.role_id')            
+        ->where([['role_user.user_id', '=', $id_user], ['roles.slug', '=', 'unidad']])
+        ->get();
         $_SESSION['unidades']=NULL;
         $meses = array(1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio', 7 => 'Julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'diciembre');
         $enFirma = DB::table('tbl_cursos')->where('status', '=', 'EN_FIRMA')->get();
         $retornoUnidad = DB::table('tbl_cursos')->where('status', 'RETORNO_UNIDAD')->get();
         //var_dump($rol);exit;
-        if($rol=='unidad')
-        { 
-            $unidad = Auth::user()->unidad;
-            $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
-            $_SESSION['unidad'] = $unidad;             
-        }
-            //var_dump($_SESSION['unidades']);exit;
-            $años = $año;
-            $var_cursos = DB::table('tbl_cursos as c')->select('c.unidad','c.plantel','c.espe','c.curso','c.clave','c.mod','c.dura',DB::raw("case when extract(hour from to_timestamp(c.hini,'HH24:MI a.m.')::time)<14 then 'MATUTINO' else 'VESPERTINO' end as turno"),
+        if (!empty($rol[0]->slug)) {
+            # si no está vacio
+            if($rol[0]->slug=='unidad')
+            { 
+                $unidad = Auth::user()->unidad;
+                $unidad = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
+                $_SESSION['unidad'] = $unidad;
+            }
+
+            $anios = $anio;
+            $var_cursos = DB::table('tbl_cursos as c')
+                ->select('c.id AS id_tbl_cursos', 'c.status AS estadocurso' ,'c.unidad','c.plantel','c.espe','c.curso','c.clave','c.mod','c.dura',DB::raw("case when extract(hour from to_timestamp(c.hini,'HH24:MI a.m.')::time)<14 then 'MATUTINO' else 'VESPERTINO' end as turno"),
                 DB::raw('extract(day from c.inicio) as diai'),DB::raw('extract(month from c.inicio) as mesi'),DB::raw('extract(day from c.termino) as diat'),DB::raw('extract(month from c.termino) as mest'),DB::raw("case when EXTRACT( Month FROM c.termino) between '7' and '9' then '1' when EXTRACT( Month FROM c.termino) between '10' and '12' then '2' when EXTRACT( Month FROM c.termino) between '1' and '3' then '3' else '4' end as pfin"),
                 'c.horas','c.dia',DB::raw("concat(c.hini,' ', 'A', ' ',c.hfin) as horario"),DB::raw('count(distinct(ca.id)) as tinscritos'),DB::raw("SUM(CASE WHEN ap.sexo='FEMENINO' THEN 1 ELSE 0 END) as imujer"),DB::raw("SUM(CASE WHEN ap.sexo='MASCULINO' THEN 1 ELSE 0 END) as ihombre"),DB::raw("SUM(CASE WHEN ca.acreditado= 'X' THEN 1 ELSE 0 END) as egresado"),
                 DB::raw("SUM(CASE WHEN ca.acreditado='X' and ap.sexo='FEMENINO' THEN 1 ELSE 0 END) as emujer"),DB::raw("SUM(CASE WHEN ca.acreditado='X' and ap.sexo='MASCULINO' THEN 1 ELSE 0 END) as ehombre"),DB::raw("SUM(CASE WHEN ca.noacreditado='X' THEN 1 ELSE 0 END) as desertado"),
@@ -215,8 +219,13 @@ class ftcontroller extends Controller
                 ->WHEREIN('c.status', ['NO REPORTADO', 'EN_FIRMA', 'RETORNO_UNIDAD'])
                 ->WHERE(DB::raw("extract(year from c.termino)"), '=', $anios)
                 ->groupby('c.unidad','c.nombre','c.clave','c.mod','c.espe','c.curso','c.inicio','c.termino','c.dia','c.dura','c.hini','c.hfin','c.horas','c.plantel','c.programa','c.muni','c.depen','c.cgeneral','c.mvalida','c.efisico','c.cespecifico','c.sector','c.mpaqueteria','c.mexoneracion','c.nota','i.sexo','ei.memorandum_validacion','ip.grado_profesional','ip.estatus','ins.costo','c.observaciones'
-                         ,'ins.abrinscri','c.arc')
+                         ,'ins.abrinscri','c.arc', 'c.id')
                 ->distinct()->get();
+
+        } else {
+            # si se encuentra vacio
+            $var_cursos = null;
+        }
             //var_dump($_SESSION['unidades']);exit;
 
         return view('reportes.vista_formatot',compact('var_cursos', 'meses', 'enFirma', 'retornoUnidad'));
