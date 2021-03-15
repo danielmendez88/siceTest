@@ -85,6 +85,7 @@
         <hr style="border-color:dimgray">
         @if (count($var_cursos) > 0)
             <form action="{{ route('reportes.formatot.unidad.xls') }}" method="POST">
+                @csrf
                 <div class="form-row">
                     <div class="form-group mb-2 mb-2">
                         <button input type="submit" class="btn btn-success my-2 my-sm-0 waves-effect waves-light">
