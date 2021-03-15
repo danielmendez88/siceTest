@@ -22,7 +22,8 @@
         "laravelcollective/html": "^6.0",
         "lcobucci/jwt": "3.3.3",
         "maatwebsite/excel": "^3.1",
-        "revolution/laravel-google-sheets": "^5.0"
+        "revolution/laravel-google-sheets": "^5.0",
+        "symfony/psr-http-message-bridge": "^2.0"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
