@@ -57,7 +57,7 @@
         <div class="row">
             <div class="col-lg-8 margin-tb">
                 <div>
-                    <h3><b>GENERACIÓN DEL FORMATO T</b></h3>
+                    <h3><b>GENERACIÓN DEL FORMATO T DE LA UNIDAD {{ $unidad }}</b></h3>
                 </div>
             </div>
         </div>
