@@ -7,6 +7,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -670,7 +671,9 @@ class ftcontroller extends Controller
         DB::raw("sum(case when ap.ultimo_grado_estudios='NIVEL SUPERIOR TERMINADO' and ap.sexo='FEMENINO' and ca.noacreditado='X' then 1 else 0 end) as naesm8"),DB::raw("sum(case when ap.ultimo_grado_estudios='NIVEL SUPERIOR TERMINADO' and ap.sexo='MASCULINO' and ca.noacreditado='X' then 1 else 0 end) as naesh8"),
         DB::raw("sum(case when ap.ultimo_grado_estudios='POSTRADO' and ap.sexo='FEMENINO' and ca.noacreditado='X' then 1 else 0 end) as naesm9"),DB::raw("sum(case when ap.ultimo_grado_estudios='POSTGRADO' and ap.sexo='MASCULINO' and ca.noacreditado='X' then 1 else 0 end) as naesh9"),
         DB::raw("case when arc='01' then nota else observaciones end as tnota"),
-        DB::raw("c.observaciones_formato_t->'OBSERVACION_RETORNO_UNIDAD'->>'OBSERVACION_RETORNO' AS observaciones_enlaces")
+        DB::raw("count(DISTINCT ar.id_pre) AS totalinscripciones"),
+        DB::raw("count(DISTINCT CASE  WHEN  ap.sexo ='MASCULINO' THEN ar.id_pre END ) AS masculinocheck"),
+        DB::raw("count(DISTINCT CASE  WHEN ap.sexo ='FEMENINO' THEN ar.id_pre END ) AS femeninocheck")
         )
         ->JOIN('tbl_calificaciones as ca','c.id', '=', 'ca.idcurso')
         ->JOIN('instructores as i','c.id_instructor', '=', 'i.id')
