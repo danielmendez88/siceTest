@@ -54,7 +54,7 @@ class pdfcontroller extends Controller
             if(count($unidades)==0) 
             {
                 $unidades =[$unidad];
-                $_SESSION['unidades'] = $unidades;
+                $_SESSION['unidad'] = $unidades;
             }
             else
             {
@@ -62,8 +62,8 @@ class pdfcontroller extends Controller
             }
         }
         //var_dump($_SESSION['unidades']);exit;
-        $fecha_memo=date('d-m-yy',strtotime($fecha_termino));
-        $reg_cursos = DB::table('tbl_cursos')->SELECT('id','nombre','clave','mvalida','mod','espe','curso','inicio','termino','dia','dura',
+        $fecha_memo=date('d-m-Y',strtotime($fecha_termino));
+        $reg_cursos = DB::table('tbl_cursos')->SELECT('id','unidad','nombre','clave','mvalida','mod','espe','curso','inicio','termino','dia','dura',
         DB::raw("concat(hini,' A ',hfin) AS horario"),'horas','plantel','depen','muni','nota','munidad','efisico','hombre','mujer','tipo','opcion',
         'motivo','cp','ze','tcapacitacion');
         if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);                
@@ -78,7 +78,7 @@ class pdfcontroller extends Controller
         }
         else
         {
-            $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
+            $reg_unidad=DB::table('tbl_unidades')->select('dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
             'pvinculacion')->where('unidad',$_SESSION['unidad'])->first();
             //dd($reg_unidad);
             $pdf = PDF::loadView('reportes.arc01',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura'));
@@ -105,13 +105,12 @@ class pdfcontroller extends Controller
                     $_SESSION['unidades'] = $unidades; 
                 $_SESSION['unidad'] = $unidad;             
             }
-            //var_dump($_SESSION['unidades']);exit;
-            $fecha_memo=date('d-m-yy',strtotime($fecha_termino));
-            $reg_cursos = DB::table('tbl_cursos')->SELECT('id','nombre','clave','mvalida','mod','curso','inicio','termino','dura',
+            $fecha_memo=date('d-m-Y',strtotime($fecha_termino));
+            //var_dump($fecha_memo);exit;
+            $reg_cursos = DB::table('tbl_cursos')->SELECT('id','unidad','nombre','clave','mvalida','mod','curso','inicio','termino','dura',
             'efisico','opcion','motivo','nmunidad','observaciones','realizo','tcapacitacion');
             if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);                
                 $reg_cursos=$reg_cursos->WHERE('nmunidad', '=', $memo_apertura)->orderby('espe')->get();
-            //var_dump($reg_cursos[0]);echo $reg_cursos[0]->opcion;exit;
             if(count($reg_cursos)==0)
             {
                 return "MEMORANDUM NO VALIDO PARA LA UNIDAD";exit;
@@ -120,10 +119,7 @@ class pdfcontroller extends Controller
             {
                 $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico',
                 'pvinculacion')->where('unidad',$_SESSION['unidad'])->first();
-                //dd($reg_unidad);
                 $pdf = PDF::loadView('reportes.arc02',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura'));
-                //return view('reportes.arc01');
-                //var_dump($pdf);exit;
                 $pdf->setpaper('letter','landscape');
                 return $pdf->stream('apertura.pdf');
             }      

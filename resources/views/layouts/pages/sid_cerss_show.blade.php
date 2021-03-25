@@ -83,18 +83,21 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="estado" class="control-label">ESTADO</label>: &nbsp; &nbsp; <b>{{$alumnoPre_show->estado}}</b>
+                    <label for="fechanacimiento" class="control-label">ESTADO</label>: &nbsp; &nbsp; <b>{{$alumnoPre_show->estado}}</b>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="estado" class="control-label">MUNICIPIO</label>: &nbsp; &nbsp; <b>{{$alumnoPre_show->municipio}}</b>
+                    <label for="nacionalidad_cerss" class="control-label">MUNICIPIO</label>: &nbsp;&nbsp; <b>{{$alumnoPre_show->municipio}}</b>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-4">
                     <label for="genero_cerss" class="control-label">GENERO</label>: &nbsp;&nbsp; <b>{{$alumnoPre_show->sexo}}</b>
                 </div>
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-4">
                     <label for="curp_cerss" class="control-label">CURP ASPIRANTE</label>: &nbsp; &nbsp; <b>{{$alumnoPre_show->curp}}</b>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="curp_cerss" class="control-label">DISCAPACIDAD</label>: &nbsp; &nbsp; <b>{{$alumnoPre_show->discapacidad}}</b>
                 </div>
             </div>
             <div class="form-row">

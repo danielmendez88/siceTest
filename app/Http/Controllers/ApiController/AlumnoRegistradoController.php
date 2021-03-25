@@ -4,10 +4,7 @@ namespace App\Http\Controllers\ApiController;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\api\Alumno;
-use App\Models\api\AlumnosPre;
 use Carbon\Carbon;
-use App\Models\api\Unidad;
 use Illuminate\Support\Facades\DB;
 
 class AlumnoRegistradoController extends Controller

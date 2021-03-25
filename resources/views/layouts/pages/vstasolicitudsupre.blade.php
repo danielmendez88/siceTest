@@ -33,8 +33,26 @@
                             <option value="unidad_capacitacion">UNIDAD CAPACITACIÓN</option>
                             <option value="fecha">FECHA</option>
                         </select>
-
-                        {!! Form::text('busquedaporSuficiencia', null, ['class' => 'form-control mr-sm-2', 'placeholder' => 'BUSCAR', 'aria-label' => 'BUSCAR', 'value' => 1]) !!}
+                        <Div id="divunidades" name="divunidades" class="d-none d-print-none">
+                            <select name="unidad" class="form-control mr-sm-2" id="unidad">
+                                <option value="">SELECCIONE UNIDAD</option>
+                                @foreach ($unidades as $cadwell)
+                                    <option value="{{$cadwell->unidad}}">{{$cadwell->unidad}}</option>
+                                @endforeach
+                            </select>
+                        </Div>
+                        <div id="divcampo" name="divcampo">
+                            {!! Form::text('busquedaporSuficiencia', null, ['class' => 'form-control mr-sm-2', 'placeholder' => 'BUSCAR', 'aria-label' => 'BUSCAR', 'value' => 1]) !!}
+                        </div>
+                        <Div id="divstat" name="divstat">
+                            <select name="tipo_status" class="form-control mr-sm-2" id="tipo_status">
+                                <option value="">BUSQUEDA POR STATUS</option>
+                                <option value="En_Proceso">EN PROCESO</option>
+                                <option value="Validado">VALIDADO</option>
+                                <option value="Contratado">CONTRATADO</option>
+                                <option value="Rechazado">RECHAZADO</option>
+                            </select>
+                        </Div>
                         <button class="btn btn-outline-info my-2 my-sm-0" type="submit">BUSCAR</button>
                     {!! Form::close() !!}
                 </div>
@@ -77,20 +95,30 @@
                         </td>
                         <td>
                             @if ( $itemData->status == 'En_Proceso')
-                            <a class="btn btn-danger" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>PDF</a>
+                                <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
+                                    <i class="fa fa-file" aria-hidden="true"></i>
+                                </a>
                                 @can('supre.validar')
-                                    <a class="btn btn-success" href="{{route('supre-validacion', ['id' => $itemData->id])}}">Validar</a>
+                                    <a class="btn btn-success btn-circle m-1 btn-circle-sm" title="Validar" href="{{route('supre-validacion', ['id' => $itemData->id])}}">
+                                        <i class="fa fa-file-text" aria-hidden="true"></i>
+                                    </a>
                                 @endcan
                                 @can('supre.edit')
-                                    <a class="btn btn-info" href="{{route('modificar_supre', ['id' => $itemData->id])}}">Editar</a>
+                                    <a class="btn btn-success btn-circle m-1 btn-circle-sm" title="Editar" href="{{route('modificar_supre', ['id' => $itemData->id])}}">
+                                        <i class="fa fa-wrench" aria-hidden="true"></i>
+                                    </a>
                                 @endcan
                                 @can('supre.delete')
-                                    <a class="btn btn-warning" href="{{route('eliminar-supre', ['id' => $itemData->id])}}">Eliminar</a>
+                                    <a class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Eliminar" href="{{route('eliminar-supre', ['id' => $itemData->id])}}">
+                                        <i class="fa fa-wrench" aria-hidden="true">
+                                    </a>
                                 @endcan
                                 <input hidden value={{$itemData->id}} id='pdfp'>
                             @endif
                             @if ($itemData->status == 'Validado')
-                                <a class="btn btn-danger" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>PDF</a>
+                                <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
+                                    <i class="fa fa-file" aria-hidden="true"></i>
+                                </a>
                                 @if ($itemData->doc_validado == NULL)
                                     @can('supre.upload_valsupre')
                                         <button type="button" class="btn btn-info btn-circle m-1 btn-circle-sm"
@@ -101,12 +129,40 @@
                                             <i class="fa fa-upload"></i>
                                         </button>
                                     @endcan
+                                @else
+                                    @can('supre.upload_valsupre')
+                                        <button type="button" class="btn btn-warning btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#DocModal2"
+                                            data-id='{{$itemData->id}}'
+                                            title="Reemplazar Validación de Suficiencia Presupuestal Firmada">
+                                            <i class="fa fa-upload"></i>
+                                        </button>
+                                    @endcan
                                 @endif
+                                @can('supre.restart')
+                                    <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                        data-toggle="modal" data-placement="top"
+                                        data-target="#restartModal"
+                                        data-id='{{$itemData->id}}'
+                                        title="Reiniciar Suficiencia Presupuestal">
+                                        <i class="fa fa-history"></i>
+                                    </button>
+                                @endcan
                             @endif
                             @if ($itemData->status == 'Rechazado')
-                                <a class="btn btn-danger" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>PDF</a>
+                                <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#supreModal" data-id='["{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
+                                    <i class="fa fa-file" aria-hidden="true"></i>
+                                </a>
                                 @can('supre.edit')
-                                    <a class="btn btn-info" href="{{route('modificar_supre', ['id' => $itemData->id])}}">Editar</a>
+                                    <a class="btn btn-success btn-circle m-1 btn-circle-sm" title="Editar" href="{{route('modificar_supre', ['id' => $itemData->id])}}">
+                                        <i class="fa fa-wrench" aria-hidden="true"></i>
+                                    </a>
+                                @endcan
+                                @can('supre.delete')
+                                    <a class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Eliminar" href="{{route('eliminar-supre', ['id' => $itemData->id])}}">
+                                        <i class="fa fa-wrench" aria-hidden="true"></i>
+                                    </a>
                                 @endcan
                             @endif
                         </td>
@@ -135,7 +191,7 @@
                                 <a class="btn btn-danger" id="supre_pdf" name="supre_pdf" href="#" target="_blank">Solicitud de Suficiencia Presupuestal</a><br>
                             </div>
                             <div style="text-align:center" class="form-group">
-                                <a class="btn btn-danger" id="anexo_pdf" name="anexo_pdf" href="#" target="_blank">Anexo Solicitud de Suficiencia Presupuestal</a><br>
+                                <a class="btn btn-danger" id="anexo_pdf" name="anexo_pdf" href="#" target="_blank">Anexo  Solicitud de Suficiencia Presupuestal</a><br>
                             </div>
                             <div style="text-align:center" class="form-group">
                                 <a class="btn btn-danger" id="valsupre_pdf" name="valsupre_pdf" href="#" target="_blank">Validación de Suficiencia Presupuestal</a><br>
@@ -178,6 +234,61 @@
                 </div>
             </div>
         <!-- END -->
+        <!-- Modal -->
+        <div class="modal fade" id="DocModal2" role="dialog">
+            <div class="modal-dialog">
+                <form method="POST" enctype="multipart/form-data" action="{{ route('doc-valsupre-guardar') }}" id="doc_valsupre">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reemplazar Validación de Suficiencia Presupuestal Firmada</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="text-align:center">
+                            <div style="text-align:center" class="form-group">
+                                <input type="file" accept="application/pdf" class="form-control" id="doc_validado" name="doc_validado" placeholder="Archivo PDF">
+                                <input id="idinsmod2" name="idinsmod2" hidden>
+                                <button type="submit" class="btn btn-primary" >Guardar</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <!-- END -->
+    <!-- Modal -->
+    <div class="modal fade" id="restartModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><b>¿Esta seguro de reiniciar este proceso?</b></h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-2"></div>
+                    <div class="form-group col-md-4">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <a class="btn btn-success" id="confirm_restart" name="confirm_restart" href="#">Aceptar</a>
+                    </div>
+                    <div class="form-group col-md-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- END -->
     </div>
     <br>
+@endsection
+@section('script_content_js')
+<script src="{{ asset("js/validate/modals.js") }}"></script>
+<script src="{{ asset("js/validate/filtersupre.js") }}"></script>
 @endsection

@@ -127,7 +127,7 @@
                         <th>{{ $a->cupo }}</th>
                         <th>{{ $a->nombre }}</th>
                         <th>{{ $a->clave }}</th>
-                        <th>{{ $a->observaciones }}</th>
+                        <th>{{ $a->tnota }}</th>
                     </tr>
                     @endforeach
                 </tbody>
@@ -137,8 +137,8 @@
             <br><br>
             <div style="font-size:11px;"> <b>A T E N T A M E N T E</b> </div>
             <br><br><br>
-            <div style="font-size:11px;"> <b>{{ $reg_unidad->dacademico }}</b> </div>
-            <div style="font-size:11px;"> <b>{{ $reg_unidad->pdacademico }}</b> </div>
+            <div style="font-size:11px;"> <b>{{ $reg_unidad->dunidad }}</b> </div>
+            <div style="font-size:11px;"> <b>{{ $reg_unidad->pdunidad }}</b> </div>
             <br><br><br>
             <div style="font-size:11px;"> <b>C.c.p {{ $reg_unidad->jcyc }} ,{{ $reg_unidad->pjcyc }}. Para su conocimiento.</b> </div>
             <div style="font-size:11px;"> <b>Archivo / Minutario.</b> </div>

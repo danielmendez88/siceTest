@@ -44,10 +44,11 @@ class DocumentoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slugpath, $subpath ,$alumnos_id, $slug)
+    public function show($folder, $id, $slug)
     {
         //
-        $file = storage_path("app\\".$slugpath."\\".$subpath."\\" . $alumnos_id . '\\' . $slug);
+        $file = storage_path("app\\uploadFiles\\".$folder."\\" . $id . '\\' . $slug);
+        
         if (file_exists($file)) {
             # si existe el archivo podemos avanzar
             $headers = [

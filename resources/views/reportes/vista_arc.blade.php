@@ -5,7 +5,7 @@
 @section('content')
     <div class="container g-pt-50"> 
         <div class="row">
-            <h4>Generacion de Aperturas y Modificaciones</h4>  
+            <h4>Aperturas y Modificaciones</h4>  
         </div>
         <div class="row">
             <div class="pull-left">

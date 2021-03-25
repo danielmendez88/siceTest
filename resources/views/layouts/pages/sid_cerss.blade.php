@@ -347,7 +347,7 @@
                 var IdEst =$('#cerss_estado').val();
                 $("#cerss_estado option:selected").each( () => {
                     var IdEst = $('#cerss_estado').val();
-                    var datos = {idEst: IdEst};
+                    var datos = {idEst: IdEst,  _token: "{{ csrf_token() }}"};
                     var url = "{{route('alumnos.sid.municipios')}}";
 
                     var request = $.ajax
@@ -484,6 +484,49 @@
 
                 $.ajax({
                     url: "{{ route('alumnos.sid.cerss.consecutivos') }}",
+                    type:  'POST',
+                    dataType : 'json',
+                    success:  function (response) {
+                        var str = response[0]['num_expediente'];
+                        var strsub = str.toString();
+                        var num_exp = strsub.substr(strsub.length - 4);
+                        var num_int = parseInt(num_exp);
+                        num_exp_sum = num_int + 1;
+                        var numeroExpedienteConsecutivo = concatenarFecha.concat(num_exp_sum);
+                        $('#numero_expediente_cerss').val(numeroExpedienteConsecutivo)
+                    },
+                    statusCode: {
+                        404: function() {
+                           console.log('Página no encontrada');
+                        }
+                    },
+                    error:function(x,xs,xt){
+                        //window.open(JSON.stringify(x));
+                        alert('error: ' + JSON.stringify(x) +"\n error string: "+ xs + "\n error throwed: " + xt);
+                    }
+                });
+            });
+
+            //llamarlo cuando la tecla es presionado en textbox
+            $("#numero_expediente_cerss").keypress(function (e) {
+                //si la letra no es digito entonces no se pueda escribir
+                if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                    return false;
+                }
+            });
+
+            // generar expediente
+            $("#generarExpediente").click(function(){
+                var date = new Date();
+                var mes = date.getMonth()+1;
+                let dia = date.getDate();
+                var anio = date.getFullYear();
+                var diaString = dia.toString();
+                var concatenarFecha = diaString.concat(mes, anio)
+
+                $.ajax({
+                    url: "{{ route('alumnos.sid.cerss.consecutivos') }}",
+                    data: {_token: "{{ csrf_token() }}"},
                     type:  'POST',
                     dataType : 'json',
                     success:  function (response) {
