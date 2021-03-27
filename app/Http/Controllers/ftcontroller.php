@@ -151,7 +151,7 @@ class ftcontroller extends Controller
                 ->JOIN('especialidades as e', function($join)
                     {
                         $join->on('ei.especialidad_id', '=', 'e.id');                
-                        // $join->on('c.espe', '=', 'e.nombre');
+                        $join->on('c.espe', '=', 'e.nombre');
                     })
                 ->JOIN($temptblinner ,function($join)
                 {
@@ -268,7 +268,7 @@ class ftcontroller extends Controller
                 ->JOIN('especialidades as e', function($join)
                     {
                         $join->on('ei.especialidad_id', '=', 'e.id');                
-                        // $join->on('c.espe', '=', 'e.nombre');
+                        $join->on('c.espe', '=', 'e.nombre');
                     })
                 ->JOIN('alumnos_registro as ar',function($join)
                 {
@@ -797,7 +797,7 @@ class ftcontroller extends Controller
         ->JOIN('especialidades as e', function($join)
             {
                 $join->on('ei.especialidad_id', '=', 'e.id');                
-                // $join->on('c.espe', '=', 'e.nombre');
+                $join->on('c.espe', '=', 'e.nombre');
             })
         ->JOIN($temptblinner ,function($join)
         {
