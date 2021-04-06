@@ -25,7 +25,8 @@ Route::get('/pago/historial/Validado/{id}', 'webController\PagoController@histor
 Route::get('/contrato/historial/validado/{id}', 'webController\ContratoController@historial_validado')->name('contrato-validado-historial');
 Route::get('/contrato/eliminar/{id}', 'webController\ContratoController@delete')->name('eliminar-contrato');
 Route::get('/contrato/previsualizacion/{id}', 'webController\ContratoController@pre_contratoPDF')->name('pre_contrato');
-Route::get('/prueba', 'webController\supreController@prueba');
+Route::get('/prueba', 'webController\ContratoController@prueba');
+Route::get('/contrato/reiniciar/{id}', 'webController\ContratoController@contractRestart')->name('reiniciar-contrato');
 
 //Ruta Manual
 Route::get('/user/manuales', 'webController\manualController@index')->name('manuales');
@@ -36,6 +37,7 @@ Route::post('/alumnos/sid/checkcursos', 'webController\AlumnoController@checkcur
 Route::post('/pago/rechazar_pago', 'webController\PagoController@rechazar_pago')->name('pago-rechazo');
 Route::get('/pago/solicitud/modificar/{id}', 'webController\Contratocontroller@mod_solicitud_pago')->name('pago-mod');
 Route::post('/pago/savemod/solpa', 'webController\ContratoController@save_mod_solpa')->name('savemod-solpa');
+Route::get('/pago/reiniciar/{id}', 'webController\PagoController@pagoRestart')->name('reiniciar-pago');
 
 //Ruta Alta/Baja
 Route::get('/cursos/alta-baja/{id}', 'webController\CursosController@alta_baja')->name('curso-alta_baja');
@@ -44,10 +46,12 @@ Route::get('/convenios/alta-baja/{id}', 'webController\ConveniosController@alta_
 Route::post('/Convenios/alta-baja/save','webController\ConveniosController@alta_baja_save')->name('convenio-alta-baja-save');
 
 // Ruta Supre busqueda & misc
-Route::post('/supre/busqueda/curso', 'webController\suprecontroller@getcursostats');
-Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios');
+Route::post('/supre/busqueda/curso', 'webController\suprecontroller@getcursostats')->name('supre.busqueda.curso');
+Route::post('/supre/busqueda/folio', 'webController\suprecontroller@getfoliostats');
+Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios')->name('alumnos.sid.municipios');
 Route::post('/supre/validacion/upload_doc','webController\SupreController@doc_valsupre_upload')->name('doc-valsupre-guardar');
 Route::get('/supre/eliminar/{id}', 'webController\SupreController@delete')->name('eliminar-supre');
+Route::get('/supre/reiniciar/{id}', 'webController\SupreController@restartSupre')->name('restart-supre');
 
 //Ruta Instructor
 Route::get('/instructor/validar/{id}', 'webController\InstructorController@validar')->name('instructor-validar');
@@ -215,7 +219,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/exportarpdf/contratohonorarios', 'webController\presupuestariaController@propa')->name('contratohonorarios');
     Route::get('/exportarpdf/solicitudsuficiencia/{id}', 'webController\presupuestariaController@export_pdf')->name('solicitudsuficiencia');
     Route::post('/alumnos/sid/cursos', 'webController\AlumnoController@getcursos')->name('alumnos.sid.cursos');
-    Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios');
     Route::post('/alumnos/sid/cursos_update', 'webController\AlumnoController@getcursos_update');
 
     /**
@@ -326,6 +329,7 @@ Route::middleware(['auth'])->group(function () {
     ->middleware('can:convenios.update');
     Route::get('/convenios/mostrar/{id}', 'webController\ConveniosController@show')->name('convenios.show')
     ->middleware('can:convenios.show');
+    Route::post('/convenios/sid/municipios', 'webController\ConveniosController@getmunicipios');
     /**
      * agregando financiero rutas -- DMC
      */
@@ -398,7 +402,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot');
     Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
     Route::post('/reportes/memo/','ftcontroller@memodta')->name('memo_dta');
-    
     /*Grupos RPN*/
     //Calificaciones
     Route::get('/grupos/calificaciones', 'Grupos\calificacionesController@index')->name('grupos.calificaciones')->middleware('can:grupos.calificaciones');
@@ -425,9 +428,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/solicitudes/folios/guardar', 'Solicitudes\foliosController@store')->name('solicitudes.folios.guardar')->middleware('can:solicitudes.folios.guardar');
     Route::post('/solicitudes/folios/editar', 'Solicitudes\foliosController@edit')->name('solicitudes.folios.edit')->middleware('can:solicitudes.folios.edit');
     Route::get('/solicitudes/folios/editar', 'Solicitudes\foliosController@edit')->name('solicitudes.folios.edit')->middleware('can:solicitudes.folios.edit');
-    
+
     Route::get('/storage/uploadFiles/DTA/solicitud_folios/{pdf}', 'Solicitudes\foliosController@pdf')->name('solicitudes.folios.pdf');
-    
+
 
     //Cancelación de Folios
     Route::get('/solicitudes/cancelacionfolios', 'Solicitudes\cancelacionfoliosController@index')->name('solicitudes.cancelacionfolios')->middleware('can:solicitudes.cancelacionfolios');
@@ -487,3 +490,35 @@ Route::get('/unidades/inicio', 'webController\UnidadesController@index')->name('
 Route::get('/unidades/modificar/{id}', 'webController\UnidadesController@editar')->name('unidades.editar')->middleware('can:unidades.editar');
 Route::post('/unidades/modificar/guardar', 'webController\UnidadesController@update')->name('unidades-actualizar');
 
+/* Modulo exoneraciones */
+
+Route::get('/exoneraciones/inicio', 'webController\ExoneracionesController@index')->name('exoneraciones.inicio');
+Route::get('/exoneraciones/agregar', 'webController\ExoneracionesController@create')->name('exoneraciones.agregar')
+    ->middleware('can:exoneraciones.create');
+Route::post('/exoneraciones/guardar', 'webController\ExoneracionesController@store')->name('exoneraciones.guardar')
+    ->middleware('can:exoneraciones.store');
+Route::get('/exoneraciones/edit/{id}', 'webController\ExoneracionesController@edit')->name('exoneraciones.edit')
+    ->middleware('can:exoneraciones.edit');
+Route::put('/exoneraciones/modificar/{id}', 'webController\ExoneracionesController@update')->name('exoneraciones.update')
+    ->middleware('can:exoneraciones.update');
+Route::post('/exoneraciones/sid/municipios', 'webController\ExoneracionesController@getmunicipios');
+
+/*Reporte Financieros 03032021*/
+Route::get('/financieros/reporte', 'webController\PagoController@financieros_reporte')->name('financieros.reporte')->middleware('can:financieros.reporte');
+Route::post('/financieros/reporte/pdf','webController\PagoController@financieros_reportepdf')->name('financieros.reportepdf');
+//Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
+Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::post('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
+Route::get('/reportes/vista_arc','pdfcontroller@index')->name('reportes.vista_arc');
+Route::get('/reportes/vista_ft','ftcontroller@index')->name('vista_formatot')->middleware('can:vista.formatot.unidades.indice');
+Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
+Route::post('/reportes/vista_ft/savetodta', 'ftcontroller@store')->name('formatot.send.dta');
+Route::post('/formato/ft/paso2', 'ftcontroller@paso2')->name('formatot.seguimiento.paso2');
+Route::get('/validacion/cursos/index', 'Validacion\validacionDtaController@index')->name('validacion.cursos.enviados.dta')->middleware('can:vista.validacion.enlaces.dta');
+Route::get('/validacion/dta/revision/cursos/index', 'Validacion\validacionDtaController@indexRevision')->name('validacion.dta.revision.cursos.indice')->middleware('can:vista.validacion.direccion.dta');
+Route::post('/reportes/dta/savetounity', 'Validacion\validacionDtaController@storedtafile')->name('dta.send.unity');
+// nueva modificación
+Route::post('/validacion/cursos/', 'Validacion\validacionDtaController@store')->name('enviar.cursos.validacion.dta');
+Route::any('/validacion/cursos/dta/envio', 'Validacion\validacionDtaController@storetodta')->name('validar.cursos.direccion.dta');
+Route::post('/validacion/dta/revision/enviar/planeacion', 'ftcontroller@sendToPlaneacion')->name('formatot.send.planeacion');
