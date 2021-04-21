@@ -186,11 +186,11 @@
                         Solicitudes
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        @can('solicitudes.folios')
-                            <a class="dropdown-item" href="{{route('solicitudes.folios')}}">Lote de Folios</a>
+                        @can('consultas.folios')
+                            <a class="dropdown-item" href="{{route('consultas.folios')}}">Folios Asignados</a>
                         @endcan
-                        @can('solicitudes.folios.cancelacion')
-                            <a class="dropdown-item" href="{{route('solicitudes.cancelacionfolios')}}">Cancelaci&oacute;n de Folios</a>
+                         @can('consultas.lotes')
+                            <a class="dropdown-item" href="{{route('consultas.lotes')}}">Actas de Folios</a>
                         @endcan
                     </div>
 
