@@ -76,10 +76,9 @@
                             <tr>
                                 <td> {{ $a->matricula}} </td>
                                 <td> {{ $a->alumno}} </td>
-                               <!-- <td class="text-center"> @if($a->folio) {{$a->folio}} @else {{ 'NINGUNO' }} @endif</td>-->
-                                <td class="text-center"> @if($a->ffolio) {{$a->ffolio}} @else {{ 'NINGUNO' }} @endif </td>
+                                <td class="text-center"> @if($a->folio) {{$a->folio}} @else {{ 'NINGUNO' }} @endif</td>                                
                                 <td>
-                                @if($a->folio=='0')
+                                @if(!$a->folio OR $a->folio=='0')
                                     <?php $cambios = true; ?>
                                     {{ Form::text('calificacion['.$a->id.']', $a->calificacion , ['id'=>$a->id, 'class' => 'form-control numero', 'required' => 'required', 'size' => 1]) }}
                                 @else

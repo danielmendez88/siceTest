@@ -84,7 +84,7 @@ class ContratoController extends Controller
             break;
             case 'unidad.ejecutiva':
                 # code...
-                $querySupre = $contratos::busquedaporcontrato($tipoContrato, $busqueda_contrato, $unidad, $mes)
+                $querySupre = $contratos::busquedaporcontrato($tipoContrato, $busqueda_contrato,  $tipoStatus, $unidad, $mes)
                                 ->WHERE('folios.status', '!=', 'En_Proceso')
                                 ->WHERE('folios.status', '!=', 'Finalizado')
                                 ->WHERE('folios.status', '!=', 'Pago_Verificado')
@@ -655,6 +655,12 @@ class ContratoController extends Controller
 
     public function contractRestart($id)
     {
+        $id_contrato = contratos::SELECT('id_contrato')->WHERE('id_folios', '=', $id)->FIRST();
+        $id_pago = pago::SELECT('id')->WHERE('id_contrato', '=', $id_contrato->id_contrato)->FIRST();
+        if ($id_pago != NULL)
+        {
+            pago::WHERE('id', '=', $id_pago->id)->delete();
+        }
         $affecttbl_inscripcion = DB::table("folios")->WHERE('id_folios', $id)->update(['status' => 'Contrato_Rechazado']);
 
         return redirect()->route('contrato-inicio')
@@ -778,7 +784,7 @@ class ContratoController extends Controller
                         ->LEFTJOIN('pagos', 'pagos.id_contrato', '=', 'contratos.id_contrato')
                         ->LEFTJOIN('especialidad_instructores', 'especialidad_instructores.id', '=', 'contratos.instructor_perfilid')
                         ->FIRST();
-        if($data->solicitud_pago == NULL)
+        if($data->solicitud_fecha == NULL)
         {
             $date = strtotime($data->created_at);
             $D = date('d', $date);
