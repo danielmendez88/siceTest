@@ -376,7 +376,7 @@ class PlaneacionController extends Controller
                                     'memos' => DB::raw("jsonb_set(memos, '{TURNADO_REVISION_DTA}','".json_encode($turnado_revision_dta)."'::jsonb)"), 
                                     'status' => 'REVISION_DTA', 
                                     'turnado' => 'REVISION_DTA',
-                                    'observaciones_para_formato_t' => DB::raw("jsonb_set(observaciones_para_formato_t, '{OBSERVACION_PLANEACION_ENVIDO_DTA}', '".json_encode($observaciones_revision_dta)."'::jsonb)")
+                                    'observaciones_para_formato_t' => DB::raw("jsonb_insert(observaciones_para_formato_t, '{PLANEACION_ENVIDO_DTA}', '".json_encode($observaciones_revision_dta)."'::jsonb)"),
                                 ]);
                         }
         
