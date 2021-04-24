@@ -1,3 +1,4 @@
+{{-- Desarrollado por MIS. Daniel Méndez Cruz --}}
 
 <!--Navbar -->
 <nav class="mb-1 navbar navbar-expand-lg navbar-dark pink darken-4">
@@ -122,30 +123,30 @@
                     </div>
                 </li>
 
-                @can('grupos.calificaciones')  
-                
-                <li class="nav-item g-mx-5--lg dropdown">
-                    <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Grupos
-                    </a>                    
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        @can('grupos.calificaciones')
-                            <a class="dropdown-item" href="{{route('grupos.calificaciones')}}">Registrar Calificaciones</a>
-                        @endcan
-                        @can('grupos.asignarfolios')
-                            <a class="dropdown-item" href="{{route('grupos.asignarfolios')}}">Asignar Folios</a>
-                        @endcan
-                        @can('grupos.folios.cancelacion')
-                            <a class="dropdown-item" href="{{route('grupos.cancelacionfolios')}}">Cancelar Folios</a>
-                        @endcan
-                        @can('grupos.consultas')                        
-                            <a class="dropdown-item" href="{{route('grupos.consultas')}}">Consultas</a>                        
-                        @endcan
-                    </div>
-                     
-                </li> 
-
+                {{-- Grupo calificaciones --}}
+                @can('grupos.calificaciones')
+                    <li class="nav-item g-mx-5--lg dropdown">
+                        <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Grupos
+                        </a>                    
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            @can('grupos.calificaciones')
+                                <a class="dropdown-item" href="{{route('grupos.calificaciones')}}">Registrar Calificaciones</a>
+                            @endcan
+                            @can('grupos.asignarfolios')
+                                <a class="dropdown-item" href="{{route('grupos.asignarfolios')}}">Asignar Folios</a>
+                            @endcan
+                            @can('grupos.cancelacionfolios')
+                                <a class="dropdown-item" href="{{route('grupos.cancelacionfolios')}}">Cancelar Folios</a>
+                            @endcan
+                            @can('grupos.consultas')                        
+                                <a class="dropdown-item" href="{{route('grupos.consultas')}}">Consultas</a>                        
+                            @endcan
+                        </div>
+                    </li> 
                 @endcan
+                {{-- grupo calificaciones end --}}
+                
                 @can('formatot.menu.indice')
                     <li class="nav-item g-mx-5--lg dropdown">
                         <a href="#" class="nav-link g-color-white--hover" id="navbarDropdownMenuLinkValidacion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -167,24 +168,30 @@
                             @can('vista.revision.validacion.planeacion.indice')
                                 <a class="dropdown-item" href="{{ route('planeacion.formatot.index') }}">Revisión y Validación Final Formato t</a>
                             @endcan
-                            @can('vista.formatot.unidades.indice')
-                                <a class="dropdown-item" href="{{route('checar.memorandum.unidad')}}">Memorandums Enviados y Recibidos a la Unidad</a> 
-                            @endcan
-                            @can('vista.validacion.direccion.dta')
-                                <a class="dropdown-item" href="{{route('checar.memorandum.dta.mes')}}">Memorandums Enviados y Recibidos a la DTA</a>
-                            @endcan
-                            @can('vista.revision.validacion.planeacion.indice')
-                            <a class="dropdown-item" href="{{route('checar.memorandum.dta.mes')}}">Memorandums Respuesta Posivita y Negativa Planeación</a>
-                            @endcan
                         </div>
                     </li>
                 @endcan
 
                 @can('solicitudes.folios')
+                    <li class="nav-item g-mx-5--lg dropdown">
+                        <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Solicitudes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            @can('solicitudes.folios')
+                                <a class="dropdown-item" href="{{route('solicitudes.folios')}}">Lote de Folios</a>
+                            @endcan
+                        </div>
+
+                    </li> 
+                @endcan
+                
+                {{-- modificaciones en el curso del menu --}}
+                {{-- consultas folios asignados --}}
                 <li class="nav-item g-mx-5--lg dropdown">
                     <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Solicitudes
-                    </a>
+                        Consultas
+                    </a>                    
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         @can('consultas.folios')
                             <a class="dropdown-item" href="{{route('consultas.folios')}}">Folios Asignados</a>
@@ -193,11 +200,8 @@
                             <a class="dropdown-item" href="{{route('consultas.lotes')}}">Actas de Folios</a>
                         @endcan
                     </div>
-
                 </li> 
-                @endcan
-                
-                {{-- modificaciones en el curso del menu --}}
+                {{-- consultas folios asignados END --}}
                 
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
