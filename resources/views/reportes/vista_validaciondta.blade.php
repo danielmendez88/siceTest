@@ -170,7 +170,7 @@
             
                 <div class="form-row">
                     <div class="table-responsive container-fluid mt-5">
-                        <table  id="table-instructor" class="table" style='width: 100%; margin-left: -1.2em;'>
+                        <table  id="table-instructor" class="table" style='width: 100%; margin-left: -1.1em;'>
                             <caption>CURSOS VALIDADOS ENVIADOS A DIRECCIÓN TÉCNICA ACADÉMICA</caption>
                             <thead class="thead-dark">
                                 <tr align="center">
@@ -500,7 +500,6 @@
                 if (!$(this).prop('disabled')) {
                     var fieldHtml = '<input type="hidden" name="comentarios_enlaces[]" id="comentarios_enlaces" value="'+this.value+'">';
                     $(wrapperEnlaceDta).append(fieldHtml); // Add field html
-                    console.log(fieldHtml);
                     // comentario_retorno.push(this.value);   
                 }
             });
@@ -509,10 +508,15 @@
             // $('.modal-body #comentarios_enlaces').val(comentario_retorno);
             $("#exampleModalCenter").modal("show");
         });
+        /*
+        * CERRAMOS EL MODAL
+        */
         $('#close_btn_modal_send_dta').click(function(){
             $("#numero_memo").rules('remove', 'required', 'extension', 'filesize');
             $("input[id*=numero_memo]").removeClass("error"); // workaround
             $("#exampleModalCenter").modal("hide");
+            // quitamos lo que hay en el contenido del wrapper
+            $('.field_wrapper_enlace_dta').empty();
         });
         $("#selectAll").click(function() {
             $("input[type=checkbox]").not(this).prop("checked", $(this).prop("checked"));

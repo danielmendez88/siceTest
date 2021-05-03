@@ -142,7 +142,7 @@
                 <div class="form-row">
                     <div class="table-responsive container-fluid mt-2">
                         <div class="col-sm-12">
-                            <table  id="table-911" class="table" style='width: 100%; margin-left: -1.7em;'>
+                            <table  id="table-911" class="table" style='width: 100%; margin-left: -1.8em;'>
                                 <caption>CURSOS A ENVIAR POR UNIDADES</caption>         
                                 <thead class="thead-dark">
                                     <tr align="center">
@@ -413,7 +413,7 @@
                                                     <textarea name="comentarios_unidad[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3" {{ $datas->estadocurso == 'EN_FIRMA' ? '' : 'disabled' }} ></textarea>
                                                 @endif
                                             </td>
-                                            <td><div style = "width:600px; word-wrap: break-word">{{ $datas->observaciones_enlaces }}</div></td>                    
+                                            <td><div style = "width:600px; word-wrap: break-word">{{ $datas->observaciones_unidad_retorno }}</div></td>                    
                                         </tr>
                                     @endforeach
                                 </tbody>
