@@ -31,3 +31,4 @@ Route::get('/consultar/memorandum/planeacion/index', 'Validacion\PlaneacionContr
  * modificaciones de busqueda por especialidad, tipo de curso y cursos
  */
 Route::post('/alumnos/sid/cursos/modificar', 'webController\AlumnoController@getcursosModified')->name('alumnos.sid.cursos.modificado');
+Route::get('/seguimiento/avances/unidades/formatot/index', 'webController\SeguimientoController@index')->name('seguimento.avance.unidades.formatot.ejecutiva.index');

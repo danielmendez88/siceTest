@@ -156,6 +156,11 @@
                             @can('vista.formatot.unidades.indice')
                                 <a class="dropdown-item" href="{{route('vista_formatot')}}">Generación Formato T por Unidades</a> 
                             @endcan
+                            {{-- modificaciones al menu --}}
+                            @can('vista.formatot.unidades.indice')
+                                <a href="{{ route('checar.memorandum.unidad') }}" class="dropdown-item">Memorandums Firmados y Recibidos</a>
+                            @endcan
+                            {{-- modificaciones al menu END --}}
                             @can('vista.validacion.enlaces.dta')
                                 <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Revisión de Cursos Formato t</a>  
                             @endcan
@@ -165,6 +170,11 @@
                             @can('vista.validacion.direccion.dta')
                                 <a class="dropdown-item" href="{{ route('indice.dta.aperturado.indice') }}" >Formato T Aperturado</a>
                             @endcan
+                            {{-- agregar nuevo elemento a menu --}}
+                            @can('vista.validacion.direccion.dta')
+                                <a href="{{ route('checar.memorandum.dta.mes') }}" class="dropdown-item">Memorandums Para la Dirección de Técnica Acádemica</a>
+                            @endcan
+                            {{-- agregar nuevo elemento a menu END --}}
                             @can('vista.revision.validacion.planeacion.indice')
                                 <a class="dropdown-item" href="{{ route('planeacion.formatot.index') }}">Revisión y Validación Final Formato t</a>
                             @endcan
@@ -202,6 +212,9 @@
                     </div>
                 </li> 
                 {{-- consultas folios asignados END --}}
+                {{-- MODIFICACIONES EN NUEVO ITEM DE MENU --}}
+                    <li class="nav-item g-mx-5--lg"><a class="nav-link g-color-white--hover" href="{{route('seguimento.avance.unidades.formatot.ejecutiva.index')}}">Seguimiento a Unidades Para el Formato T</a></li>
+                {{-- MODIFICACIONES EN NUEVO ITEM DE MENU END --}}
                 
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
