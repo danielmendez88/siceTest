@@ -440,7 +440,7 @@ class validacionDtaController extends Controller
                             ->WHEREIN('tbl_cursos.status', ['TURNADO_PLANEACION'])
                             ->WHEREIN('tbl_cursos.turnado',['PLANEACION'])
                             ->WHERE('tbl_unidades.ubicacion', '=', $unidadSeleccionada)
-                            ->WHERE(DB::raw("to_char(tbl_cursos.fecha_turnado, 'TMMONTH') IN ('MARZO', 'ABRIL')"))
+                            ->WHEREIN(DB::raw("to_char(tbl_cursos.fecha_turnado, 'TMMONTH')"), ['MARZO', 'ABRIL'])
                             ->get();
                             // ENVIADOS A PLANEACION
                             $total_turnado_planeacion = DB::table('tbl_cursos')
@@ -449,7 +449,7 @@ class validacionDtaController extends Controller
                             ->WHERE('tbl_cursos.status', '=', 'TURNADO_PLANEACION')
                             ->WHERE('tbl_cursos.turnado', '=', 'PLANEACION')
                             ->WHERE('tbl_unidades.ubicacion', '=', $unidadSeleccionada)
-                            ->WHERE(DB::raw("to_char(tbl_cursos.fecha_turnado, 'TMMONTH') = 'ABRIL'"))
+                            ->WHERE(DB::raw("to_char(tbl_cursos.fecha_turnado, 'TMMONTH')"), '=', 'ABRIL')
                             ->get();
 
                             $comentarios_enviados = $_POST['comentarios_enlaces'];
