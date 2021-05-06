@@ -455,7 +455,6 @@ class validacionDtaController extends Controller
                             $sum_total = $total_turnado_planeacion[0]->total_cursos_turnado_planeacion + $total;
 
                             $comentarios_enviados = $_POST['comentarios_enlaces'];
-                            dd($total_turnado_planeacion);
 
                             // dd(DB::getQueryLog()); // Show results of log
                             $elabora = Auth::user()->name;
