@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * DESARROLLADO POR MIS LSC DANIEL MÉNDEZ CRUZ
+ */
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -142,7 +144,8 @@ class ftcontroller extends Controller
                 THEN 1 ELSE 0 END )) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 15 and 19 and ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( CASE WHEN EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 20 and 24 AND ap.sexo='FEMENINO' THEN 1 ELSE 0  END )) + COALESCE(sum( Case When EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between '20' and '24' and ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( CASE WHEN EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 25 and 34  AND ap.sexo='FEMENINO' THEN 1 ELSE 0 END )) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 25 and 34 
                 AND ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum(  case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 35 and 44 
                 AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 35 and 44 AND ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum(  case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 45 and 54
-                AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum(  case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 45 and 54 AND ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 55 and 64 AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between '55' and '64' and ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) >= 65 AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) >= 65 and ap.sexo='MASCULINO' then 1 else 0 end)) as sumatoria_total_ins_edad")
+                AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum(  case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 45 and 54 AND ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between 55 and 64 AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) between '55' and '64' and ap.sexo='MASCULINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) >= 65 AND ap.sexo='FEMENINO' then 1 else 0 end)) + COALESCE(sum( case when EXTRACT(year from (age(c.termino,ap.fecha_nacimiento))) >= 65 and ap.sexo='MASCULINO' then 1 else 0 end)) as sumatoria_total_ins_edad"),
+                DB::raw("c.observaciones_formato_t->'OBSERVACION_RETORNO_UNIDAD' AS observaciones_unidad_retorno")
                 )
                 ->JOIN('tbl_calificaciones as ca','c.id', '=', 'ca.idcurso')
                 ->JOIN('instructores as i','c.id_instructor', '=', 'i.id')
@@ -417,20 +420,25 @@ class ftcontroller extends Controller
                         }
                         //$comentario_unidad = explode(",", $_POST['comentarios_unidad_to_dta']); // obtenemos los comentarios
                         // dd($_POST['comentarios_unidad_to_dta']);
+                        // DB::enableQueryLog(); // Enable query log
                         foreach(array_combine($pila, $_POST['comentarios_unidad_to_dta']) as $key => $comentariosUnidad){
                             $comentarios_envio_dta = [
-                                'OBSERVACION_UNIDAD' =>  $comentariosUnidad
+                                'COMENTARIOS_UNIDAD' =>  $comentariosUnidad
+                            ];
+                            $array_memosDTA = [
+                                'TURNADO_DTA' => $memos_DTA
                             ];
                             \DB::table('tbl_cursos')
                                 ->where('id', $key)
                                 ->update([
-                                    'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACION_UNIDAD_DTA}', '".json_encode($comentarios_envio_dta)."'::jsonb)"),
-                                    'memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 
+                                    'observaciones_formato_t' => DB::raw("'".json_encode($comentarios_envio_dta)."'::jsonb"),
+                                    'memos' => \DB::raw("'".json_encode($array_memosDTA)."'::jsonb"), 
                                     'status' => 'TURNADO_DTA', 
                                     'turnado' => 'DTA',
                                     'fecha_turnado' => $formatFechaActual
                                 ]);
                         }
+                        // dd(DB::getQueryLog());
                         
                     } else {
                         # si la condición no se cumple se tiene que tomar el envío con fecha del siguiente spring
@@ -454,20 +462,25 @@ class ftcontroller extends Controller
                             array_push($pila, $key);
                         }
                         // $comentario_unidad = explode(",", $_POST['comentarios_unidad_to_dta']); // obtenemos los comentarios
+                        // DB::enableQueryLog(); // Enable query log
                         foreach(array_combine($pila, $_POST['comentarios_unidad_to_dta']) as $key => $comentariosUnidad){
                             $comentarios_envio_dta = [
-                                'OBSERVACION_UNIDAD' =>  $comentariosUnidad
+                                'COMENTARIOS_UNIDAD' =>  $comentariosUnidad
+                            ];
+                            $array_memosDTA = [
+                                'TURNADO_DTA' => $memos_DTA
                             ];
                             \DB::table('tbl_cursos')
                                 ->where('id', $key)
                                 ->update([
-                                    'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACION_UNIDAD_DTA}', '".json_encode($comentarios_envio_dta)."'::jsonb)"),
-                                    'memos' => DB::raw("jsonb_set(memos, '{TURNADO_DTA}','".json_encode($memos_DTA)."'::jsonb)"), 
+                                    'observaciones_formato_t' => DB::raw("'".json_encode($comentarios_envio_dta)."'::jsonb"),
+                                    'memos' => \DB::raw("'".json_encode($array_memosDTA)."'::jsonb"), 
                                     'status' => 'TURNADO_DTA', 
                                     'turnado' => 'DTA',
                                     'fecha_turnado' => $formatFechaSiguiente,
                                 ]);
                         }
+                        // dd(DB::getQueryLog());
                     }
     
                     /**
@@ -650,14 +663,17 @@ class ftcontroller extends Controller
                         $comentarios_envio_planeacion = [
                             'OBSERVACION_ENVIO_PLANEACION' => $value
                         ];
+                        $array_planeacion = [
+                            'TURNADO_PLANEACION' => $memo_turnado_planeacion
+                        ];
                         # entramos en el ciclo para guardar cada registro
                         \DB::table('tbl_cursos')
                             ->where('id', $key)
                             ->update([
-                                'memos' => DB::raw("jsonb_set(memos, '{TURNADO_PLANEACION}','".json_encode($memo_turnado_planeacion)."'::jsonb)"), 
+                                'memos' => DB::raw("'".json_encode($array_planeacion)."'::jsonb"), 
                                 'status' => 'TURNADO_PLANEACION', 
                                 'turnado' => 'PLANEACION',
-                                'observaciones_formato_t' => DB::raw("jsonb_set(observaciones_formato_t, '{OBSERVACION_DIRECCIONDTA_TO_PLANEACION}','".json_encode($comentarios_envio_planeacion)."'::jsonb)"),
+                                'observaciones_formato_t' => DB::raw("'".json_encode($comentarios_envio_planeacion)."'::jsonb"),
                             ]);
                     }
                     // enviar  a la página de inicio del módulo si el proceso fue satisfactorio
@@ -965,6 +981,36 @@ class ftcontroller extends Controller
         if(count($formatot_planeacion_unidad)>0){  
             return Excel::download(new FormatoTReport($formatot_planeacion_unidad,$head, $titulo), $nombreLayout);
         }
+    }
+
+    /**
+     * nuevo método para generar  el módulo
+     */
+    protected function memorandumporunidad(Request $request){
+        // obtenemos la unidad en base a una sesion
+        $unidad = Auth::user()->unidad;
+        $unidadstr = DB::table('tbl_unidades')->where('id',$unidad)->value('unidad');
+        // dd($unidadstr);
+        $busquedaPorMes = $request->get('busquedaMes');
+        $meses = array(1 => 'ENERO', 2 => 'FEBRERO', 3 => 'MARZO', 4 => 'ABRIL', 5 => 'MAYO', 6 => 'JUNIO', 7 => 'JULIO', 8 => 'AGOSTO', 9 => 'SEPTIEMBRE', 10 => 'OCTUBRE', 11 => 'NOVIEMBRE', 12 => 'DICIEMBRE');
+        /**
+         * CONSULTA PARA MOSTRAR INFORMACIÓN DE LOS MEMORANDUM DEL FORMATO T
+         */
+        if (isset($busquedaPorMes)) {
+            # si la variable está inicializada se carga la consulta
+            $queryGetMemo = DB::table('tbl_cursos')
+                        ->select(DB::raw("memos->'TURNADO_DTA'->>'MEMORANDUM' AS memorandum_enviados"), DB::raw("memos->'TURNADO_UNIDAD'->>'MEMORANDUM' AS memorandum_retorno_unidad"))
+                        ->join('tbl_unidades as u', 'u.unidad', '=', 'tbl_cursos.unidad')
+                        ->where('u.ubicacion', '=', $unidadstr)
+                        ->where(DB::raw("EXTRACT(MONTH FROM TO_DATE(memos->'TURNADO_DTA'->>'FECHA','YYYY-MM-DD'))") , '=' , $busquedaPorMes)
+                        ->groupby(DB::raw("memos->'TURNADO_DTA'->>'MEMORANDUM'"), DB::raw("memos->'TURNADO_UNIDAD'->>'MEMORANDUM'"))
+                        ->paginate(5);
+        } else {
+            # si la variable no está inicializada no se carga la consulta
+            $queryGetMemo = (array) null;
+        }
+        //dd($queryGetMemo);
+        return view('reportes.memorandum_unidad_formatot', compact('meses', 'queryGetMemo', 'unidadstr'));
     }
 
 }

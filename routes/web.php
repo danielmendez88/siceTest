@@ -219,7 +219,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/exportarpdf/contratohonorarios', 'webController\presupuestariaController@propa')->name('contratohonorarios');
     Route::get('/exportarpdf/solicitudsuficiencia/{id}', 'webController\presupuestariaController@export_pdf')->name('solicitudsuficiencia');
     Route::post('/alumnos/sid/cursos', 'webController\AlumnoController@getcursos')->name('alumnos.sid.cursos');
-    Route::post('/alumnos/sid/cursos_update', 'webController\AlumnoController@getcursos_update');
+    Route::post('/alumnos/sid/cursos_update', 'webController\AlumnoController@getcursos_update'); // QUITAR O MODIFICAR
 
     /**
      * ============================================================================================================================================
@@ -403,7 +403,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reportes/vista_ft','ftcontroller@cursos')->name('formatot.cursos');
     Route::post('/reportes/memo/','ftcontroller@memodta')->name('memo_dta');
     /*Grupos RPN*/
-       
     //Calificaciones
     Route::get('/grupos/calificaciones', 'Grupos\calificacionesController@index')->name('grupos.calificaciones')->middleware('can:grupos.calificaciones');
     Route::post('/grupos/calificaciones/buscar', 'Grupos\calificacionesController@search')->name('grupos.calificaciones.buscar')->middleware('can:grupos.calificaciones.buscar');
@@ -415,14 +414,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/grupos/asignarfolios', 'Grupos\asignarfoliosController@index')->name('grupos.asignarfolios')->middleware('can:grupos.asignarfolios');
     Route::post('/grupos/asignarfolios/guardar', 'Grupos\asignarfoliosController@store')->name('grupos.asignarfolios.guardar')->middleware('can:grupos.asignarfolios.guardar');
     Route::get('/grupos/asignarfolios/guardar', 'Grupos\asignarfoliosController@store')->name('grupos.asignarfolios.guardar')->middleware('can:grupos.asignarfolios.guardar');
-    
      //Cancelación de Folios
     Route::get('/grupos/cancelacionfolios', 'Grupos\cancelacionfoliosController@index')->name('grupos.cancelacionfolios')->middleware('can:grupos.cancelacionfolios');
     Route::post('/grupos/cancelacionfolios', 'Grupos\cancelacionfoliosController@index')->name('grupos.cancelacionfolios')->middleware('can:grupos.cancelacionfolios');
     Route::post('/grupos/cancelacionfolios/guardar', 'Grupos\cancelacionfoliosController@store')->name('grupos.cancelacionfolios.guardar')->middleware('can:grupos.cancelacionfolios.guardar');
     Route::get('/grupos/cancelacionfolios/guardar', 'Grupos\cancelacionfoliosController@store')->name('grupos.cancelacionfolios.guardar')->middleware('can:grupos.cancelacionfolios.guardar');
- 
- 
+
+
     /*Grupos Consultas*/
     Route::get('/grupos/consultas', 'Grupos\consultasController@index')->name('grupos.consultas')->middleware('can:grupos.consultas');
     Route::post('/grupos/consultas', 'Grupos\consultasController@index')->name('grupos.consultas')->middleware('can:grupos.consultas');
@@ -438,29 +436,37 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/solicitudes/folios/editar', 'Solicitudes\foliosController@edit')->name('solicitudes.folios.edit')->middleware('can:solicitudes.folios.edit');
     Route::get('/solicitudes/folios/editar', 'Solicitudes\foliosController@edit')->name('solicitudes.folios.edit')->middleware('can:solicitudes.folios.edit');
     Route::get('/storage/uploadFiles/DTA/solicitud_folios/{pdf}', 'Solicitudes\foliosController@pdf')->name('solicitudes.folios.pdf');
-    
+    //Cancelación y Eliminacion de Folios
+    Route::get('/solicitudes/cancelacionfolios', 'Solicitudes\cancelacionfoliosController@index')->name('solicitudes.cancelacionfolios')->middleware('can:solicitudes.cancelacionfolios');
+    Route::post('/solicitudes/cancelacionfolios', 'Solicitudes\cancelacionfoliosController@index')->name('solicitudes.cancelacionfolios')->middleware('can:solicitudes.cancelacionfolios');
+    Route::post('/solicitudes/cancelacionfolios/guardar', 'Solicitudes\cancelacionfoliosController@store')->name('solicitudes.cancelacionfolios.guardar')->middleware('can:solicitudes.cancelacionfolios.guardar');
+    Route::get('/solicitudes/cancelacionfolios/guardar', 'Solicitudes\cancelacionfoliosController@store')->name('solicitudes.cancelacionfolios.guardar')->middleware('can:solicitudes.cancelacionfolios.guardar');
+
      /*CONSULTAS*/
      /*FOLIOS ASIGNADOS*/
     Route::get('/consultas/folios', 'Consultas\foliosController@index')->name('consultas.folios')->middleware('can:consultas.folios');
     Route::post('/consultas/folios', 'Consultas\foliosController@index')->name('consultas.folios')->middleware('can:consultas.folios');
     Route::post('/consultas/folios/xls', 'Consultas\foliosController@xls')->name('consultas.folios.xls');
-    
      /*LOTES DE FOLIOS*/
     Route::get('/consultas/lotes', 'Consultas\lotesController@index')->name('consultas.lotes')->middleware('can:consultas.lotes');
     Route::post('/consultas/lotes', 'Consultas\lotesController@index')->name('consultas.lotes')->middleware('can:consultas.lotes');
     Route::post('/consultas/lotes/xls', 'Consultas\lotesController@xls')->name('consultas.lotes.xls');
 
-      
+   /*CURSOS FINALIZADOS*/
+    Route::get('/consultas/cursosfinalizados', 'Consultas\cursosfinalizadosController@index')->name('consultas.cursosfinalizados')->middleware('can:consultas.cursosfinalizados');
+    Route::post('/consultas/cursosfinalizados', 'Consultas\cursosfinalizadosController@index')->name('consultas.cursosfinalizados')->middleware('can:consultas.cursosfinalizados');
+    Route::post('/consultas/cursosfinalizados/xls', 'Consultas\cursosfinalizadosController@xls')->name('consultas.cursosfinalizados.xls');
+
+
     /*VINCULACION->PREINSCRIPCION=> NUEVO GRUPO RPN*/
     Route::get('/preinscripcion/grupo', 'Preinscripcion\grupoController@index')->name('preinscripcion.grupo');
-    Route::get('/preinscripcion/grupo/cmbcursos', 'Preinscripcion\grupoController@cmbcursos')->name('preinscripcion.grupo.cmbcursos');        
-    Route::get('/preinscripcion/grupo/alumno', 'Preinscripcion\grupoController@showAlumno')->name('preinscripcion.grupo.showalumno');    
+    Route::get('/preinscripcion/grupo/cmbcursos', 'Preinscripcion\grupoController@cmbcursos')->name('preinscripcion.grupo.cmbcursos');
+    Route::get('/preinscripcion/grupo/alumno', 'Preinscripcion\grupoController@showAlumno')->name('preinscripcion.grupo.showalumno');
     Route::post('/preinscripcion/grupo/guardar', 'Preinscripcion\grupoController@save')->name('preinscripcion.grupo.save');
     Route::get('/preinscripcion/grupo/nuevo', 'Preinscripcion\grupoController@turnar')->name('preinscripcion.grupo.nuevo');
     Route::post('/preinscripcion/grupo/nuevo', 'Preinscripcion\grupoController@turnar')->name('preinscripcion.grupo.nuevo');
     Route::post('/preinscripcion/grupo/turnar', 'Preinscripcion\grupoController@turnar')->name('preinscripcion.grupo.turnar');
     Route::get('/preinscripcion/alumno/eliminar', 'Preinscripcion\tableAlumnoController@delete')->name('preinscripcion.alumno.eliminar');
-    
     /*VINCULACION->PREINSCRIPCION=> BUSCAR GRUPO RPN*/
     Route::get('/preinscripcion/buscar', 'Preinscripcion\buscarController@index')->name('preinscripcion.buscar');
     Route::post('/preinscripcion/buscar', 'Preinscripcion\buscarController@index')->name('preinscripcion.buscar');
@@ -551,3 +557,6 @@ Route::post('/reportes/dta/savetounity', 'Validacion\validacionDtaController@sto
 Route::post('/validacion/cursos/', 'Validacion\validacionDtaController@store')->name('enviar.cursos.validacion.dta');
 Route::any('/validacion/cursos/dta/envio', 'Validacion\validacionDtaController@storetodta')->name('validar.cursos.direccion.dta');
 Route::post('/validacion/dta/revision/enviar/planeacion', 'ftcontroller@sendToPlaneacion')->name('formatot.send.planeacion');
+
+//cancelacion de folio de supre 21/04/2021
+Route::post('/supre/cancelacion/folio', 'webController\supreController@cancelFolio')->name('folio-cancel');
