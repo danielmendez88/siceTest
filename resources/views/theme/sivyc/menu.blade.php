@@ -174,10 +174,26 @@
                             @can('vista.validacion.direccion.dta')
                                 <a href="{{ route('checar.memorandum.dta.mes') }}" class="dropdown-item">Memorandums Para la Dirección de Técnica Acádemica</a>
                             @endcan
+                            @can('vista.validacion.enlaces.dta')
+                                <a href="{{ route('checar.memorandum.dta.mes') }}" class="dropdown-item">Memorandums Enviados a DTA</a>
+                            @endcan
                             {{-- agregar nuevo elemento a menu END --}}
                             @can('vista.revision.validacion.planeacion.indice')
                                 <a class="dropdown-item" href="{{ route('planeacion.formatot.index') }}">Revisión y Validación Final Formato t</a>
                             @endcan
+                            @can('vista.formatot.unidades.indice')
+                                <a href="{{ route('cursos.reportados.historico.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+                            @can('vista.validacion.enlaces.dta')
+                                <a href="{{ route('cursos.reportados.historico.dta.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+                            @can('vista.validacion.direccion.dta')
+                                <a href="{{ route('cursos.reportados.historico.direccion.dta.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+                            @can('vista.revision.validacion.planeacion.indice')
+                                <a href="{{ route('cursos.reportados.historico.planeacion.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+                                <a class="dropdown-item" href="{{route('seguimento.avance.unidades.formatot.ejecutiva.index')}}">Seguimiento Ejecutivo a Unidades Para el Formato T</a>
                         </div>
                     </li>
                 @endcan
@@ -212,9 +228,6 @@
                     </div>
                 </li> 
                 {{-- consultas folios asignados END --}}
-                {{-- MODIFICACIONES EN NUEVO ITEM DE MENU --}}
-                    <li class="nav-item g-mx-5--lg"><a class="nav-link g-color-white--hover" href="{{route('seguimento.avance.unidades.formatot.ejecutiva.index')}}">Seguimiento a Unidades Para el Formato T</a></li>
-                {{-- MODIFICACIONES EN NUEVO ITEM DE MENU END --}}
                 
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
