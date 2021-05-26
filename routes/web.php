@@ -47,6 +47,7 @@ Route::post('/Convenios/alta-baja/save','webController\ConveniosController@alta_
 
 // Ruta Supre busqueda & misc
 Route::post('/supre/busqueda/curso', 'webController\suprecontroller@getcursostats')->name('supre.busqueda.curso');
+Route::post('/supre/busqueda/tipo_curso', 'webController\suprecontroller@gettipocurso')->name('supre.busqueda.tipocurso');
 Route::post('/supre/busqueda/folio', 'webController\suprecontroller@getfoliostats');
 Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios')->name('alumnos.sid.municipios');
 Route::post('/supre/validacion/upload_doc','webController\SupreController@doc_valsupre_upload')->name('doc-valsupre-guardar');
@@ -485,8 +486,9 @@ Route::get('/form/msg/{id}', 'supervisionController\UrlController@msg');
 Route::get('/encuesta/form/{url}','supervisionController\EncuestaController@encuesta')->name('encuesta');
 Route::post('/encuesta/save','supervisionController\EncuestaController@encuesta_save')->name('encuesta.save');
 
-/*Reporte Planeación 04012021*/
+/*Reporte Planeación 04012021-20052021*/
 Route::get('/planeacion/reporte', 'webController\supreController@planeacion_reporte')->name('planeacion.reporte');
+Route::get('/vinculadores/reporte-cursos', 'webController\CursoValidadoController@cursosVinculador_reporte')->name('cursosvinculador.reporte');
 Route::post('/planeacion/reporte/pdf','webController\supreController@planeacion_reportepdf')->name('planeacion.reportepdf');
 Route::post('/directorio/getcurso','webController\supreController@get_curso')->name('get-curso');
 Route::post('/directorio/getins','webController\supreController@get_ins')->name('get-ins');
@@ -526,7 +528,6 @@ Route::get('/unidades/modificar/{id}', 'webController\UnidadesController@editar'
 Route::post('/unidades/modificar/guardar', 'webController\UnidadesController@update')->name('unidades-actualizar');
 
 /* Modulo exoneraciones */
-
 Route::get('/exoneraciones/inicio', 'webController\ExoneracionesController@index')->name('exoneraciones.inicio');
 Route::get('/exoneraciones/agregar', 'webController\ExoneracionesController@create')->name('exoneraciones.agregar')
     ->middleware('can:exoneraciones.create');

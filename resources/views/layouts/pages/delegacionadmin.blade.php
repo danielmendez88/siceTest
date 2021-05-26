@@ -226,10 +226,9 @@
                             total = parseFloat(total).toFixed(2);
 
                             document.getElementById('addmore['+x+'][importe]').value = total;
-
+                            document.getElementById('addmore['+x+'][aviso]').innerHTML = null;
                             document.getElementById('addmore['+x+'][iva]').value = iva;
 
-                            document.getElementById('addmore['+x+'][aviso]').innerHTML = null;
                         }else{
 
                             //Puedes mostrar un mensaje de error en algún div del DOM
@@ -239,12 +238,31 @@
 
             request.fail(( jqXHR, textStatus ) =>
             {
-                alert( "Hubo un error: " + textStatus );
+                //alert( "Hubo un error: " + textStatus );
             });
 
             } else {
 
             }
+            /*var url = '/supre/busqueda/tipo_curso';
+                var request = $.ajax
+                ({
+                    url: url,
+                    method: 'POST',
+                    data: datos,
+                    dataType: 'json'
+                });
+                request.done(( respuesta) =>
+                {
+                    if (respuesta == 'CERT')
+                    {
+                        document.getElementById('addmore['+x+'][aviso]').innerHTML = 'Curso Certificado Extraordinario';
+                    }
+                    if (respuesta == 'NORMAL')
+                    {
+                        document.getElementById('addmore['+x+'][aviso]').innerHTML = null;
+                    }
+                });*/
         });
     });
 
