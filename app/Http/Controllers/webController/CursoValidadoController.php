@@ -18,7 +18,10 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\tbl_unidades;
+use App\Models\Alumno;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 class CursoValidadoController extends Controller
 {
@@ -205,5 +208,105 @@ class CursoValidadoController extends Controller
     {
         $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();
         return view('layouts.pages.vstareportecursovinculador', compact('unidades'));
+    }
+//a
+    public function vinculacion_reportepdf(Request $request)
+    {
+        $usuarioUnidad = Auth::user()->unidad;
+        $unidadUsuario = DB::table('tbl_unidades')->WHERE('id', $usuarioUnidad)->FIRST();
+
+        $i = 0;
+        set_time_limit(0);
+
+        if ($request->filtro == "general")
+        {
+            $data = tbl_curso::SELECT('tbl_cursos.curso','tbl_cursos.tcapacitacion','tbl_cursos.mod','tbl_cursos.espe',
+                            'tbl_cursos.id_curso','tbl_cursos.unidad','tbl_cursos.clave','tbl_inscripcion.alumno',
+                            'tbl_inscripcion.matricula','tbl_inscripcion.realizo')
+                           ->whereDate('tbl_cursos.inicio', '>=', $request->fecha1)
+                           ->whereDate('tbl_cursos.inicio', '<=', $request->fecha2)
+                           ->WHERE('tbl_cursos.unidad', '=', $unidadUsuario->ubicacion)
+                           ->LEFTJOIN('tbl_inscripcion', 'tbl_inscripcion.id_curso', '=', 'tbl_cursos.id')
+                           ->GET();
+        }
+        else if ($request->filtro == 'curso')
+        {
+            $data = tbl_curso::SELECT('tbl_cursos.curso','tbl_cursos.tcapacitacion','tbl_cursos.mod','tbl_cursos.espe',
+                            'tbl_cursos.id_curso','tbl_cursos.unidad','tbl_cursos.clave','tbl_inscripcion.alumno',
+                            'tbl_inscripcion.matricula','tbl_inscripcion.realizo')
+                           ->whereDate('tbl_cursos.inicio', '>=', $request->fecha1)
+                           ->whereDate('tbl_cursos.inicio', '<=', $request->fecha2)
+                           ->WHERE('tbl_cursos.unidad', '=', $unidadUsuario->ubicacion)
+                           ->WHERE('tbl_cursos.id', '=', $request->id_curso)
+                           ->LEFTJOIN('tbl_inscripcion', 'tbl_inscripcion.id_curso', '=', 'tbl_cursos.id')
+                           ->GET();
+        }
+        else if ($request->filtro == 'vinculador')
+        {
+            $data = tbl_curso::SELECT('tbl_cursos.curso','tbl_cursos.tcapacitacion','tbl_cursos.mod','tbl_cursos.espe',
+                            'tbl_cursos.id_curso','tbl_cursos.unidad','tbl_cursos.clave','tbl_inscripcion.alumno',
+                            'tbl_inscripcion.matricula','tbl_inscripcion.realizo')
+                           ->whereDate('tbl_cursos.inicio', '>=', $request->fecha1)
+                           ->whereDate('tbl_cursos.inicio', '<=', $request->fecha2)
+                           ->WHERE('tbl_cursos.unidad', '=', $unidadUsuario->ubicacion)
+                           ->WHERE('tbl_inscripcion.realizo', '=', $request->vinculadoraut)
+                           ->LEFTJOIN('tbl_inscripcion', 'tbl_inscripcion.id_curso', '=', 'tbl_cursos.id')
+                           ->GET();
+        }
+
+        foreach($data as $cadwell)
+        {
+            $ins_sivyc = Alumno::SELECT('alumnos_registro.realizo','alumnos_pre.curp', 'alumnos_pre.sexo')
+            ->WHERE('alumnos_registro.no_control', '=', $cadwell->matricula)
+            ->WHERE('alumnos_registro.id_curso', '=', $cadwell->id_curso)
+            ->LEFTJOIN('alumnos_pre', 'alumnos_pre.id', '=', 'alumnos_registro.id_pre')
+            ->FIRST();
+
+            if($ins_sivyc !=  NULL)
+            {
+                $realizo[$i] = $ins_sivyc->realizo;
+                $curp[$i] = $ins_sivyc->curp;
+                $sexo[$i] = $ins_sivyc->sexo;
+            }
+            else
+            {
+                $curp[$i] = NULL;
+                $sexo[$i] = NULL;
+            }
+
+            $i++;
+        }
+
+        $pdf = PDF::loadView('layouts.pdfpages.reportevincalum', compact('data','curp','sexo','realizo'));
+        $pdf->setPaper('legal', 'Landscape');
+        return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
+
+    }
+
+    public function get_vin(Request $request){
+
+        $search = $request->search;
+
+        if (isset($search)) {
+            # si la variable está inicializada
+            if($search == ''){
+                $vinculador = User::orderby('users.name','asc')->select('role_user.user_id','users.name')
+                    ->LEFTJOIN('role_user','role_user.role_id', '=', '11')
+                    ->limit(10)->get();
+            }else{
+                $vinculador = User::orderby('users.name','asc')->select('role_user.user_id','users.name')
+                    ->where('nombre', 'like', '%' .$search . '%')
+                    ->LEFTJOIN('role_user','role_user.role_id', '=', '11')
+                    ->limit(10)->get();
+            }
+
+            $response = array();
+            foreach($vinculador as $dir){
+                $response[] = array("value"=>$dir->id,"label"=>$dir->name);
+            }
+
+            echo json_encode($response);
+            exit;
+        }
     }
 }
