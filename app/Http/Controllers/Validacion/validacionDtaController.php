@@ -460,7 +460,7 @@ class validacionDtaController extends Controller
         $date = $fecha_actual->format('Y-m-d'); // fecha
         $fecha_nueva = $fecha_actual->format('d-m-Y');
 
-        // validamos que este inicializada la variable 
+        // validamos que este inicializada la variable
         if (isset($_POST['envioDireccionDta'])) {
             # en esta parte se envía a la jefa de DTA para validación y envío a Planeación
             // TURNADO_VALIDACION_DIRECCION_DTA[FECHA: "XXXX-XX-XX"]
@@ -740,7 +740,7 @@ class validacionDtaController extends Controller
                         # checamos que la variable no se encuentre vacia
                         foreach ($_POST['chkcursos'] as $key => $value) {
                             // $observaciones_revision_a_planeacion = [
-                            //     'OBSERVACION_REVISION_A_PLANEACION' =>  
+                            //     'OBSERVACION_REVISION_A_PLANEACION' =>
                             // ];
                             # entremos en el loop
                             \DB::table('tbl_cursos')
@@ -822,7 +822,7 @@ class validacionDtaController extends Controller
                         $memo = str_replace('/', '_', $numero_memo);
                         /**
                          * aquí vamos a verificar que el archivo no se encuentre guardado
-                         * previamente en el sistema de archivos del sistema de ser así se 
+                         * previamente en el sistema de archivos del sistema de ser así se
                          * remplazará el archivo porel que se subirá a continuación
                          */
                         // construcción del archivo
@@ -1008,8 +1008,8 @@ class validacionDtaController extends Controller
     private function generarMemorandumPlaneacion($num_memo_planeacion) {
         if (isset($num_memo_planeacion)) {
             /**
-             * obtener el mes de los cursos que se encuentran en el registro del módulo 
-             * de la dirección DTA 
+             * obtener el mes de los cursos que se encuentran en el registro del módulo
+             * de la dirección DTA
              */
             $queryMesMemo = DB::table('tbl_cursos')
                 ->select(DB::raw("to_char(tbl_cursos.fecha_turnado, 'TMMONTH') AS mes_obtenido"))

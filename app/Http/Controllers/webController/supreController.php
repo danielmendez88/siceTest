@@ -570,7 +570,7 @@ class supreController extends Controller
         $supre = new supre();
         $folio = new folio();
         $data_supre = $supre::WHERE('id', '=', $id)->FIRST();
-        $data_folio = $folio::WHERE('id_supre', '=', $id)->GET();
+        $data_folio = $folio::WHERE('id_supre', '=', $id)->WHERE('status', '!=', 'Cancelado')->GET();
         $date = strtotime($data_supre->fecha);
         $D = date('d', $date);
         $MO = date('m',$date);
@@ -605,6 +605,7 @@ class supreController extends Controller
                         'folios.comentario','instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno','tbl_cursos.unidad',
                         'tbl_cursos.curso AS curso_nombre','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura')
                     ->WHERE('id_supre', '=', $id )
+                    ->WHERE('folios.status', '!=', 'Cancelado')
                     ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                     ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                     ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
@@ -645,6 +646,7 @@ class supreController extends Controller
                         'folios.comentario','instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno','tbl_cursos.unidad',
                         'cursos.nombre_curso AS curso_nombre','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre','tbl_cursos.mujer')
                     ->WHERE('id_supre', '=', $id )
+                    ->WHERE('folios.status', '!=', 'Cancelado')
                     ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                     ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                     ->LEFTJOIN('cursos','cursos.id','=','tbl_cursos.id_curso')
@@ -652,12 +654,15 @@ class supreController extends Controller
                     ->GET();
         $data2 = supre::WHERE('id', '=', $id)->FIRST();
 
-        $cadwell = folio::SELECT('id_cursos')->WHERE('id_supre', '=', $id)->GET();
+        $cadwell = folio::SELECT('id_cursos')->WHERE('id_supre', '=', $id)
+            ->WHERE('folios.status', '!=', 'Cancelado')
+            ->GET();
         foreach ($cadwell as $item)
         {
             $h = tbl_curso::SELECT('hombre')->WHERE('id', '=', $item->id_cursos)->FIRST();
             $m = tbl_curso::SELECT('mujer')->WHERE('id', '=', $item->id_cursos)->FIRST();
             $hm = $h->hombre+$m->mujer;
+            //printf($item->id_cursos  . $h . ' + ' . $m . '=' . $hm . ' // ');
             if ($hm < 10)
             {
                 $recursos[$i] = "Estatal";
@@ -668,6 +673,8 @@ class supreController extends Controller
             }
             $i++;
         }
+
+       // dd($recursos);
 
 
         $date = strtotime($data2->fecha);
@@ -692,7 +699,7 @@ class supreController extends Controller
         $pdf->setPaper('A4', 'Landscape');
         return $pdf->stream('medium.pdf');
 
-        return view('layouts.pdfpages.valsupre', compact('data','data2','D','M','Y','Dv','Mv','Yv','getremitente','getfirmante','getccp1','getccp2','getccp3','getccp4'));
+        return view('layouts.pdfpages.valsupre', compact('data','data2','D','M','Y','Dv','Mv','Yv','getremitente','getfirmante','getccp1','getccp2','getccp3','getccp4','recursos'));
     }
 
     protected function monthToString($month)
