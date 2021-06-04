@@ -222,8 +222,7 @@ class CursosController extends Controller
                 'arc' => trim($request->arc),
                 'tcapacitacion' => trim($request->tcapacitacion),
                'fecha_apertura' => $request->fecha_apertura,
-               'fecha_modificacion' => $request->fecha_modificacion,
-               'fecha_modificacion' => date('Y-m-d'),
+                'fecha_modificacion' => $request->fecha_modificacion,
                 'costo' => trim($request->costo),
                 'motivo_correccion' => trim($request->motivo_correccion),
                 'status_curso' => trim($request->status_curso)
