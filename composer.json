@@ -20,14 +20,9 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "2.0",
         "laravelcollective/html": "^6.0",
-<<<<<<< HEAD
-        "revolution/laravel-google-sheets": "^5.0",
-        "maatwebsite/excel": "^3.1"
-=======
         "lcobucci/jwt": "3.3.3",
         "maatwebsite/excel": "^3.1",
         "revolution/laravel-google-sheets": "^5.0"
->>>>>>> c693001952b3a9dcb6987fb59509e3dead0d12b5
     },
     "require-dev": {
         "facade/ignition": "^2.0",
