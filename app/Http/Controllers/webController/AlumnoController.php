@@ -133,6 +133,7 @@ class AlumnoController extends Controller
                 /**
                  * formar el formato fecha para fecha de nacimiento
                  */
+                $usuarioUnidad = Auth::user()->unidad;
                 $dia = trim($request->dia);
                 $mes = trim($request->mes);
                 $anio = trim($request->anio);
@@ -142,6 +143,7 @@ class AlumnoController extends Controller
                 $nombre_estado = DB::table('estados')->where('id', $request->input('estado'))->select('nombre')->first();
 
                 $AlumnoPreseleccion = new Alumnopre;
+                $AlumnoPreseleccion->id_unidad = $usuarioUnidad;
                 $AlumnoPreseleccion->nombre = $request->nombre;
                 $AlumnoPreseleccion->apellido_paterno = $request->apellidoPaterno;
                 $AlumnoPreseleccion->apellido_materno = $request->apellidoMaterno;
@@ -195,6 +197,7 @@ class AlumnoController extends Controller
      */
     public function storecerss(Request $request)
     {
+        $usuarioUnidad = Auth::user()->unidad;
 
         $rules = [
             'nombre_cerss' => ['required', 'min:4'],
@@ -256,8 +259,9 @@ class AlumnoController extends Controller
                 } else {
                     $fecha_nacimiento = $anio."-".$mes."-".$dia;
                 }
-
+//A
                 $id_alumnos_pre = DB::table('alumnos_pre')->insertGetId([
+                    'id_unidad' => $usuarioUnidad,
                     'nombre' => $request->input('nombre_aspirante_cerss'),
                     'apellido_paterno' => (is_null($request->input('apellidoPaterno_aspirante_cerss')) ? '' : $request->input('apellidoPaterno_aspirante_cerss')),
                     'apellido_materno' => (is_null($request->input('apellidoMaterno_aspirante_cerss')) ? '' : $request->input('apellidoMaterno_aspirante_cerss')),
@@ -967,7 +971,24 @@ class AlumnoController extends Controller
             $tipo_curso = $request->tipo;
             $unidad_seleccionada = '["'.$request->unidad.'"]';
             //$Curso = new curso();
-            $Cursos = DB::table('cursos')->select('id','nombre_curso')->where([['tipo_curso', '=', $tipo_curso], ['id_especialidad', '=', $idEspecialidad], ['unidades_disponible', '@>', $unidad_seleccionada]])->get();
+            $Cursos = DB::table('cursos')->select('id','nombre_curso')->where([['tipo_curso', '=', $tipo_curso], ['id_especialidad', '=', $idEspecialidad], ['unidades_disponible', '@>', $unidad_seleccionada], ['estado', '=', true]])->get();
+
+            /*Usamos un nuevo método que habremos creado en la clase municipio: getByDepartamento*/
+            $json=json_encode($Cursos);
+        }else{
+            $json=json_encode(array('error'=>'No se recibió un valor de id de Especialidad para filtar'));
+        }
+
+        return $json;
+    }
+
+    protected function getcursosModified(Request $request){
+        if (isset($request->idEsp_mod)){
+            /*Aquí si hace falta habrá que incluir la clase municipios con include*/
+            $idEspecialidad = $request->idEsp_mod;
+            $tipo_curso = $request->tipo_mod;
+            //$Curso = new curso();
+            $Cursos = DB::table('cursos')->select('id','nombre_curso')->where([['tipo_curso', '=', $tipo_curso], ['id_especialidad', '=', $idEspecialidad], ['estado', '=', true]])->get();
 
             /*Usamos un nuevo método que habremos creado en la clase municipio: getByDepartamento*/
             $json=json_encode($Cursos);
@@ -1150,7 +1171,7 @@ class AlumnoController extends Controller
                     # si está vacio tenemos que checar lo siguiente
                     $empresa = 'DESEMPLEADO';
                 }
-                
+
 
             # code...
                 $array = [
@@ -1326,6 +1347,7 @@ class AlumnoController extends Controller
 
                 //obtener el estado
                 $nombre_estado_mod = Estado::WHERE('id', '=', $request->estado_mod)->GET();
+<<<<<<< HEAD
 
                 //obtener el valor de la empresa
                 if (!empty($request->empresa_mod)) {
@@ -1336,6 +1358,18 @@ class AlumnoController extends Controller
                     $empresa = 'DESEMPLEADO';
                 }
 
+=======
+
+                //obtener el valor de la empresa
+                if (!empty($request->empresa_mod)) {
+                    # si no está vacio tenemos que cargar el dato puro
+                    $empresa = trim($request->empresa_mod);
+                } else {
+                    # si está vacio tenemos que checar lo siguiente
+                    $empresa = 'DESEMPLEADO';
+                }
+
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                 # code...
                 $array = [
                     'nombre' => trim($request->nombre_alum_mod),
@@ -1433,7 +1467,11 @@ class AlumnoController extends Controller
                     return redirect()->route('alumnos.index')
                         ->with('success', sprintf('ASPIRANTE %s  MODIFICADO EXTIOSAMENTE!', $curpAlumno));
                 }
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
             }
         }
     }

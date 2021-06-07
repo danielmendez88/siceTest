@@ -61,8 +61,12 @@
                         @can('alumnos.inscritos.index')
                             <a class="dropdown-item" href="{{ route('alumnos.inscritos') }}">Alumnos</a>
                         @endcan
-                        <a class="dropdown-item" href="{{route('convenios.index')}}">Convenios</a>
-                        <a class="dropdown-item" href="{{route('cerss.inicio')}}">CERSS</a>
+                        @can('convenios.index')
+                            <a class="dropdown-item" href="{{route('convenios.index')}}">Convenios</a>
+                        @endcan
+                        @can('cerss.inicio')
+                            <a class="dropdown-item" href="{{route('cerss.inicio')}}">CERSS</a>
+                        @endcan
                         @can('areas.inicio')
                             <a class="dropdown-item" href="{{route('areas.inicio')}}">Áreas</a>
                         @endcan
@@ -72,7 +76,9 @@
                         @can('unidades.index')
                             <a class="dropdown-item" href="{{route('unidades.inicio')}}">Unidades</a>
                         @endcan
-                        <a class="dropdown-item" href="{{route('exoneraciones.inicio')}}">Exoneraciones</a>
+                        @can('exoneraciones.inicio')
+                            <a class="dropdown-item" href="{{route('exoneraciones.inicio')}}">Exoneraciones</a>
+                        @endcan
                         @can('instituto.inicio')
                             <a class="dropdown-item" href="{{route('instituto.inicio')}}">Acerca del instituto</a>
                         @endcan
@@ -119,6 +125,12 @@
                         @can('financieros.reporte')
                             <a class="dropdown-item" href="{{route('financieros.reporte')}}">ESTADO DE CONTRATOS Y PAGOS</a>
                         @endcan
+<<<<<<< HEAD
+=======
+                        @can('vinculacion.reporte')
+                            <a class="dropdown-item" href="{{route('cursosvinculador.reporte')}}">VINCULADOR-ALUMNO</a>
+                        @endcan
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                         {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATOT</a> --}}
                     </div>
                 </li>
@@ -128,7 +140,11 @@
                     <li class="nav-item g-mx-5--lg dropdown">
                         <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Grupos
+<<<<<<< HEAD
                         </a>                    
+=======
+                        </a>
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             @can('grupos.calificaciones')
                                 <a class="dropdown-item" href="{{route('grupos.calificaciones')}}">Registrar Calificaciones</a>
@@ -140,6 +156,7 @@
                                 <a class="dropdown-item" href="{{route('grupos.cancelacionfolios')}}">Cancelar Folios</a>
                             @endcan
                             @can('grupos.consultas')                        
+<<<<<<< HEAD
                                 <a class="dropdown-item" href="{{route('grupos.consultas')}}">Consultas</a>                        
                             @endcan
                         </div>
@@ -147,14 +164,23 @@
                 @endcan
                 {{-- grupo calificaciones end --}}
                 
+=======
+                            <a class="dropdown-item" href="{{route('grupos.consultas')}}">B&uacute;squeda</a>                        
+                             @endcan
+                        </div>
+                    </li>
+                @endcan
+                {{-- grupo calificaciones end --}}
+
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                 @can('formatot.menu.indice')
                     <li class="nav-item g-mx-5--lg dropdown">
                         <a href="#" class="nav-link g-color-white--hover" id="navbarDropdownMenuLinkValidacion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Formatos t
+                            Formatos T
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLinkValidacion">
                             @can('vista.formatot.unidades.indice')
-                                <a class="dropdown-item" href="{{route('vista_formatot')}}">Generación Formato T por Unidades</a> 
+                                <a class="dropdown-item" href="{{route('vista_formatot')}}">Generación Formato T por Unidades</a>
                             @endcan
                             {{-- modificaciones al menu --}}
                             @can('vista.formatot.unidades.indice')
@@ -162,10 +188,13 @@
                             @endcan
                             {{-- modificaciones al menu END --}}
                             @can('vista.validacion.enlaces.dta')
-                                <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Revisión de Cursos Formato t</a>  
+                                <a class="dropdown-item" href="{{ route('validacion.cursos.enviados.dta') }}">Revisión de Cursos Formato T</a>
                             @endcan
                             @can('vista.validacion.direccion.dta')
-                                <a class="dropdown-item" href="{{ route('validacion.dta.revision.cursos.indice') }}">Validación de Cursos Formato t DTA</a>
+                                <a class="dropdown-item" href="{{ route('validacion.dta.revision.cursos.indice') }}">Validación de Cursos Formato T DTA</a>
+                            @endcan
+                            @can('vista.revision.validacion.planeacion.indice')
+                                <a class="dropdown-item" href="{{ route('planeacion.formatot.index') }}">Revisión y Validación Final Formato T</a>
                             @endcan
                             @can('vista.validacion.direccion.dta')
                                 <a class="dropdown-item" href="{{ route('indice.dta.aperturado.indice') }}" >Formato T Aperturado</a>
@@ -178,9 +207,22 @@
                                 <a href="{{ route('checar.memorandum.dta.mes') }}" class="dropdown-item">Memorandums Enviados a DTA</a>
                             @endcan
                             {{-- agregar nuevo elemento a menu END --}}
-                            @can('vista.revision.validacion.planeacion.indice')
-                                <a class="dropdown-item" href="{{ route('planeacion.formatot.index') }}">Revisión y Validación Final Formato t</a>
+<<<<<<< HEAD
+=======
+                            @can('vista.formatot.unidades.indice')
+                                <a href="{{ route('cursos.reportados.historico.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
                             @endcan
+                            @can('vista.validacion.enlaces.dta')
+                                <a href="{{ route('cursos.reportados.historico.dta.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+                            @can('vista.validacion.direccion.dta')
+                                <a href="{{ route('cursos.reportados.historico.direccion.dta.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
+                            @can('vista.revision.validacion.planeacion.indice')
+                                <a href="{{ route('cursos.reportados.historico.planeacion.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
+                            @endcan
+<<<<<<< HEAD
                             @can('vista.formatot.unidades.indice')
                                 <a href="{{ route('cursos.reportados.historico.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
                             @endcan
@@ -193,11 +235,15 @@
                             @can('vista.revision.validacion.planeacion.indice')
                                 <a href="{{ route('cursos.reportados.historico.planeacion.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
                             @endcan
+=======
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                                 <a class="dropdown-item" href="{{route('seguimento.avance.unidades.formatot.ejecutiva.index')}}">Seguimiento Ejecutivo a Unidades Para el Formato T</a>
                         </div>
                     </li>
                 @endcan
 
+                {{-- modificaciones en el curso del menu --}}
+                {{-- consultas folios asignados --}}
                 @can('solicitudes.folios')
                     <li class="nav-item g-mx-5--lg dropdown">
                         <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -207,6 +253,7 @@
                             @can('solicitudes.folios')
                                 <a class="dropdown-item" href="{{route('solicitudes.folios')}}">Lote de Folios</a>
                             @endcan
+<<<<<<< HEAD
                         </div>
 
                     </li> 
@@ -218,10 +265,24 @@
                     <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Consultas
                     </a>                    
+=======
+                            @can('solicitudes.cancelacionfolios')
+                                <a class="dropdown-item" href="{{route('solicitudes.cancelacionfolios')}}">Cancelaci&oacute;n Folios</a>
+                            @endcan
+                        </div>
+                    </li>
+                @endcan
+
+                <li class="nav-item g-mx-5--lg dropdown">
+                    <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Consultas
+                    </a>
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         @can('consultas.folios')
                             <a class="dropdown-item" href="{{route('consultas.folios')}}">Folios Asignados</a>
                         @endcan
+<<<<<<< HEAD
                          @can('consultas.lotes')
                             <a class="dropdown-item" href="{{route('consultas.lotes')}}">Actas de Folios</a>
                         @endcan
@@ -229,6 +290,17 @@
                 </li> 
                 {{-- consultas folios asignados END --}}
                 
+=======
+                        @can('consultas.lotes')
+                            <a class="dropdown-item" href="{{route('consultas.lotes')}}">Actas de Folios</a>
+                        @endcan
+                        @can('consultas.cursosaperturados')
+                            <a class="dropdown-item" href="{{route('consultas.cursosaperturados')}}">Cursos Aperturados</a>
+                        @endcan
+                    </div>
+             </li>
+
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
                 <li class="nav-item g-mx-5--lg">

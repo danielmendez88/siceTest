@@ -181,6 +181,13 @@ $(function(){
     $('#restartModalPago').on('show.bs.modal', function(event){
         var button = $(event.relatedTarget);
         var id = button.data('id');
-        $('#confirm_restart').attr("href","/pago/reiniciar/" + id);
+        $('#confirm_restart2').attr("href","/pago/reiniciar/" + id);
+    });
+
+    //Modal de cancelacion de folio
+    $('#cancelModalFolio').on('show.bs.modal', function(event){
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        document.getElementById('idf').value = id;
     });
 });

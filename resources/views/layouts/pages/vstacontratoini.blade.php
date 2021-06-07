@@ -1,4 +1,4 @@
-<!--Creado por Orlando Chavez-->
+<!--Creado por Orlando Chavez -->
 @extends('theme.sivyc.layout')
 <!--llamar a la plantilla -->
 @section('title', 'Contratos | SIVyC Icatech')
@@ -12,7 +12,6 @@
         br {
             line-height:70px;
         }
-        }
 
         #myInput {
         background-image: url('img/search.png');
@@ -24,10 +23,7 @@
         padding: 12px 20px 12px 40px;
         border: 1px solid #ddd;
         margin-bottom: 12px;
-
-        br {
             line-height:50px;
-        }
         }
     </style>
     <div class="container g-pt-50">
@@ -155,6 +151,15 @@
                                             <i class="fa fa-file-text" aria-hidden="true"></i>
                                         </a>
                                     @endcan
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Validando_Contrato')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="Documento pdf" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -173,6 +178,15 @@
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Previsualización de Contrato" target="_blank" href="{{route('pre_contrato', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-address-book" aria-hidden="true"></i>
                                     </a>
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Contrato_Rechazado')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="Documento pdf" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -186,6 +200,15 @@
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Previsualización de Contrato" target="_blank" href="{{route('pre_contrato', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-address-book" aria-hidden="true"></i>
                                     </a>
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Contratado')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="Documento pdf" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -208,6 +231,15 @@
                                             <i class="fa fa-history"></i>
                                         </button>
                                     @endcan
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Pago_Rechazado')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -218,9 +250,27 @@
                                             <i class="fa fa-wrench" aria-hidden="true"></i>
                                         </a>
                                     @endcan
+                                    @can('contrato.restart')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#restartModalContrato"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Reiniciar Contrato">
+                                            <i class="fa fa-history"></i>
+                                        </button>
+                                    @endcan
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Consulta de Validación" href="{{route('contrato-validado-historial', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Verificando_Pago')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -229,6 +279,24 @@
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Consulta de Validación" href="{{route('contrato-validado-historial', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>
+                                    @can('contrato.restart')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#restartModalContrato"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Reiniciar Contrato">
+                                            <i class="fa fa-history"></i>
+                                        </button>
+                                    @endcan
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Pago_Verificado')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -237,6 +305,15 @@
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Consulta de Validación" href="{{route('contrato-validado-historial', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                                 @if ($itemData->status == 'Finalizado')
                                     <a class="btn btn-danger btn-circle m-1 btn-circle-sm" title="PDF" id="show_pdf" name="show_pdf" data-toggle="modal" data-target="#myModal" data-id='["{{$itemData->id_folios}}","{{$itemData->id_contrato}}","{{$itemData->docs}}","{{$itemData->id}}","{{$itemData->status}}","{{$itemData->doc_validado}}"]'>
@@ -245,6 +322,15 @@
                                     <a class="btn btn-info btn-circle m-1 btn-circle-sm" title="Consulta de Validación" href="{{route('contrato-validado-historial', ['id' => $itemData->id_contrato])}}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>
+                                    @can('folio.cancel')
+                                        <button type="button" class="btn btn-danger btn-circle m-1 btn-circle-sm"
+                                            data-toggle="modal" data-placement="top"
+                                            data-target="#cancelModalFolio"
+                                            data-id='{{$itemData->id_folios}}'
+                                            title="Cancelar Folio">
+                                            <i class="fa fa-window-close"></i>
+                                        </button>
+                                    @endcan
                                 @endif
                             </td>
                             <td>
@@ -377,6 +463,41 @@
             </div>
         </div>
     </div>
+<!-- END -->
+<!-- Modal Cancel Folio -->
+<div class="modal fade" id="cancelModalFolio" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><b>¿Esta seguro de cancelar este proceso?</b></h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('folio-cancel') }}" method="post" id="cancelfolio">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group col-md-2"></div>
+                    <div class="form-group col-md-8">
+                        <label for="observaciones"><b>Describa el motivo de cancelación</b></label>
+                        <textarea name="observaciones" id="observaciones" cols="8" rows="6" class="form-control" required></textarea>
+                        <input name="idf" id="idf" type="text" class="form-control" hidden>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-2"></div>
+                    <div class="form-group col-md-4">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <button type="submit" class="btn btn-primary" >Aceptar</button>
+                    </div>
+                    <div class="form-group col-md-2"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <!-- END -->
 <br>
 @endsection

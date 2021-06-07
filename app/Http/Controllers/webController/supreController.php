@@ -19,6 +19,7 @@ use App\Http\Controllers\Controller;
 use PDF;
 use function PHPSTORM_META\type;
 use Carbon\Carbon;
+use DateTime;
 
 class supreController extends Controller
 {
@@ -110,8 +111,8 @@ class supreController extends Controller
                         ->with('success','Error Interno. Intentelo mas tarde.');
             }
         }
-
-
+//
+// este es el cambio de prueba cherry-pick
         return redirect()->route('supre-inicio')
                         ->with('success','Solicitud de Suficiencia Presupuestal agregado');
     }
@@ -311,29 +312,62 @@ class supreController extends Controller
                     ->with('success','Suficiencia Presupuestal Reiniciada');
     }
 
+    public function cancelFolio(Request $request)
+    {
+        $folio = folio::find($request->idf);
+        $folio->observacion_cancelacion = $request->observaciones;
+        $folio->status = 'Cancelado';
+        $folio->save();
+        return redirect()->route('supre-inicio')
+                    ->with('success','Folio de Suficiencia Presupuestal Cancelada');
+    }
+
     protected function getcursostats(Request $request)
     {
         if (isset($request->valor)){
             /*Aquí si hace falta habrá que incluir la clase municipios con include*/
             $claveCurso = $request->valor;
             $Curso = new tbl_curso();
-            $Cursos = $Curso->SELECT('tbl_cursos.ze','tbl_cursos.cp','tbl_cursos.dura')
+            $Cursos = $Curso->SELECT('tbl_cursos.ze','tbl_cursos.cp','tbl_cursos.dura', 'tbl_cursos.inicio', 'tbl_cursos.tipo_curso')
                                     ->WHERE('clave', '=', $claveCurso)->FIRST();
 
             if($Cursos != NULL)
             {
-                if ($Cursos->ze == 'II')
+                $inicio = date("m-d-Y", strtotime($Cursos->inicio));
+                $date1 = "2021-05-01";
+                $date1 = date("m-d-Y", strtotime($date1));
+
+                if ($date1 <= $inicio)
                 {
-                    $criterio = criterio_pago::SELECT('monto_hora_ze2 AS monto')->WHERE('id', '=' , $Cursos->cp)->FIRST();
+                    $ze2 = 'ze2_2021 AS monto';
+                    $ze3 = 'ze3_2021 AS monto';
                 }
                 else
                 {
-                    $criterio = criterio_pago::SELECT('monto_hora_ze3 AS monto')->WHERE('id', '=' , $Cursos->cp)->FIRST();
+                    $ze2 = 'monto_hora_ze2 AS monto';
+                    $ze3 = 'monto_hora_ze3 AS monto';
+                }
+
+                if ($Cursos->ze == 'II')
+                {
+                    $criterio = criterio_pago::SELECT($ze2)->WHERE('id', '=' , $Cursos->cp)->FIRST();
+                }
+                else
+                {
+                    $criterio = criterio_pago::SELECT($ze3)->WHERE('id', '=' , $Cursos->cp)->FIRST();
                 }
 
                 if($criterio != NULL)
                 {
-                    $total = $criterio->monto * $Cursos->dura;
+                    if($Cursos->tipo_curso == 'CERTIFICACION')
+                    {
+                        $total = $criterio->monto * 10;
+                        //$aviso = TRUE;
+                    }
+                    else
+                    {
+                        $total = $criterio->monto * $Cursos->dura;
+                    }
                 }
                 else
                 {
@@ -352,6 +386,36 @@ class supreController extends Controller
 
         return $json;
     }
+    protected function gettipocurso(Request $request)
+    {
+        $claveCurso = $request->valor;
+        $Curso = new tbl_curso();
+        $Cursos = $Curso->SELECT('tbl_cursos.tipo_curso')
+                                ->WHERE('clave', '=', $claveCurso)->FIRST();
+
+        if($Cursos != NULL)
+        {
+            switch ($Cursos->tipo_curso) {
+                case 'CERTIFICACION':
+                    $tipo = 'CERT';
+                break;
+                case 'NORMAL':
+                    $tipo = 'NORMAL';
+                break;
+                default:
+                    $tipo = 'ERROR';
+                break;
+            }
+        }
+        else
+        {
+            $tipo = 'ERROR';
+        }
+
+        $json=json_encode($tipo);
+        return $json;
+    }
+
 
     protected function getfoliostats(Request $request)
     {
@@ -506,7 +570,7 @@ class supreController extends Controller
         $supre = new supre();
         $folio = new folio();
         $data_supre = $supre::WHERE('id', '=', $id)->FIRST();
-        $data_folio = $folio::WHERE('id_supre', '=', $id)->GET();
+        $data_folio = $folio::WHERE('id_supre', '=', $id)->WHERE('status', '!=', 'Cancelado')->GET();
         $date = strtotime($data_supre->fecha);
         $D = date('d', $date);
         $MO = date('m',$date);
@@ -541,6 +605,7 @@ class supreController extends Controller
                         'folios.comentario','instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno','tbl_cursos.unidad',
                         'tbl_cursos.curso AS curso_nombre','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura')
                     ->WHERE('id_supre', '=', $id )
+                    ->WHERE('folios.status', '!=', 'Cancelado')
                     ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                     ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                     ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
@@ -581,6 +646,7 @@ class supreController extends Controller
                         'folios.comentario','instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno','tbl_cursos.unidad',
                         'cursos.nombre_curso AS curso_nombre','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre','tbl_cursos.mujer')
                     ->WHERE('id_supre', '=', $id )
+                    ->WHERE('folios.status', '!=', 'Cancelado')
                     ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                     ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                     ->LEFTJOIN('cursos','cursos.id','=','tbl_cursos.id_curso')
@@ -588,12 +654,15 @@ class supreController extends Controller
                     ->GET();
         $data2 = supre::WHERE('id', '=', $id)->FIRST();
 
-        $cadwell = folio::SELECT('id_cursos')->WHERE('id_supre', '=', $id)->GET();
+        $cadwell = folio::SELECT('id_cursos')->WHERE('id_supre', '=', $id)
+            ->WHERE('folios.status', '!=', 'Cancelado')
+            ->GET();
         foreach ($cadwell as $item)
         {
             $h = tbl_curso::SELECT('hombre')->WHERE('id', '=', $item->id_cursos)->FIRST();
             $m = tbl_curso::SELECT('mujer')->WHERE('id', '=', $item->id_cursos)->FIRST();
             $hm = $h->hombre+$m->mujer;
+            //printf($item->id_cursos  . $h . ' + ' . $m . '=' . $hm . ' // ');
             if ($hm < 10)
             {
                 $recursos[$i] = "Estatal";
@@ -604,6 +673,8 @@ class supreController extends Controller
             }
             $i++;
         }
+
+       // dd($recursos);
 
 
         $date = strtotime($data2->fecha);
@@ -628,7 +699,7 @@ class supreController extends Controller
         $pdf->setPaper('A4', 'Landscape');
         return $pdf->stream('medium.pdf');
 
-        return view('layouts.pdfpages.valsupre', compact('data','data2','D','M','Y','Dv','Mv','Yv','getremitente','getfirmante','getccp1','getccp2','getccp3','getccp4'));
+        return view('layouts.pdfpages.valsupre', compact('data','data2','D','M','Y','Dv','Mv','Yv','getremitente','getfirmante','getccp1','getccp2','getccp3','getccp4','recursos'));
     }
 
     protected function monthToString($month)

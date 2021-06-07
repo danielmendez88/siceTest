@@ -146,6 +146,10 @@
                                 <caption>CURSOS A ENVIAR POR UNIDADES</caption>         
                                 <thead class="thead-dark">
                                     <tr align="center">
+<<<<<<< HEAD
+=======
+                                        <th scope="col">N°</th>
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                                         <th scope="col">
                                             <div style = "width:100px; word-wrap: break-word">
                                                 SELECCIONAR
@@ -278,10 +282,18 @@
                                     </tr>
                                 </thead>
                                 <tbody style="height: 300px; overflow-y: auto">
+<<<<<<< HEAD
                                     @foreach ($var_cursos as $datas)
                                         <tr align="center" 
                                             style="background-color:{{ $datas->estadocurso == 'RETORNO_UNIDAD' ? '#FCF55F ' : '' }} 
                                                 {{ ($datas->masculinocheck == $datas->ihombre and $datas->femeninocheck == $datas->imujer) ? '' : '#808080' }}" >
+=======
+                                    @foreach ($var_cursos as $key => $datas)
+                                        <tr align="center" 
+                                            style="background-color:{{ $datas->estadocurso == 'RETORNO_UNIDAD' ? '#FCF55F ' : '' }} 
+                                                {{ ($datas->masculinocheck == $datas->ihombre and $datas->femeninocheck == $datas->imujer) ? '' : '#808080' }}" >
+                                            <td>{{$key + 1}}</td>
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                                             <td>
                                                 @if ($datas->totalinscripciones = $datas->sumatoria_total_ins_edad)
                                                     <input type="checkbox" id="cbk_{{ $datas->id_tbl_cursos }}" class="checkbx" name="chkcursos_list[]" value="{{  $datas->id_tbl_cursos }}" {{ $datas->estadocurso == 'RETORNO_UNIDAD' ? 'disabled' : '' }} {{ $datas->estadocurso == 'EN_FIRMA' ? 'checked' : '' }}/>
@@ -410,10 +422,17 @@
                                             <td><div style = "width:800px; word-wrap: break-word">{{ $datas->tnota }}</div></td>
                                             <td>
                                                 @if ($datas->masculinocheck == $datas->ihombre and $datas->femeninocheck == $datas->imujer)
+<<<<<<< HEAD
                                                     <textarea name="comentarios_unidad[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3" {{ $datas->estadocurso == 'EN_FIRMA' ? '' : 'disabled' }} ></textarea>
                                                 @endif
                                             </td>
                                             <td><div style = "width:600px; word-wrap: break-word" align="justify">{{ json_decode($datas->observaciones_enlaces, JSON_UNESCAPED_SLASHES) }}</div></td>                    
+=======
+                                                    <textarea name="comentarios_unidad[]" id="comentario_{{ $datas->id_tbl_cursos }}" cols="45" rows="3" {{ $datas->estadocurso == 'EN_FIRMA' ? '' : 'disabled' }} >{{ json_decode($datas->observaciones_firma, JSON_UNESCAPED_SLASHES) }}</textarea>
+                                                @endif
+                                            </td>
+                                            <td><div style = "width:600px; word-wrap: break-word" align="justify">{{ json_decode($datas->observaciones_enlaces, JSON_UNESCAPED_SLASHES) }}</div></td>
+>>>>>>> 220835857aeaba9a2e45230e981f02ef32a81606
                                         </tr>
                                     @endforeach
                                 </tbody>

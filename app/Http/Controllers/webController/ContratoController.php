@@ -25,13 +25,30 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\tbl_unidades;
 use Illuminate\Pagination\Paginator;
+use DateTime;
 
 class ContratoController extends Controller
 {
     public function prueba()
     {
-        $it = contratos::whereDate('contratos.created_at', '>=', '2021-10-01')->whereDate('contratos.created_at', '<=', '2021-10-31')->GET();
-        dd($it);
+        $Curso = new tbl_curso();
+            $Cursos = $Curso->SELECT('tbl_cursos.ze','tbl_cursos.cp','tbl_cursos.dura', 'tbl_cursos.inicio')
+                                    ->WHERE('clave', '=', '852')->FIRST();
+                $inicio = date("m-d-Y", strtotime($Cursos->inicio));
+                $date1 = "2021-05-01";
+                $date1 = date("m-d-Y", strtotime($date1));
+
+                if ($date1 <= $inicio) {
+
+                    $ze2 = 'ze2_2021 AS monto';
+                    $ze3 = 'ze3_2021 AS monto';
+                    dd($ze2);
+                }else{
+
+                    $ze2 = 'monto_hora_ze2 AS monto';
+                    $ze3 = 'monto_hora_ze3 AS monto';
+                    dd($ze2);
+                }
     }
     public function index(Request $request)
     {
@@ -67,6 +84,7 @@ class ContratoController extends Controller
                                 ->WHERE('folios.status', '!=', 'Finalizado')
                                 ->WHERE('folios.status', '!=', 'Pago_Verificado')
                                 ->WHERE('folios.status', '!=', 'Rechazado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -84,11 +102,12 @@ class ContratoController extends Controller
             break;
             case 'unidad.ejecutiva':
                 # code...
-                $querySupre = $contratos::busquedaporcontrato($tipoContrato, $busqueda_contrato, $unidad, $mes)
+                $querySupre = $contratos::busquedaporcontrato($tipoContrato, $busqueda_contrato,  $tipoStatus, $unidad, $mes)
                                 ->WHERE('folios.status', '!=', 'En_Proceso')
                                 ->WHERE('folios.status', '!=', 'Finalizado')
                                 ->WHERE('folios.status', '!=', 'Pago_Verificado')
                                 ->WHERE('folios.status', '!=', 'Rechazado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -111,6 +130,7 @@ class ContratoController extends Controller
                                  ->WHERE('folios.status', '!=', 'Finalizado')
                                  ->WHERE('folios.status', '!=', 'Pago_Verificado')
                                  ->WHERE('folios.status', '!=', 'Rechazado')
+                                 ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -133,6 +153,7 @@ class ContratoController extends Controller
                                 ->WHERE('folios.status', '!=', 'Finalizado')
                                 ->WHERE('folios.status', '!=', 'Pago_Verificado')
                                 ->WHERE('folios.status', '!=', 'Rechazado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -157,6 +178,7 @@ class ContratoController extends Controller
                                 ->WHERE('folios.status', '!=', 'Rechazado')
                                 ->WHERE('folios.status', '!=', 'eliminado')
                                 ->WHERE('folios.status', '!=', 'Validado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -181,6 +203,7 @@ class ContratoController extends Controller
                                 ->WHERE('folios.status', '!=', 'Rechazado')
                                 ->WHERE('folios.status', '!=', 'eliminado')
                                 ->WHERE('folios.status', '!=', 'Validado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -211,6 +234,7 @@ class ContratoController extends Controller
                                 ->WHERE('folios.status', '!=', 'Finalizado')
                                 ->WHERE('folios.status', '!=', 'Pago_Verificado')
                                 ->WHERE('folios.status', '!=', 'Rechazado')
+                                ->WHERE('folios.status', '!=', 'Cancelado')
                                 ->RIGHTJOIN('folios', 'contratos.id_folios', '=', 'folios.id_folios')
                                 ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
                                 ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -655,6 +679,12 @@ class ContratoController extends Controller
 
     public function contractRestart($id)
     {
+        $id_contrato = contratos::SELECT('id_contrato')->WHERE('id_folios', '=', $id)->FIRST();
+        $id_pago = pago::SELECT('id')->WHERE('id_contrato', '=', $id_contrato->id_contrato)->FIRST();
+        if ($id_pago != NULL)
+        {
+            pago::WHERE('id', '=', $id_pago->id)->delete();
+        }
         $affecttbl_inscripcion = DB::table("folios")->WHERE('id_folios', $id)->update(['status' => 'Contrato_Rechazado']);
 
         return redirect()->route('contrato-inicio')
@@ -778,7 +808,7 @@ class ContratoController extends Controller
                         ->LEFTJOIN('pagos', 'pagos.id_contrato', '=', 'contratos.id_contrato')
                         ->LEFTJOIN('especialidad_instructores', 'especialidad_instructores.id', '=', 'contratos.instructor_perfilid')
                         ->FIRST();
-        if($data->solicitud_pago == NULL)
+        if($data->solicitud_fecha == NULL)
         {
             $date = strtotime($data->created_at);
             $D = date('d', $date);

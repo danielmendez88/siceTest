@@ -19,6 +19,7 @@
         <?php
             if(isset($curso)) $clave = $curso->clave;
             else $clave = null;
+            
         ?>
         {{ Form::open(['route' => 'grupos.asignarfolios', 'method' => 'post', 'id'=>'frm']) }}                    
 
@@ -26,25 +27,35 @@
             <div class="form-group col-md-3">
                     {{ Form::text('clave', $clave, ['id'=>'clave', 'class' => 'form-control', 'placeholder' => 'CLAVE DEL CURSO', 'aria-label' => 'CLAVE DEL CURSO', 'required' => 'required', 'size' => 30]) }}
             </div>
+             <div class="form-group col-md-2">
+                    {{ Form::text('matricula', $matricula, ['id'=>'matricula', 'class' => 'form-control', 'placeholder' => 'MATRICULA', 'aria-label' => 'MATRICULA', 'size' => 15]) }}
+            </div>
             <div class="form-group col-md-2">
                     {{ Form::button('BUSCAR', ['class' => 'btn', 'type' => 'submit']) }}
             </div>
                 
-        </div>
-       @if(isset($curso))
-            @if(isset($acta))
-            <h5>REFERENCIA DEL ACTA</h5>
-            <div class="row bg-light" style="padding:20px">
-                    <div class="form-group col-md-3">NUM. ACTA: <b>{{ $acta->num_acta }}</b></div>
-                    <div class="form-group col-md-3">FECHA ACTA: <b>{{ $acta->facta }}</b></div>
-                    <div class="form-group col-md-2">FOLIO INICIAL: <b>{{ $acta->finicial }}</b></div>
-                    <div class="form-group col-md-2">FOLIO FINAL: <b>{{ $acta->ffinal }}</b></div>
-                    <div class="form-group col-md-2">FOLIOS ASIGNADOS: <b>{{ $acta->contador }}</b></div>
-            </div>
+        </div>        
+       @if(isset($curso))        
+            @if(count($acta)>0)
+                <h5>{{count($acta)}} ACTA(S) DISPONIBLE(S)</h5>                
+                @foreach($acta as $a)
+                    <div class="row bg-light" style="padding-top:8px; margin-bottom: 2px ;">                    
+                        <div class="form-group col-md-2">ID: <b>{{ str_pad ($a->id, 8, 0, STR_PAD_LEFT)}}</b></div>
+                        <div class="form-group col-md-2">MOD: <b>{{ $a->mod }}</b></div>
+                        <div class="form-group col-md-2">NUM. ACTA: <b>{{ $a->num_acta }}</b></div>
+                        <div class="form-group col-md-2">FECHA ACTA: <b>{{ date('d/m/Y', strtotime($a->facta)) }}</b></div>
+                        <div class="form-group col-md-2">FOLIO INICIAL: <b>{{ $a->finicial }}</b></div>
+                        <div class="form-group col-md-2">FOLIO FINAL: <b>{{ $a->ffinal }}</b></div>
+                        <div class="form-group col-md-2">DISPONIBLE: <b>{{ $a->folio_disponible }}</b></div>                        
+                        <div class="form-group col-md-2">TOTAL DISPONIBLES: <b>{{ $a->total-$a->contador }}</b></div>
+                        
+                    </div>
+                    <?php $actas[$a->id] =  str_pad ($a->id, 8, 0, STR_PAD_LEFT); ?>
+                @endforeach            
             @endif
-       <h5>DATOS DEL CURSO</h5>      
-       
-        <div class="row bg-light" style="padding:20px">            
+        <br />
+        <h5>DATOS DEL CURSO</h5>  
+        <div class="row bg-light" style="padding:8px">            
             <div class="form-group col-md-3">
                 UNIDAD/ACCIÓN MÓVIL: <b>{{ $curso->unidad }}</b>
             </div>
@@ -76,7 +87,7 @@
             <div class="form-group col-md-2">
                 MODALIDAD: <b>{{ $curso->mod}}</b>
             </div> 
-            <hr/>
+            
         </div>        
         <h5>ALUMNOS</h5>
         <div class="row">
@@ -88,28 +99,50 @@
                             <th scope="col">ALUMNOS</th>
                             <th scope="col" class="text-center" width="10%">CALIFICACI&Oacute;N</th>
                             <th scope="col" class="text-center" width="10%">FOLIO</th>
-                            <th scope="col" class="text-center" width="10%">EXPEDICI&Oacute;N</th>                            
+                            <th scope="col" class="text-center" width="10%">ESTATUS</th>
+                            <th scope="col" class="text-center" width="10%">EXPEDICI&Oacute;N</th>
+                            <th scope="col" class="text-center" width="10%">MOTIVO</th>                        
                         </tr>
                     </thead>
                     @if(isset($alumnos))   
                     <tbody>
-                        <?php $asignado = true;?>
+                        <?php $boton_asignar = false; //con una asignaicion se activa ?>
                         @foreach($alumnos as $a)
+                            <?php 
+                            $asignar = false;
+                            if(($a->calificacion>5 AND !$a->folio) OR ($a->id_folioi== $a->id_foliof AND $a->movimiento=='CANCELADO'  AND $a->reexpedicion==false)){
+                                if(count($alumnos)>0 AND isset($actas)) $boton_asignar = $asignar = true;
+                            }    
+                            ?>
                             <tr>
-                                <td> {{ $a->matricula }} </td>
+                                <td> {{ $a->matricula }}</td>
                                 <td> {{ $a->alumno }} </td>
                                 <td class="text-center"> {{ $a->calificacion }} </td>
                                 <td class="text-center"> {{ $a->folio }} </td>
-                                <td class="text-center"> {{ $a->fecha_expedicion }} </td>                                
+                                 @if($asignar==true)
+                                    <td class="text-center text-danger">@if($a->folio){{ "REASIGNAR" }}@else {{ "ASIGNAR" }}@endif </td>  
+                                 @else
+                                    <td class="text-center"> {{ $a->movimiento}} </td>
+                                 @endif
+                                 <td class="text-center"> @if($a->fecha_expedicion){{ date('d/m/Y', strtotime($a->fecha_expedicion)) }}@endif  </td>
+                                <td class="text-center"> {{ $a->motivo}} </td>                                    
                             </tr>
-                            <?php if(($a->folio OR $a->calificacion==NULL) AND $asignado==true)$asignado = false;?>
+                            
                         @endforeach                       
                     </tbody>
                     <tfoot>
-                        <tr>
-                        @if($asignado AND count($alumnos)>0 AND  !$message) 
-                            <td colspan="5" class="text-right">{{ Form::button('ASIGNAR FOLIOS', ['id' => 'guardar','class' => 'btn']) }}</td>
-                        @endif
+                        <tr>                            
+                            <td colspan="3" class="text-right" style="border-color:white;"></td>                                                            
+                            @if($boton_asignar==true)
+                                <td colspan="2" class="text-right" style="border-color:white;">                                
+                                    {{ Form::select('id_afolio', $actas, NULL ,['id'=>'id_afolio', 'class' => 'form-control mt-2']) }}
+                                </td>
+                                <td colspan="2" class="text-right" style="border-color:white;">
+                                    {{ Form::button('ASIGNAR FOLIOS', ['id' => 'guardar','class' => 'form-control btn']) }}
+                                </td>                                    
+                            @endif
+                                
+                                                
                         </tr>
                     </tfoot>
                     @endif
@@ -122,7 +155,11 @@
     @section('script_content_js') 
         <script language="javascript">
              $(document).ready(function(){                
-                $("#guardar" ).click(function(){ $('#frm').attr('action', "{{route('grupos.asignarfolios.guardar')}}"); $('#frm').submit(); });             
+                $("#guardar" ).click(function(){ 
+                    if(confirm("Esta seguro de ejecutar la acción?")==true){ 
+                        $('#frm').attr('action', "{{route('grupos.asignarfolios.guardar')}}"); $('#frm').submit(); 
+                    }
+                });             
             });       
         </script>  
     @endsection
