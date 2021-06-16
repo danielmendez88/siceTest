@@ -20,6 +20,10 @@ use PDF;
 use function PHPSTORM_META\type;
 use Carbon\Carbon;
 use DateTime;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\FormatoTReport; // agregamos la exportación de FormatoTReport
+use App\Models\pago;
+use Illuminate\Support\Facades\Auth;
 
 class supreController extends Controller
 {
@@ -52,69 +56,102 @@ class supreController extends Controller
     }
 
     public function store(Request $request) {
-        $supre = new supre();
-        $curso_validado = new tbl_curso();
-        $directorio = new supre_directorio();
-
-        //Guarda Solicitud
-        $supre->unidad_capacitacion = strtoupper($request->unidad);
-        $supre->no_memo = strtoupper($request->memorandum);
-        $supre->fecha = strtoupper($request->fecha);
-        $supre->status = 'En_Proceso';
-        $supre->fecha_status = strtoupper($request->fecha);
-        $supre->save();
-
-       $id = $supre->id;
-       $directorio->supre_dest = $request->id_destino;
-       $directorio->supre_rem = $request->id_remitente;
-       $directorio->supre_valida = $request->id_valida;
-       $directorio->supre_elabora = $request->id_elabora;
-       $directorio->supre_ccp1 = $request->id_ccp1;
-       $directorio->supre_ccp2 = $request->id_ccp2;
-       $directorio->id_supre = $id;
-       $directorio->save();
-
-        //Guarda Folios
-        foreach ($request->addmore as $key => $value){
-            $folio = new folio();
-            $folio->folio_validacion = strtoupper($value['folio']);
-            $folio->iva = $value['iva'];
-            $folio->comentario = $value['comentario'];
-            $clave = strtoupper($value['clavecurso']);
-            $hora = $curso_validado->SELECT('tbl_cursos.dura','tbl_cursos.id')
-                    ->WHERE('tbl_cursos.clave', '=', $clave)
-                    ->FIRST();
-            $importe = $value['importe']/1.16;
-            $X = $hora->dura;
-            if ($X != NULL)
+        $memo = supre::SELECT('no_memo')->WHERE('no_memo', '=', $request->memorandum)->FIRST();
+        if (is_null($memo))
+        {
+            foreach ($request->addmore as $key => $value)
             {
-                if (strpos($hora->dura, " ")) {
-                    # si tiene un espacio en blanco la cadena
-                    $str_horas = explode (" ", $hora->dura);
-                    $horas = (int) $str_horas[0];
-                } else {
-                    $horas = (int) $hora->dura;
+                $validacion_folio = folio::SELECT('folio_validacion')
+                 ->WHERE('folio_validacion', '=', $value['folio'])
+                 ->WHERE('status', '!=', 'Cancelado')
+                 ->FIRST();
+                 if (isset($validacion_folio))
+                 {
+                    return redirect()->route('frm-supre')
+                    ->withErrors(sprintf('LO SENTIMOS, EL NUMERO DE FOLIO INGRESADO YA SE ENCUENTRA REGISTRADO', $validacion_folio));
+                 }
+                 $claveval = tbl_curso::SELECT('id')->WHERE('clave', '=', $value['clavecurso'])->FIRST();
+                 $validacion_curso = folio::SELECT('id_cursos')
+                 ->WHERE('id_cursos', '=', $claveval->id)
+                 ->WHERE('status', '!=', 'Cancelado')
+                 ->FIRST();
+                 if (isset($validacion_curso))
+                 {
+                    return redirect()->route('frm-supre')
+                    ->withErrors(sprintf('LO SENTIMOS, EL CURSO INGRESADO YA SE ENCUENTRA REGISTRADO', $validacion_curso));
+                 }
+            }
+            $supre = new supre();
+            $curso_validado = new tbl_curso();
+            $directorio = new supre_directorio();
+
+            //Guarda Solicitud
+            $supre->unidad_capacitacion = strtoupper($request->unidad);
+            $supre->no_memo = strtoupper($request->memorandum);
+            $supre->fecha = strtoupper($request->fecha);
+            $supre->status = 'En_Proceso';
+            $supre->fecha_status = strtoupper($request->fecha);
+            $supre->save();
+
+            $id = $supre->id;
+            $directorio->supre_dest = $request->id_destino;
+            $directorio->supre_rem = $request->id_remitente;
+            $directorio->supre_valida = $request->id_valida;
+            $directorio->supre_elabora = $request->id_elabora;
+            $directorio->supre_ccp1 = $request->id_ccp1;
+            $directorio->supre_ccp2 = $request->id_ccp2;
+            $directorio->id_supre = $id;
+            $directorio->save();
+
+            //Guarda Folios
+            foreach ($request->addmore as $key => $value)
+            {
+                $folio = new folio();
+                $folio->folio_validacion = strtoupper($value['folio']);
+                $folio->iva = $value['iva'];
+                $folio->comentario = $value['comentario'];
+                $clave = strtoupper($value['clavecurso']);
+                $hora = $curso_validado->SELECT('tbl_cursos.dura','tbl_cursos.id')
+                        ->WHERE('tbl_cursos.clave', '=', $clave)
+                        ->FIRST();
+                $importe = $value['importe']/1.16;
+                $X = $hora->dura;
+                if ($X != NULL)
+                {
+                    if (strpos($hora->dura, " "))
+                    {
+                        # si tiene un espacio en blanco la cadena
+                        $str_horas = explode (" ", $hora->dura);
+                        $horas = (int) $str_horas[0];
+                    } else
+                    {
+                        $horas = (int) $hora->dura;
+                    }
+                    $importe_hora = $importe / $horas;
+                    $folio->importe_hora = $importe_hora;
+                    $folio->importe_total = $value['importe'];
+                    $folio->id_supre = $id;
+                    $folio->id_cursos = $hora->id;
+                    $folio->status = 'En_Proceso';
+                    $folio->save();
                 }
-                $importe_hora = $importe / $horas;
-                $folio->importe_hora = $importe_hora;
-                $folio->importe_total = $value['importe'];
-                $folio->id_supre = $id;
-                $folio->id_cursos = $hora->id;
-                $folio->status = 'En_Proceso';
-                $folio->save();
+                else
+                {
+                    supre::WHERE('id', '=', $id)->DELETE();
+                    supre_directorio::WHERE('id_supre', '=', $id)->DELETE();
+                    return redirect()->route('supre-inicio')
+                            ->with('success','Error Interno. Intentelo mas tarde.');
+                }
             }
-            else
-            {
-                supre::WHERE('id', '=', $id)->DELETE();
-                supre_directorio::WHERE('id_supre', '=', $id)->DELETE();
-                return redirect()->route('supre-inicio')
-                        ->with('success','Error Interno. Intentelo mas tarde.');
-            }
-        }
-//
-// este es el cambio de prueba cherry-pick
-        return redirect()->route('supre-inicio')
+
+            return redirect()->route('supre-inicio')
                         ->with('success','Solicitud de Suficiencia Presupuestal agregado');
+        }
+        else
+        {
+            return redirect()->route('frm-supre')
+                    ->withErrors(sprintf('LO SENTIMOS, EL NUMERO DE MEMORANDUM INGRESADO YA SE ENCUENTRA REGISTRADO', $request->memorandum));
+        }
     }
 
     public function solicitud_modificar($id)
@@ -314,10 +351,21 @@ class supreController extends Controller
 
     public function cancelFolio(Request $request)
     {
+        $userName = Auth::user()->name;
+//a
         $folio = folio::find($request->idf);
         $folio->observacion_cancelacion = $request->observaciones;
+        $folio->cancelo = $userName;
         $folio->status = 'Cancelado';
         $folio->save();
+
+        $idcontrato = contratos::SELECT('id_contrato')->WHERE('id_folios', '=', $request->idf)->FIRST();
+        if($idcontrato != NULL)
+            {
+                contrato_directorio::WHERE('id_contrato', '=', $idcontrato->id_contrato)->DELETE();
+                pago::WHERE('id_contrato', '=', $request->idf)->DELETE();
+                contratos::where('id_folios', '=', $request->idf)->DELETE();
+            }
         return redirect()->route('supre-inicio')
                     ->with('success','Folio de Suficiencia Presupuestal Cancelada');
     }
@@ -462,6 +510,13 @@ class supreController extends Controller
         }
     }
 
+    public function cancelados_reporte()
+    {
+        $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();
+
+        return view('layouts.pages.vstareportecancelados', compact('unidades'));
+    }
+
     public function planeacion_reporte()
     {
         $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();
@@ -471,98 +526,40 @@ class supreController extends Controller
 
     public function planeacion_reportepdf(Request $request)
     {
-        $i = 0;
-        set_time_limit(0);
 
-        if ($request->filtro == "general")
-        {
-            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
-                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
-                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
-                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
-                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
-                           'tbl_cursos.mujer')
-                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
-                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
-                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
-                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
-                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
-                           ->GET();
-        }
-        else if ($request->filtro == 'curso')
-        {
-            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
-                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
-                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
-                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
-                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
-                           'tbl_cursos.mujer')
-                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
-                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
-                           ->WHERE('tbl_cursos.id', '=', $request->id_curso)
-                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
-                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
-                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
-                           ->GET();
-        }
-        else if ($request->filtro == 'unidad')
-        {
-            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
-                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
-                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
-                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
-                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
-                           'tbl_cursos.mujer')
-                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
-                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
-                           ->WHERE('tabla_supre.unidad_capacitacion', '=', $request->unidad)
-                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
-                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
-                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
-                           ->GET();
-        }
-        else if ($request->filtro == 'instructor')
-        {
-            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
-                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
-                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
-                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
-                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
-                           'tbl_cursos.mujer')
-                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
-                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
-                           ->WHERE('instructores.id', '=', $request->id_instructor)
-                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
-                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
-                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
-                           ->GET();
-        }
+        $filtrotipo = (isset($request->filtro) ? $request->filtro: 0);
+        $idcurso = (isset($request->id_curso) ? $request->id_curso : 0);
+        $unidad = (empty($request->unidad) ? $request->unidad : 0);
+        $idInstructor = (isset($request->id_instructor)? $request->id_instructor : 0);
+        $fecha1 = $request->fecha1;
+        $fecha2 = $request->fecha2;
 
+        # si el arreglo nos retorna un número mayor a cero
+        $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();
+        return view('layouts.pages.vstareporteplaneacion', compact('unidades', 'filtrotipo','idcurso','unidad','idInstructor','fecha1','fecha2'));
 
-        foreach($data as $cadwell)
-        {
-            $risr[$i] = $this->numberFormat(round($cadwell->importe_total * 0.10, 2));
-            $riva[$i] = $this->numberFormat(round($cadwell->importe_total * 0.1066, 2));
+        // dd($data);
 
-            $iva[$i] = $this->numberFormat($cadwell->iva);
-            $cantidad[$i] = $this->numberFormat($cadwell->importe_total);
+        // $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad','iva'));
+        // $pdf->setPaper('legal', 'Landscape');
+        // return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
 
-            $hm = $cadwell->hombre+$cadwell->mujer;
-            if ($hm < 10)
-            {
-                $recursos[$i] = "Estatal";
-            }
-            else
-            {
-                $recursos[$i] = "Federal";
-            }
-            $i++;
-        }
+        // /**
+        //  * Aquí se genera el documento en excel
+        //  */
+        // $cabecera = [
+        //     'SEC. DE SOLIC.', 'MEMO. SOLICITADO', 'NO. DE SUFICIENCIA',
+        //     'FECHA', 'INSTRUCTOR', 'UNIDAD/A.M DE CAP.', 'CURSO', 'CLAVE DEL GRUPO',
+        //     'Z.E.', 'HSM', 'IVA 16%', 'PARTIDA/CONCEPTO', 'IMPORTE TOTAL FEDERAL',
+        //     'IMPORTE TOTAL ESTATAL', 'RETENCIÓN ISR', 'RETENCIÓN IVA', 'MEMO PRESUPUESTA',
+        //     'FECHA REGISTRO', 'OBSERVACIONES'
+        // ];
 
-
-        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad','iva'));
-        $pdf->setPaper('legal', 'Landscape');
-        return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
+        // $nombreLayout = "formato de control".$request->fecha1 . ' - '. $request->fecha2.".xlsx";
+        // $titulo = "formato de control ".$request->fecha1 . ' - '. $request->fecha2;
+        // if(count($data)>0){
+        //     return Excel::download(new FormatoTReport($data,$head, $titulo), $nombreLayout);
+        // }
 
     }
 
@@ -596,6 +593,49 @@ class supreController extends Controller
 
         $pdf = PDF::loadView('layouts.pdfpages.presupuestaria',compact('data_supre','data_folio','D','M','Y','getdestino','getremitente','getvalida','getelabora','getccp1','getccp2','directorio','unidad'));
         return  $pdf->stream('medium.pdf');
+    }
+
+    protected function planeacion_reporte_canceladospdf(Request $request){
+        $i = 0;
+        set_time_limit(0);
+
+        if ($request->filtro == "general")
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario','folios.cancelo',
+                           'folios.observacion_cancelacion','folios.updated_at','instructores.nombre',
+                           'instructores.apellidoPaterno','instructores.apellidoMaterno','tbl_cursos.curso',
+                           'tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre','tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
+                           ->WHERE('folios.status', '=', 'Cancelado')
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($request->filtro == 'unidad')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario','folios.cancelo',
+                           'folios.observacion_cancelacion','instructores.nombre','instructores.apellidoPaterno',
+                           'instructores.apellidoMaterno','tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze',
+                           'tbl_cursos.dura','tbl_cursos.hombre','tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $request->fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $request->fecha2)
+                           ->WHERE('tabla_supre.unidad_capacitacion', '=', $request->unidad)
+                           ->WHERE('folios.status', '=', 'Cancelado')
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+
+        $pdf = PDF::loadView('layouts.pdfpages.reportefolioscancelados', compact('data'));
+        $pdf->setPaper('legal', 'Landscape');
+        return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
     }
 
     public function tablasupre_pdf($id){
@@ -815,5 +855,226 @@ class supreController extends Controller
         $part[0] = number_format($part['0']);
         $cadwell = implode(".", $part);
         return ($cadwell);
+    }
+
+    /**
+     * agregar métodos - generate_report_supre_pdf -
+     */
+    protected function generate_report_supre_pdf($filtrotipo, $idcurso, $unidad, $idInstructor, $fecha1, $fecha2){
+        $i = 0;
+        set_time_limit(0);
+
+        if ($filtrotipo == "general")
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
+                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
+                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
+                           'tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'curso')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
+                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
+                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
+                           'tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('tbl_cursos.id', '=', $idcurso)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'unidad')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
+                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
+                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
+                           'tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('tabla_supre.unidad_capacitacion', '=', $unidad)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'instructor')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo','tabla_supre.fecha','tabla_supre.unidad_capacitacion',
+                           'tabla_supre.folio_validacion','tabla_supre.fecha_validacion','folios.folio_validacion as suf',
+                           'folios.importe_hora','folios.iva','folios.importe_total','folios.comentario',
+                           'instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
+                           'tbl_cursos.curso','tbl_cursos.clave','tbl_cursos.ze','tbl_cursos.dura','tbl_cursos.hombre',
+                           'tbl_cursos.mujer')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('instructores.id', '=', $idInstructor)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+
+
+        foreach($data as $cadwell)
+        {
+            $risr[$i] = $this->numberFormat( floatval(round($cadwell->importe_total * 0.10, 2)));
+            $riva[$i] = $this->numberFormat( floatval(round($cadwell->importe_total * 0.1066, 2)));
+
+            $iva[$i] = $this->numberFormat( floatval($cadwell->iva));
+            $cantidad[$i] = $this->numberFormat( floatval($cadwell->importe_total));
+
+            $hm = $cadwell->hombre+$cadwell->mujer;
+            if ($hm < 10)
+            {
+                $recursos[$i] = "Estatal";
+            }
+            else
+            {
+                $recursos[$i] = "Federal";
+            }
+            $i++;
+        }
+
+        $pdf = PDF::loadView('layouts.pdfpages.reportesupres', compact('data','recursos','risr','riva','cantidad','iva'));
+        $pdf->setPaper('legal', 'Landscape');
+        return $pdf->Download('formato de control '. $fecha1 . ' - '. $fecha2 .'.pdf');
+    }
+
+    /**
+     *
+     */
+    protected function generate_report_supre_xls($filtrotipo, $idcurso, $unidad, $idInstructor, $fecha1, $fecha2){
+        $i = 0;
+        set_time_limit(0);
+
+        if ($filtrotipo == "general")
+        {
+            $data = supre::SELECT('tabla_supre.no_memo',
+                    'folios.folio_validacion as suf',
+                    'tabla_supre.fecha',
+                    \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
+                    'tabla_supre.unidad_capacitacion',
+                    'tbl_cursos.curso',
+                    'tbl_cursos.clave',
+                    'tbl_cursos.ze',
+                    'tbl_cursos.dura',
+                    \DB::raw("TO_CHAR(folios.importe_hora, '999,999.99') AS importe_hora"),
+                    \DB::raw("TO_CHAR(folios.iva, '999,999.99') AS importe_iva_16"),
+                    \DB::raw("'12101 Honorarios' AS partida_concepto"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) >= 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END AS importe_federal"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) < 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END AS importe_estatal"),
+                    \DB::raw("ROUND(folios.importe_total * 0.10, 2) AS retencion_isr"),
+                    \DB::raw("ROUND(folios.importe_total * 0.1066, 2) AS retencion_iva"),
+                    'tabla_supre.folio_validacion AS memo_validacion',
+                    'tabla_supre.fecha_validacion AS fecha_registro',
+                    'folios.comentario AS observaciones')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'curso')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo',
+                    'folios.folio_validacion as suf',
+                    'tabla_supre.fecha',
+                    \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
+                    'tabla_supre.unidad_capacitacion',
+                    'tbl_cursos.curso', 'tbl_cursos.clave',
+                    'tbl_cursos.ze', 'tbl_cursos.dura',
+                    \DB::raw("TO_CHAR(folios.importe_hora, '999,999.99')"),
+                    \DB::raw("TO_CHAR(folios.iva, '999,999.99')"),
+                    \DB::raw("'12101 Honorarios'"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) >= 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) < 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END"),
+                    \DB::raw("ROUND(folios.importe_total * 0.10, 2)"),
+                    \DB::raw("ROUND(folios.importe_total * 0.1066, 2)"),
+                    'tabla_supre.folio_validacion',
+                    'tabla_supre.fecha_validacion',
+                    'folios.comentario')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('tbl_cursos.id', '=', $idcurso)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'unidad')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo', 'folios.folio_validacion as suf',
+                    'tabla_supre.fecha', \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
+                    'tabla_supre.unidad_capacitacion', 'tbl_cursos.curso', 'tbl_cursos.clave',
+                    'tbl_cursos.ze', 'tbl_cursos.dura', \DB::raw("TO_CHAR(folios.importe_hora, '999,999.99')"),
+                    \DB::raw("TO_CHAR(folios.iva, '999,999.99')"),
+                    \DB::raw("'12101 Honorarios'"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) >= 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) < 10 THEN TO_CHAR(folios.importe_total, '999,999.99') END"),
+                    \DB::raw("ROUND(folios.importe_total * 0.10, 2)"),
+                    \DB::raw("ROUND(folios.importe_total * 0.1066, 2)"),
+                    'tabla_supre.folio_validacion',
+                    'tabla_supre.fecha_validacion',
+                    'folios.comentario')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('tabla_supre.unidad_capacitacion', '=', $unidad)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+        else if ($filtrotipo == 'instructor')
+        {
+            $data = supre::SELECT('tabla_supre.no_memo', 'folios.folio_validacion as suf',
+                    'tabla_supre.fecha', \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
+                    'tabla_supre.unidad_capacitacion', 'tbl_cursos.curso', 'tbl_cursos.clave',
+                    'tbl_cursos.ze', 'tbl_cursos.dura', \DB::raw("TO_CHAR(folios.importe_hora, '999,999.99')"),
+                    \DB::raw("TO_CHAR(folios.iva, '999,999.99')"),
+                    \DB::raw("'12101 Honorarios'"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) >= 10 THEN TO_CHAR(folios.importe_total, '999,999.99') ELSE 0 END"),
+                    \DB::raw("CASE WHEN (tbl_cursos.hombre + tbl_cursos.mujer) < 10 THEN TO_CHAR(folios.importe_total, '999,999.99') ELSE 0 END"),
+                    \DB::raw("ROUND(folios.importe_total * 0.10, 2)"),
+                    \DB::raw("ROUND(folios.importe_total * 0.1066, 2)"),
+                    'tabla_supre.folio_validacion',
+                    'tabla_supre.fecha_validacion',
+                    'folios.comentario')
+                           ->whereDate('tabla_supre.fecha', '>=', $fecha1)
+                           ->whereDate('tabla_supre.fecha', '<=', $fecha2)
+                           ->WHERE('instructores.id', '=', $idInstructor)
+                           ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                           ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+                           ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+                           ->GET();
+        }
+
+        $cabecera = [
+            'MEMO. SOLICITADO', 'NO. DE SUFICIENCIA', 'FECHA',
+            'INSTRUCTOR', 'UNIDAD/A.M DE CAP.', 'CURSO', 'CLAVE DEL GRUPO',
+            'Z.E.', 'HSM', 'IMPORTE POR HORA', 'IVA 16%', 'PARTIDA/CONCEPTO', 'IMPORTE TOTAL FEDERAL',
+            'IMPORTE TOTAL ESTATAL', 'RETENCIÓN ISR', 'RETENCIÓN IVA', 'MEMO PRESUPUESTA',
+            'FECHA REGISTRO', 'OBSERVACIONES'
+        ];
+
+        $nombreLayout = "formato de control".$fecha1 . ' - '. $fecha2.".xlsx";
+        $titulo = "formato de control ".$fecha1 . ' - '. $fecha2;
+        if(count($data)>0){
+            return Excel::download(new FormatoTReport($data,$cabecera, $titulo), $nombreLayout);
+        }
     }
 }

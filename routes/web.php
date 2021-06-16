@@ -391,6 +391,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reportes/acred/pdf', 'reportesController\cursosController@riacAcred')->name('reportes.acred.pdf');
     Route::post('/reportes/cert/pdf', 'reportesController\cursosController@riacCert')->name('reportes.cert.pdf');
     Route::post('/reportes/const/xls', 'reportesController\cursosController@xlsConst')->name('reportes.const.xls');
+    /*REPORTE 911 AGC*/
+    Route::get('/reportes/911', 'reportesController\formato911Controller@showForm')->name('reportes.911.showForm')->middleware('can:reportes.911');
+    Route::post('/reportes/911/pdf', 'reportesController\formato911Controller@store')->name('contacto');
 
     Route::get('reportes/formato_t_reporte/index', function () {
         return view('layouts.pages.reportes.formato_t_reporte');
@@ -510,11 +513,13 @@ Route::get('/form/msg/{id}', 'supervisionController\UrlController@msg');
 Route::get('/encuesta/form/{url}','supervisionController\EncuestaController@encuesta')->name('encuesta');
 Route::post('/encuesta/save','supervisionController\EncuestaController@encuesta_save')->name('encuesta.save');
 
-/*Reporte Planeación 04012021-20052021*/
+/*Reporte Planeación 04012021-14062021*/
 Route::get('/planeacion/reporte', 'webController\supreController@planeacion_reporte')->name('planeacion.reporte');
+Route::get('/planeacion/reporte/cancelados', 'webController\supreController@cancelados_reporte')->name('planeacion.reporte-cancelados');
 Route::post('/planeacion/reporte/pdf','webController\supreController@planeacion_reportepdf')->name('planeacion.reportepdf');
 Route::post('/directorio/getcurso','webController\supreController@get_curso')->name('get-curso');
 Route::post('/directorio/getins','webController\supreController@get_ins')->name('get-ins');
+Route::post('/planeacion/reporte-cancelados/pdf','webController\supreController@planeacion_reporte_canceladospdf')->name('planeacion.reporte-canceladospdf');
 
 /* Modulo CERSS 11012021 */
 Route::get('/cerss/inicio', 'webController\CerssController@index')->name('cerss.inicio')
@@ -591,3 +596,8 @@ Route::post('/supre/cancelacion/folio', 'webController\supreController@cancelFol
 Route::get('/vinculadores/reporte-cursos', 'webController\CursoValidadoController@cursosVinculador_reporte')->name('cursosvinculador.reporte');
 Route::post('/directorio/getvin','webController\CursoValidadoController@get_vin')->name('get-vin');
 Route::post('/vinculacion/reporte/pdf','webController\CursoValidadoController@vinculacion_reportepdf')->name('vinculacion.reportepdf');
+/**
+ * apartado supre generado por ISC. Orlando Chavez 07/06/2021
+ */
+Route::get('planeacion/generar/reporte/{filtrotipo}/{idcurso}/{unidad}/{idInstructor}/{fecha1}/{fecha2}', 'webController\supreController@generate_report_supre_pdf')->name('planeacion.generar.reporte.supre.pdf');
+Route::get('planeacion/generar/reporte/xls/{filtrotipo}/{idcurso}/{unidad}/{idInstructor}/{fecha1}/{fecha2}', 'webController\supreController@generate_report_supre_xls')->name('planeacion.generar.reporte.supre.xls');

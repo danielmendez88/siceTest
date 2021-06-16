@@ -112,23 +112,27 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         {{-- <a class="dropdown-item" href="https://datastudio.google.com/reporting/7c518e16-99ea-4cb2-8509-7064c0604e00" target="_blank">CURSOS VS OBJETIVOS</a>
                         <a class="dropdown-item" href="https://datastudio.google.com/reporting/512e11eb-babf-4476-8827-8d4243e2c219" target="_blank">STATUS PAGO INSTRUCTORES</a> --}}
-                        {{-- <a class="dropdown-item" href="{{route('reportes.formatoT')}}">REPORTE DE FORMATO T</a>                         --}}
+                        {{-- <a class="dropdown-item" href="{{route('reportes.formatoT')}}">Reporte de Formato T</a>                         --}}
                         @can('academicos.arc')
-                            <a class="dropdown-item" href="{{route('reportes.vista_arc')}}">APERTURA</a>
+                            <a class="dropdown-item" href="{{route('reportes.vista_arc')}}">Solicitudes ARC01 y ARC02 </a>
                         @endcan
                         @can('reportes.cursos')
-                            <a class="dropdown-item" href="{{route('reportes.cursos.index')}}">CURSOS AUTORIZADOS</a>
+                            <a class="dropdown-item" href="{{route('reportes.cursos.index')}}">Cursos Autorizados</a>
                         @endcan
                         @can('planeacion.reporte')
-                            <a class="dropdown-item" href="{{route('planeacion.reporte')}}">PLANEACIÓN</a>
+                            <a class="dropdown-item" href="{{route('planeacion.reporte')}}">Suficiencias Presupuestales</a>
+                            <a class="dropdown-item" href="{{route('planeacion.reporte-cancelados')}}">Folios Cancelados</a>
                         @endcan
                         @can('financieros.reporte')
-                            <a class="dropdown-item" href="{{route('financieros.reporte')}}">ESTADO DE CONTRATOS Y PAGOS</a>
+                            <a class="dropdown-item" href="{{route('financieros.reporte')}}">Estado de Contratos y Pagos</a>
                         @endcan
                         @can('vinculacion.reporte')
-                            <a class="dropdown-item" href="{{route('cursosvinculador.reporte')}}">VINCULADOR-ALUMNO</a>
+                            <a class="dropdown-item" href="{{route('cursosvinculador.reporte')}}">Alumno por Vinculador</a>
                         @endcan
-                        {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">FORMATOT</a> --}}
+                        @can('reportes.911')
+                            <a class="dropdown-item" href="{{route('reportes.911.showForm')}}">Reporte 911</a>
+                        @endcan
+                        {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">Formato T</a> --}}
                     </div>
                 </li>
 
@@ -149,8 +153,8 @@
                                 <a class="dropdown-item" href="{{route('grupos.cancelacionfolios')}}">Cancelar Folios</a>
                             @endcan
                             @can('grupos.consultas')
-                                <a class="dropdown-item" href="{{route('grupos.consultas')}}">Consultas</a>
-                            @endcan
+                            <a class="dropdown-item" href="{{route('grupos.consultas')}}">B&uacute;squeda</a>
+                             @endcan
                         </div>
                     </li>
                 @endcan
@@ -231,12 +235,11 @@
                         @can('consultas.lotes')
                             <a class="dropdown-item" href="{{route('consultas.lotes')}}">Actas de Folios</a>
                         @endcan
-                        @can('consultas.cursosfinalizados')
-                            <a class="dropdown-item" href="{{route('consultas.cursosfinalizados')}}">Cursos Finalizados</a>
+                        @can('consultas.cursosaperturados')
+                            <a class="dropdown-item" href="{{route('consultas.cursosaperturados')}}">Cursos Aperturados</a>
                         @endcan
                     </div>
-                </li>
-                {{-- consultas folios asignados END --}}
+             </li>
 
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">

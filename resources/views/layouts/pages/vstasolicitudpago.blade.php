@@ -3,6 +3,15 @@
 @section('title', 'Formulario de Contrato | Sivyc Icatech')
 @section('content')
     <div class="container g-pt-50">
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div> <br>
+        @endif
         <form action="{{ route('save-doc') }}" method="post" id="register_solpa" enctype="multipart/form-data">
             @csrf
             <div style="text-align: right;width:62%">
@@ -30,6 +39,17 @@
                     <label for="inputsolicitud_fecha">Fecha de Solicitud de Pago</label>
                     <input id="solicitud_fecha" name="solicitud_fecha" type="date" class="form-control">
                 </div>
+            </div>
+            <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="inputeremite">Nombre de Remitente</label>
+                        <input id="remitente" name="remitente" type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="inputpuesto_para">Puesto de Remitente</label>
+                        <input id="remitente_puesto" readonly name="remitente_puesto" type="text" class="form-control" required>
+                        <input id="id_remitente" name="id_remitente" hidden required>
+                    </div>
             </div>
             <div class="form-row">
                     <div class="form-group col-md-4">
