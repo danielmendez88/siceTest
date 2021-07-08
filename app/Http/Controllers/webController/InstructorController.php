@@ -362,7 +362,7 @@ class InstructorController extends Controller
         // consulta
         $validado = $instructor_perfil->SELECT('especialidades.nombre',
         'especialidad_instructores.observacion', 'especialidad_instructores.id AS especialidadinsid',
-        'especialidad_instructores.memorandum_validacion')
+        'especialidad_instructores.memorandum_validacion','especialidad_instructores.criterio_pago_id')
                         ->WHERE('instructor_perfil.numero_control', '=', $id)
                         ->RIGHTJOIN('especialidad_instructores','especialidad_instructores.perfilprof_id','=','instructor_perfil.id')
                         ->LEFTJOIN('especialidades','especialidades.id','=','especialidad_instructores.especialidad_id')
@@ -485,7 +485,7 @@ class InstructorController extends Controller
         //$affecttbl_cursos = DB::table("tbl_cursos")->WHERE('nombre', $old)->update(['nombre' =>$new]);
 
         Inscripcion::where('instructor', '=', $old)->update(['instructor' => $new]);
-        Calificacion::where('instructor', '=', $old)->update(['instructor' => $new]);
+        //Calificacion::where('instructor', '=', $old)->update(['instructor' => $new]);
         tbl_curso::where('nombre', '=', $old)->update(['nombre' => $new]);
         tbl_curso::where('id_instructor', '=', $request->id)->update(['curp' => $request->curp]);
 

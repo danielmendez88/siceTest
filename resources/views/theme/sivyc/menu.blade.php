@@ -132,6 +132,16 @@
                         @can('reportes.911')
                             <a class="dropdown-item" href="{{route('reportes.911.showForm')}}">Reporte 911</a>
                         @endcan
+                        @can('reportes.rdcd08')
+                            <a class="dropdown-item" href="{{route('reportes.rdcd08.index')}}">RDCD-08</a>
+                        @endcan
+                        @can('reportes.rcdod11')
+                            <a class="dropdown-item" href="{{route('reportes.rcdod11.index')}}">RCDOD-11</a>
+                        @endcan
+                        @can('financieros.reportevalrec')
+                        <a class="dropdown-item" data-toggle="modal" data-placement="top"
+                                data-target="#ModalFinanciero">TRAMITES VALIDADOS Y RECEPCIONADOS</a>
+                        @endcan
                         {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">Formato T</a> --}}
                     </div>
                 </li>
@@ -189,7 +199,7 @@
                                 <a href="{{ route('checar.memorandum.dta.mes') }}" class="dropdown-item">Memorandums Enviados a DTA</a>
                             @endcan
                             {{-- agregar nuevo elemento a menu END --}}
-                            @can('vista.formatot.unidades.indice')
+                            {{--@can('vista.formatot.unidades.indice')
                                 <a href="{{ route('cursos.reportados.historico.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
                             @endcan
                             @can('vista.validacion.enlaces.dta')
@@ -200,7 +210,7 @@
                             @endcan
                             @can('vista.revision.validacion.planeacion.indice')
                                 <a href="{{ route('cursos.reportados.historico.planeacion.index') }}" class="dropdown-item">Cursos Reportados de Meses Anteriores Para la Unidad</a>
-                            @endcan
+                            @endcan--}}
                                 <a class="dropdown-item" href="{{route('seguimento.avance.unidades.formatot.ejecutiva.index')}}">Seguimiento Ejecutivo a Unidades Para el Formato T</a>
                         </div>
                     </li>
@@ -273,3 +283,69 @@
     </div>
 </nav>
 <!--/.Navbar -->
+<!-- Modal Cancel Folio -->
+<div class="modal fade" id="ModalFinanciero" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title"><b>Generador de Reporte de Tramites Validados/Recepcionados</b></h6>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('reporte_valrecep') }}" method="post" id="valrecep">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group col-md-2"></div>
+                    <div class="form-group col-md-4">
+                        <label for="fini"><b>Mes Inicial</b></label>
+                        <select name="fini" id="fini">
+                                <option value="01">ENERO</option>
+                                <option value="02">FEBRERO</option>
+                                <option value="03">MARZO</option>
+                                <option value="04">ABRIL</option>
+                                <option value="05">MAYO</option>
+                                <option value="06">JUNIO</option>
+                                <option value="07">JULIO</option>
+                                <option value="08">AGOSTO</option>
+                                <option value="09">SEPTIEMBRE</option>
+                                <option value="10">OCTUBRE</option>
+                                <option value="11">NOVIEMBRE</option>
+                                <option value="12">DICIEMBRE</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-1"></div>
+                    <div class="form-group col-md-4">
+                        <label for="ffin"><b>Mes Final</b></label>
+                        <select name="ffin" id="ffin">
+                                <option value="01">ENERO</option>
+                                <option value="02">FEBRERO</option>
+                                <option value="03">MARZO</option>
+                                <option value="04">ABRIL</option>
+                                <option value="05">MAYO</option>
+                                <option value="06">JUNIO</option>
+                                <option value="07">JULIO</option>
+                                <option value="08">AGOSTO</option>
+                                <option value="09">SEPTIEMBRE</option>
+                                <option value="10">OCTUBRE</option>
+                                <option value="11">NOVIEMBRE</option>
+                                <option value="12">DICIEMBRE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-2"></div>
+                    <div class="form-group col-md-4">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                    </div>
+                    <div class="form-group col-md-1"></div>
+                    <div class="form-group col-md-4">
+                        <button type="submit" class="btn btn-primary" >Aceptar</button>
+                    </div>
+                    <div class="form-group col-md-1"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- END -->

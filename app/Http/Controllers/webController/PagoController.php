@@ -66,7 +66,7 @@ class PagoController extends Controller
         ->orderBy('pagos.created_at', 'desc')
         ->PAGINATE(25, [
             'contratos.id_contrato', 'contratos.numero_contrato', 'contratos.cantidad_letras1',
-            'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma',
+            'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma','folios.permiso_editar',
             'contratos.docs', 'contratos.observacion', 'folios.status', 'folios.id_folios','folios.id_supre',
             'pagos.created_at'
         ]);
@@ -111,7 +111,7 @@ class PagoController extends Controller
                 ->orderBy('contratos.fecha_firma', 'desc')
                 ->PAGINATE(25, [
                     'contratos.id_contrato', 'contratos.numero_contrato', 'contratos.cantidad_letras1',
-                    'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma',
+                    'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma','folios.permiso_editar',
                     'contratos.docs', 'contratos.observacion', 'folios.status', 'folios.id_folios','folios.id_supre'
                 ]);
                 break;
@@ -246,6 +246,86 @@ class PagoController extends Controller
         return view('layouts.pages.vsthistorialvalidarpago', compact('contratos','director','datapago'));
     }
 
+    public function  reporte_validados_recepcionados(Request $request)
+    {
+        $mes1 = null; $mes2 = null; $mes3 = null; $mes4 = null; $mes5 = null; $mes6 = null; $mes7 = null; $mes8 = null;
+        $mes9 = null; $mes10 = null; $mes11 = null; $mes12 = null;
+        $i = $request->fini;
+        $now = Carbon::now();
+        $monthnow = $this->monthToString($now->month);
+        $mi = Carbon::parse($now->year . '-' . $request->fini . '-01');
+        $fi = Carbon::parse($now->year . '-' . $request->ffin . '-01');
+        $dym = $fi->daysInMonth;
+        $fin = $now->year . '-' . $request->ffin . '-' . $dym;
+        $nombremesini = $this->monthToString($request->fini);
+        $nombremesfin = $this->monthToString($request->ffin);
+
+
+        //dd($request);
+        do {
+            if(substr($i, -2, 1) == '0')
+            {
+                $nomval = "mes" . substr($i, -1);
+            }
+            else
+            {
+                $nomval = "mes" . $i;
+            }
+            //dd($nomval);
+            $inicial = Carbon::parse($now->year . '-' . $i . '-01');
+            $dym = $inicial->daysInMonth;
+            $inicial00 = $now->year . '-' . $i . '-01';
+            //dd($inicial00);
+            $final = Carbon::parse($now->year . '-' . $i . '-' . $dym . ' 23:59:59');
+            //printf($inicial . ' - ' . $final . ' // ');
+            $cab1 = "sivyc";
+            $cab2 = "fisico";
+            $cab3 = "PorEntregar";
+            $query1 = "sum(case when b.status in ('Contratado','Verificando_Pago','Pago_Verificado','Finalizado') then 1 else 0 end) AS " . $cab1;
+            $query2 = "sum(case when b.status in ('Pago_Verificado','Finalizado')  then 1 else 0 end) AS " . $cab2;
+            $query3 = "sum(case when b.status in ('Contratado','Verificando_Pago')  then 1 else 0 end) AS " . $cab3;
+            //dd($inicial);
+            $$nomval = $data = db::table(DB::raw("(SELECT * from FOLIOS WHERE folios.created_at >=  '$inicial'  and folios.created_at <= '$final' ) AS B"))->select('tbl_unidades.ubicacion',
+                DB::raw($query1),
+                DB::raw($query2),
+                DB::raw($query3),
+                )
+                //->WHERE('folios.created_at', '>=', $inicial)
+                //->WHERE('folios.created_at', '<=', $final)
+                //->WHERE('tbl_unidades.ubicacion', '=', 'TUXTLA')
+                ->JOIN('tabla_supre', 'tabla_supre.id', '=', 'b.id_supre')
+                ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tabla_supre.unidad_capacitacion')
+                ->groupBy('tbl_unidades.ubicacion')
+                ->orderBy('tbl_unidades.ubicacion')
+                ->GET();
+
+            $i++;
+        } while ($i <= $request->ffin);
+        $data = db::table(DB::raw("(SELECT * from FOLIOS WHERE folios.created_at >=  '$mi'  and folios.created_at <= '$fin' ) AS B"))->select('tbl_unidades.ubicacion',
+            DB::raw("sum(case when b.status in ('Contratado','Verificando_Pago','Pago_Verificado','Finalizado')  then 1 else 0 end) AS Sivyc"),
+            DB::raw("sum(case when b.status in ('Pago_Verificado','Finalizado')  then 1 else 0 end) AS Fisico"),
+            DB::raw("sum(case when b.status in ('Contratado','Verificando_Pago')  then 1 else 0 end) AS PorEntregar"),
+            DB::raw("sum(case when b.status in ('Finalizado')  then 1 else 0 end) AS Pagado"),
+            DB::raw("sum(case when b.status in ('Pago_Verificado')  then 1 else 0 end) AS PorPagar"),
+            DB::raw("sum(case when b.status in ('Contrato_Rechazado','Pago_Rechazado')  then 1 else 0 end) AS Observados")
+            )
+            //->WHERE('folios.created_at', '>=', $mi)
+            //->WHERE('folios.created_at', '<=', $fin) a
+            //->WHERE('tbl_unidades.ubicacion', '=', 'TUXTLA')
+            ->JOIN('tabla_supre', 'tabla_supre.id', '=', 'b.id_supre')
+            ->RIGHTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tabla_supre.unidad_capacitacion')
+            ->groupBy('tbl_unidades.ubicacion')
+            ->orderBy('tbl_unidades.ubicacion')
+            ->GET();
+            //dd($monthnow);
+
+            //return view('layouts.pdfpages.reportescontratosval', compact('mes1','mes2','mes3','mes4','mes5','mes6','mes7','mes8','mes9','mes10','mes11','mes12','data','nombremesini','nombremesfin'));
+
+            $pdf = PDF::loadView('layouts.pdfpages.reportescontratosval', compact('mes1','mes2','mes3','mes4','mes5','mes6','mes7','mes8','mes9','mes10','mes11','mes12','data','nombremesini','nombremesfin','now','monthnow'));
+            $pdf->setPaper('legal', 'Landscape');
+            return $pdf->stream('medium.pdf');
+    }
+
     public function mostrar_pago($id)
     {
         $data = contratos::SELECT('instructores.numero_control','instructores.nombre','instructores.apellidoPaterno','instructores.apellidoMaterno',
@@ -262,7 +342,6 @@ class PagoController extends Controller
 
         //return view('layouts.pages.vstapagofinalizado', compact('data', 'nomins'));
         $pdf = PDF::loadView('layouts.pages.vstapagofinalizado', compact('data', 'nomins'));
-
         return $pdf->download('medium.pdf');
     }
 
@@ -311,5 +390,59 @@ class PagoController extends Controller
         $pdf->setPaper('legal', 'Landscape');
         return $pdf->Download('formato de control '. $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
 
+    }
+
+    protected function monthToString($month)
+    {
+        switch ($month)
+        {
+            case 1:
+                return 'ENERO';
+            break;
+
+            case 2:
+                return 'FEBRERO';
+            break;
+
+            case 3:
+                return 'MARZO';
+            break;
+
+            case 4:
+                return 'ABRIL';
+            break;
+
+            case 5:
+                return 'MAYO';
+            break;
+
+            case 6:
+                return 'JUNIO';
+            break;
+
+            case 7:
+                return 'JULIO';
+            break;
+
+            case 8:
+                return 'AGOSTO';
+            break;
+
+            case 9:
+                return 'SEPTIEMBRE';
+            break;
+
+            case 10:
+                return 'OCTUBRE';
+            break;
+
+            case 11:
+                return 'NOVIEMBRE';
+            break;
+
+            case 12:
+                return 'DICIEMBRE';
+            break;
+        }
     }
 }

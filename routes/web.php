@@ -51,8 +51,12 @@ Route::post('/supre/busqueda/tipo_curso', 'webController\suprecontroller@gettipo
 Route::post('/supre/busqueda/folio', 'webController\suprecontroller@getfoliostats');
 Route::post('/alumnos/sid/municipios', 'webController\AlumnoController@getmunicipios')->name('alumnos.sid.municipios');
 Route::post('/supre/validacion/upload_doc','webController\SupreController@doc_valsupre_upload')->name('doc-valsupre-guardar');
+Route::post('/supre/busqueda/folios/modal', 'webController\suprecontroller@getfoliostatsmodal')->name('supre.busqueda.foliosmodal');
+Route::post('/supre/folio/permiso','webController\SupreController@dar_permiso_folio')->name('folio-permiso-mod');
+Route::post('/supre/folio/modificacion-especial','webController\SupreController@folio_edicion_especial_save')->name('folio-especialedit-save');
 Route::get('/supre/eliminar/{id}', 'webController\SupreController@delete')->name('eliminar-supre');
 Route::get('/supre/reiniciar/{id}', 'webController\SupreController@restartSupre')->name('restart-supre');
+Route::get('/folio/edicion_especial/{id}', 'webController\SupreController@folio_edicion_especial')->name('folio_especialedit');
 
 //Ruta Instructor
 Route::get('/instructor/validar/{id}', 'webController\InstructorController@validar')->name('instructor-validar');
@@ -391,9 +395,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reportes/acred/pdf', 'reportesController\cursosController@riacAcred')->name('reportes.acred.pdf');
     Route::post('/reportes/cert/pdf', 'reportesController\cursosController@riacCert')->name('reportes.cert.pdf');
     Route::post('/reportes/const/xls', 'reportesController\cursosController@xlsConst')->name('reportes.const.xls');
+
     /*REPORTE 911 AGC*/
-    Route::get('/reportes/911', 'reportesController\formato911Controller@showForm')->name('reportes.911.showForm')->middleware('can:reportes.911');
-    Route::post('/reportes/911/pdf', 'reportesController\formato911Controller@store')->name('contacto');
+    Route::get('/reportes/911', 'reportesController\for911Controller@showForm')->name('reportes.911.showForm')->middleware('can:reportes.911');
+    Route::post('/reportes/911/pdf', 'reportesController\for911Controller@store')->name('contacto');
+
+    /*REPORTE RDCD-08*/
+    Route::get('reportes/rdcd08','reportesController\rdcdController@index')->name('reportes.rdcd08.index')->middleware('can:reportes.rdcd08');
+    Route::get('reportes/rdcd08/{id}','reportesController\rdcdController@none')->name('nombre');
+    Route::post('reportes/rdcd08','reportesController\rdcdController@index')->name('lolipop');
+
+    /*RDCOD-11*/
+    Route::get('reportes/rcdod11','reportesController\rcdod11Controller@index')->name('reportes.rcdod11.index')->middleware('can:reportes.rcdod11');
+    Route::post('reportes/rcdod11','reportesController\rcdod11Controller@index')->name('carter');
+    Route::post('reportes/rcdod11/pdf','reportesController\rcdod11Controller@pdf')->name('carter.pdf');
 
     Route::get('reportes/formato_t_reporte/index', function () {
         return view('layouts.pages.reportes.formato_t_reporte');
@@ -572,6 +587,7 @@ Route::post('/exoneraciones/sid/municipios', 'webController\ExoneracionesControl
 /*Reporte Financieros 03032021*/
 Route::get('/financieros/reporte', 'webController\PagoController@financieros_reporte')->name('financieros.reporte')->middleware('can:financieros.reporte');
 Route::post('/financieros/reporte/pdf','webController\PagoController@financieros_reportepdf')->name('financieros.reportepdf');
+Route::post('/financieros/reporte/tramites_valrec','webController\PagoController@reporte_validados_recepcionados')->name('reporte_valrecep');
 //Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
 Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
 Route::get('/reportes/vista_911','pdfcontroller@index')->name('reportes.vista_911');
