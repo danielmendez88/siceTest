@@ -55,7 +55,7 @@ class grupoController extends Controller
             if(count($alumnos)>0){
                 $id_curso = $alumnos[0]->id_curso; 
                 $tipo = $alumnos[0]->tipo_curso;
-                if($alumnos[0]->turnado == 'VINCULACION')$this->activar = true;
+                if($alumnos[0]->turnado == 'VINCULACION' AND isset($this->data['cct_unidad']))$this->activar = true;
                 else $this->activar = false;
                 
                 if($alumnos) $curso = DB::table('cursos')->where('id',$id_curso)->first();
@@ -107,7 +107,7 @@ class grupoController extends Controller
     
     public function save(Request $request){
         $curp = $request->busqueda;    
-        $matricula = $message = NULL;            
+        $matricula = $message = NULL;
         if($curp){
             $alumno = DB::table('alumnos_pre')->select('id as id_pre','matricula')->where('curp',$curp)->where('activo',true)->first();
             if(!$_SESSION['folio_grupo'] AND $alumno) $_SESSION['folio_grupo'] =$this->genera_folio();           
