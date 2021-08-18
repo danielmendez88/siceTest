@@ -186,7 +186,7 @@ Route::get('/storage/uploadFiles/{folder}/{id}/{slug}', 'webController\Documento
  */
 Route::middleware(['auth'])->group(function () {
     /**
-     * Desarrollado por Adrian y Daniel
+     * Desarrollado por Adrian y Daniel , act AGC
      */
     //Route::get('/alumnos/indice', 'webController\AlumnoController@index')
         //   ->name('alumnos.index')->middleware('can:alumnos.index');
@@ -198,6 +198,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('alumnos/sid', 'webController\AlumnoController@create')
         ->name('alumnos.preinscripcion')->middleware('can:alumnos.inscripcion-paso1');
     Route::get('alumnos/municipio_nov', 'webController\AlumnoController@showlm');
+    Route::get('alumnos/fecha_s', 'webController\AlumnoController@showlf');
+    Route::get('alumnos/municipios', 'webController\AlumnoController@municipios');
     Route::get('alumnos/sid/cerss', 'webController\AlumnoController@createcerss')->name('preinscripcion.cerss');
     Route::post('alumnos/sid/cerss/save', 'webController\AlumnoController@storecerss')->name('preinscripcion.cerss.save'); // guardar preiscripcion cerss
     Route::get('alumnos/sid/cerss/show/{id}', 'webController\AlumnoController@showCerss')->name('preinscripcion.cerss.show');
@@ -220,7 +222,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('alumnos/modificar/sid/{id}', 'webController\AlumnoController@showUpdate')->name('alumnos.presincripcion-modificar');
     Route::get('alumnos/modificar/jefe-unidad/sid/{id}', 'webController\AlumnoController@modifyUpdateChief')->name('alumnos.modificar-jefe-unidad');
     Route::post('alumnos/sid/modificar/{idAspirante}', 'webController\AlumnoController@updateSid')->name('sid.modificar');
-    Route::put('alumnos/sid/modificar/jefe-unidad/{idAspirante}', 'webController\AlumnoController@updateSidJefeUnidad')->name('sid.modificar-jefe-unidad')->middleware('can:alumnos.inscripcion-jefe-unidad-update');
+    Route::post('alumnos/sid/modificar/vinculador/{idAspirante}', 'webController\AlumnoController@updateSidJefeUnidad')->name('sid.modificar-vinculador')->middleware('can:alumnos.inscripcion-jefe-unidad-update');
     Route::get('alumnos/sid/documento/{nocontrol}', 'webController\AlumnoRegistradoController@getDocumentoSid')->name('documento.sid');
     Route::get('alumnos/sid/documento/cerrs/{nocontrol}', 'webController\AlumnoRegistradoController@getDocumentoCerrsSid')->name('documento.sid_cerrs');
     // nueva ruta
@@ -275,9 +277,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', function() {
         return view('layouts.pages.home');
     })->name('home');
+    Route::get('/password/new','passwordController@index')->name('password.view');//->middleware('can:password.update');
+    Route::post('/password/update','passwordController@updatePassword')->name('update.password');
 
-
-    /*
+    /* a route
     Route::get('/', function () {
         return view('layouts.pages.home');
     });
@@ -655,6 +658,7 @@ Route::get('planeacion/generar/reporte/xls/{filtrotipo}/{idcurso}/{unidad}/{idIn
 //exportar catalogos de cursos e instructores08072021
 Route::get('academico/catalogo/exportar/cursos', 'webController\CursosController@exportar_cursos')->name('academico.exportar.cursos');
 Route::get('academico/catalogo/exportar/instructores', 'webController\InstructorController@exportar_instructores')->name('academico.exportar.instructores');
+Route::get('academico/catalogo/exportar/instructores_especialidades', 'webController\InstructorController@exportar_instructoresByEspecialidad')->name('academico.exportar.instructoresByespecialidad');
 
 // grupos vulnerables
 Route::get('/GruposVulnerables/inicio', 'Validacion\ReportesPlaneacionFormatoT@index')->name('reportes.planeacion.grupos_vulnerables');
@@ -668,4 +672,8 @@ Route::get('/IngresosPropiosReporteXls/reporte', 'Validacion\ReportesPlaneacionF
 Route::get('/Estadisticas/inicio', 'Validacion\ReportesPlaneacionFormatoT@indexEstadisticas')->name('reportes.planeacion.estadisticas');
 Route::get('/Estadisticas/reporte', 'Validacion\ReportesPlaneacionFormatoT@estadisticasCreatePdf')->name('reportes.planeacion.estadisticasPdf');
 Route::get('/EstadisticasXls/reporte', 'Validacion\ReportesPlaneacionFormatoT@estadisticasCreateXls')->name('reportes.planeacion.estadisticasXls');
+
+//armando
+//Route::get('/password/new','passwordController@index')->name('password.view')->middleware('can:password.update');
+//Route::post('/password/update','passwordController@updatePassword')->name('update.password');
 

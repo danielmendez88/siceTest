@@ -199,6 +199,5 @@ if($data->tipo_curso=='CERTIFICACION'){
             <img class="izquierdabot" src="{{ public_path('img/franja.png') }}">
             <img class="derechabot" src="{{ public_path('img/icatech-imagen.png') }}">
         </footer>
-
     </body>
 </html>

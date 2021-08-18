@@ -54,13 +54,7 @@
                              <a class="dropdown-item" href="{{route('curso-inicio')}}">Cursos</a>
                         @endcan
                         <a class="dropdown-item" href="{{route('instructor-inicio')}}">Instructor</a>
-                        <!--alumnos.index-->
-                        @can('alumnos.index')
-                            <a class="dropdown-item" href="{{ route('alumnos.index') }}">Aspirantes</a>
-                        @endcan
-                        @can('alumnos.inscritos.index')
-                            <a class="dropdown-item" href="{{ route('alumnos.inscritos') }}">Alumnos</a>
-                        @endcan
+
                         @can('convenios.index')
                             <a class="dropdown-item" href="{{route('convenios.index')}}">Convenios</a>
                         @endcan
@@ -113,9 +107,9 @@
                         {{-- <a class="dropdown-item" href="https://datastudio.google.com/reporting/7c518e16-99ea-4cb2-8509-7064c0604e00" target="_blank">CURSOS VS OBJETIVOS</a>
                         <a class="dropdown-item" href="https://datastudio.google.com/reporting/512e11eb-babf-4476-8827-8d4243e2c219" target="_blank">STATUS PAGO INSTRUCTORES</a> --}}
                         {{-- <a class="dropdown-item" href="{{route('reportes.formatoT')}}">Reporte de Formato T</a>                         --}}
-                        @can('academicos.arc')
+                        {{--@can('academicos.arc')
                             <a class="dropdown-item" href="{{route('reportes.vista_arc')}}">Solicitudes ARC01 y ARC02 </a>
-                        @endcan
+                        @endcan--}}
                         @can('reportes.cursos')
                             <a class="dropdown-item" href="{{route('reportes.cursos.index')}}">Cursos Autorizados</a>
                         @endcan
@@ -151,7 +145,14 @@
                         <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Preinscripci&oacute;n
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">                            
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <!--alumnos.index-->
+                            @can('alumnos.index')
+                                <a class="dropdown-item" href="{{ route('alumnos.index') }}">Aspirantes</a>
+                            @endcan
+                            @can('alumnos.inscritos.index')
+                                <a class="dropdown-item" href="{{ route('alumnos.inscritos') }}">Alumnos</a>
+                            @endcan
                             <a class="dropdown-item" href="{{route('preinscripcion.grupo.nuevo')}}">Nuevo Grupo</a>
                             <a class="dropdown-item" href="{{route('preinscripcion.buscar')}}">Buscar Grupo</a>
                         </div>
@@ -163,7 +164,7 @@
                         <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Solicitud
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">                            
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" href="{{route('solicitud.apertura')}}">Clave de Apertura ARC01</a>
                             <a class="dropdown-item" href="{{route('solicitud.apertura.modificar')}}">Modificaci&oacute;n Apertura ARC02</a>
                             <a class="dropdown-item" href="{{route('solicitud.apertura.turnar')}}">Turnar Solicitud</a>
@@ -273,12 +274,13 @@
                         @can('consultas.cursosaperturados')
                             <a class="dropdown-item" href="{{route('consultas.cursosaperturados')}}">Cursos Aperturados</a>
                         @endcan
-                        @can('academico.catalogocursos')
+                        <!--can('academico.catalogocursos')-->
                             <a class="dropdown-item" href="{{route('academico.exportar.cursos')}}">Exportar Cursos</a>
-                        @endcan
-                        @can('academico.catalogoinstructores')
-                            <a class="dropdown-item" href="{{route('academico.exportar.instructores')}}">Exportar Instructores</a>
-                        @endcan
+                        <!--endcan-->
+                        <!--can('academico.catalogoinstructores')-->
+                            <a class="dropdown-item" data-toggle="modal" data-placement="top"
+                                data-target="#ModalExpIns">Exportar Instructores</a>
+                        <!--endcan-->
                         @can('planeacion.estadisticas')
                             <a class="dropdown-item" href="{{route('reportes.planeacion.estadisticas')}}">Estadisticas del Formato T</a>
                         @endcan
@@ -306,6 +308,9 @@
                         <a class="dropdown-item" href="#">
                             {{ Auth::user()->name }}
                         </a>
+                        <!--can('password.update')-->
+                            <a class="dropdown-item" href="{{route('password.view')}}">Cambiar Contraseña</a>
+                        <!--endcan-->
                         <a class="dropdown-item" href="{{ route('logout') }}"
                                 onclick="event.preventDefault();
                                                 document.getElementById('logout-form').submit();">
@@ -385,6 +390,36 @@
                     <div class="form-group col-md-1"></div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+<!-- END -->
+<!-- Modal Cancel Folio -->
+<div class="modal fade" id="ModalExpIns" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title"><b>Exportar Instructores</b></h6>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-1"></div>
+                <div class="form-group col-md-5">
+                    <a class="btn btn-info" href="{{route('academico.exportar.instructores')}}">Exportar Por Instructor</a>
+                </div>
+                <div class="form-group col-md-5">
+                    <a class="btn btn-info" href="{{route('academico.exportar.instructoresByespecialidad')}}">Exportar Por Especialidad</a>
+                </div>
+                <div class="form-group col-md-1"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-5"></div>
+                <div class="form-group col-md-3">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
