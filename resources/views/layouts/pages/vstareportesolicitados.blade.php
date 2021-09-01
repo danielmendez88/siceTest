@@ -33,37 +33,86 @@
         <br>
         <div class="row">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped table-hover">
                     <tr>
-                        <td>INSTRUCTOR</td>
-                        <td>UNIDAD</td>
-                        <td>CURSO</td>
-                        <td>FECHA DE INICIO</td>
-                        <td>FECHA DE TERMINO</td>
-                        <td>DIAS</td>
-                        <td>HORA INICIO</td>
-                        <td>HORA TERMINO</td>
+                        <td rowspan="3" style="text-align: center;"><br><br>UNIDADES</td>
+                        <td colspan="3" align="center">SUFICIENCIAS PRESUPUESTALES</td>
+                        <td colspan="3" align="center">CONTRATOS</td>
+                        <td colspan="4" align="center">PAGOS</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" align="center"><br>Solicitado</td>
+                        <td colspan="2" align="center">Validación</td>
+                        <td rowspan="2" align="center"><br>Solicitado</td>
+                        <td colspan="2" align="center">Validación</td>
+                        <td rowspan="2" align="center"><br>Solicitado</td>
+                        <td colspan="3" align="center">Validación</td>
+                    </tr>
+                    <tr>
+                        <td align="center">Aceptado</td>
+                        <td align="center">Rechazado</td>
+                        <td align="center">Aceptado</td>
+                        <td align="center">Rechazado</td>
+                        <td align="center">Aceptado</td>
+                        <td align="center">Finalizado</td>
+                        <td align="center">Rechazado</td>
+                    </tr>
+                    @if($consulta1 != NULL)
+                        @if($consulta2 != NULL)
+                            @foreach ($unidades as $unidad)
+                                <?php $findit = FALSE; ?>
+                                @foreach($consulta1 as $key => $supre)
+                                    @if ($unidad->unidad == $supre->unidad)
+                                        <?php
+                                            $findit = TRUE; $key2 = $key + 1;
+                                            $dif = round($supre->supre_validados * 100 / $supre->supre_total, 2);
+                                            if($dif == 100)
+                                            {
+                                                $color = '#c6efce';
+                                            }
+                                            else if($dif >= 50)
+                                            {
+                                                $color = '#ffeb9c';
+                                            }
+                                            else
+                                            {
+                                                $color = '#ffc7ce';
+                                            }
+                                        ?>
+                                        <tr bgcolor= {{$color}}>
 
-                    </tr>
-                    @isset($consulta)
-                    @foreach ($consulta as $item)
-                    <tr>
-                        <td>{{$item->nombre}}</td>
-                        <td>{{$item->unidad}}</td>
-                        <td>{{$item->curso}}</td>
-                        <td>{{$item->inicio}}</td>
-                        <td>{{$item->termino}}</td>
-                        <td>{{$item->dia}}</td>
-                        <td>{{$item->hini}}</td>
-                        <td>{{$item->hfin}}</td>
-                    </tr>
-                    @endforeach
-                    <tr>
-                        <td colspan="8">
-                            {{$consulta->appends(request()->query())->links()}}
-                        </td>
-                    </tr>
-                    @endisset
+                                            <td align="center" >{{$supre->unidad}}</td>
+                                            <td align="center" >{{$supre->supre_proceso}}</td>
+                                            <td align="center" >{{$supre->supre_validados}}</td>
+                                            <td align="center" >{{$supre->supre_rechazados}}</td>
+                                            <td align="center" >{{$consulta2[$key]->contrato_proceso}}</td>
+                                            <td align="center" >{{$consulta2[$key]->contrato_validados}}</td>
+                                            <td align="center" >{{$consulta2[$key]->contrato_rechazados}}</td>
+                                            <td align="center" >{{$consulta2[$key]->pago_proceso}}</td>
+                                            <td align="center" >{{$consulta2[$key]->pago_validados}}</td>
+                                            <td align="center" >{{$consulta2[$key]->pago_finalizados}}</td>
+                                            <td align="center" >{{$consulta2[$key]->pago_rechazados}}</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                                @if($findit == FALSE)
+                                    <tr>
+                                        <td align="center">{{$unidad->unidad}}</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                        <td align="center">0</td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        @endif
+                    @endif
                 </table>
             </div>
         </div>
