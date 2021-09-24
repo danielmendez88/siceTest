@@ -12,16 +12,16 @@ class tbl_curso extends Model
     protected $table = 'tbl_cursos';
 
     protected $fillable = [
-    'id','cct','unidad','nombre','curp','rfc','clave','grupo','mvalida','mod','turno','area','espe','curso',
-    'inicio','termino','dia','dia2','pini','pfin','dura','hini','hfin','horas','ciclo','plantel','depen','muni',
-    'sector','programa','nota','hini2','hfin2','munidad','efisico','cespecifico','mpaqueteria','mexoneracion',
-    'hombre','mujer','tipo','fcespe','cgeneral','fcgen','opcion','motivo','cp','ze','id_curso','id_instructor',
-    'modinstructor','nmunidad','nmacademico','observaciones','status','realizo','valido','arc',
-    'tcapacitacion','status_curso','fecha_apertura','fecha_modificacion','costo','motivo_correccion',
-    'pdf_curso','json_supervision','turnado','fecha_turnado','tipo_curso','id_especialidad','instructor_escolaridad',
-    'instructor_titulo','instructor_sexo','instructor_mespecialidad','medio_virtual','link_virtual','folio_grupo',
-    'id_municipio','clave_especialidad','id_cerss','tdias'
-];
+        'id','cct','unidad','nombre','curp','rfc','clave','grupo','mvalida','mod','turno','area','espe','curso',
+        'inicio','termino','dia','dia2','pini','pfin','dura','hini','hfin','horas','ciclo','plantel','depen','muni',
+        'sector','programa','nota','hini2','hfin2','munidad','efisico','cespecifico','mpaqueteria','mexoneracion',
+        'hombre','mujer','tipo','fcespe','cgeneral','fcgen','opcion','motivo','cp','ze','id_curso','id_instructor',
+        'modinstructor','nmunidad','nmacademico','observaciones','status','realizo','valido','arc',
+        'tcapacitacion','status_curso','fecha_apertura','fecha_modificacion','costo','motivo_correccion',
+        'pdf_curso','json_supervision','turnado','fecha_turnado','tipo_curso','id_especialidad','instructor_escolaridad',
+        'instructor_titulo','instructor_sexo','instructor_mespecialidad','medio_virtual','link_virtual','folio_grupo',
+        'id_municipio','clave_especialidad','id_cerss','tdias', 'asis_finalizado', 'calif_finalizado'
+    ];
 
     protected $hidden = ['created_at', 'updated_at'];
     protected $casts = ['json_supervision' => 'array'];

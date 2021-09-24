@@ -693,8 +693,14 @@ Route::get('/estadisticas/ecursos','Estadisticas\ecursosController@index')->name
 Route::post('/estadisticas/ecursos','Estadisticas\ecursosController@index')->name('estadisticas.ecursos')->middleware('can:estadisticas.ecursos');
 Route::post('/cestadisticas/ecursos/xls', 'Estadisticas\ecursosController@xls')->name('estadisticas.ecursos.xls');
 
-//firma electronica
+// agregar documento para firma
+Route::get('/addDocumento/inicio', 'FirmaElectronica\AddDocumentController@index')->name('addDocument.inicio');
+Route::post('/addDocumento/buscar', 'FirmaElectronica\AddDocumentController@search')->name('addDocument.buscar');
+Route::post('/addDocumento/guardar', 'FirmaElectronica\AddDocumentController@save')->name('addDocument.guardar');
+
+//firma electronica 
 Route::get('/firma/inicio', 'FirmaElectronica\FirmarController@index')->name('firma.inicio');
 Route::post('/firma/update', 'FirmaElectronica\FirmarController@update')->name('firma.update');
 Route::post('/firma/sellar', 'FirmaElectronica\FirmarController@sellar')->name('firma.sellar');
 Route::post('/firma/generar', 'FirmaElectronica\FirmarController@generarPDF')->name('firma.generarPdf');
+Route::post('/firma/cancelar', 'FirmaElectronica\FirmarController@cancelarDocumento')->name('firma.cancelar');
