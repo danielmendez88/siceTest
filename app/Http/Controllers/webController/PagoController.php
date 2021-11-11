@@ -57,7 +57,8 @@ class PagoController extends Controller
         //dd($roles[0]->role_name);
 
         $contratos_folios = $contrato::busquedaporpagos($tipoPago, $busqueda_pago, $tipoStatus, $unidad, $mes)
-        ->WHEREIN('folios.status', ['Verificando_Pago','Pago_Verificado','Pago_Rechazado','Finalizado'])
+        ->WHEREIN('folios.status', ['Contrato_Validado','Verificando_Pago','Pago_Verificado','Pago_Rechazado',
+                    'Finalizado'])
         ->LEFTJOIN('folios','folios.id_folios', '=', 'contratos.id_folios')
         ->LEFTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
         ->LEFTJOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
@@ -67,8 +68,8 @@ class PagoController extends Controller
         ->PAGINATE(25, [
             'contratos.id_contrato', 'contratos.numero_contrato', 'contratos.cantidad_letras1',
             'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma','folios.permiso_editar',
-            'contratos.docs', 'contratos.observacion', 'folios.status', 'folios.id_folios','folios.id_supre',
-            'pagos.created_at'
+            'contratos.docs', 'contratos.observacion', 'folios.status','folios.recepcion', 'folios.id_folios',
+            'folios.id_supre','pagos.created_at'
         ]);
         switch ($roles[0]->role_name) {
             case 'unidad.ejecutiva':
@@ -115,8 +116,9 @@ class PagoController extends Controller
                 ->orderBy('contratos.fecha_firma', 'desc')
                 ->PAGINATE(25, [
                     'contratos.id_contrato', 'contratos.numero_contrato', 'contratos.cantidad_letras1',
-                    'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma','folios.permiso_editar',
-                    'contratos.docs', 'contratos.observacion', 'folios.status', 'folios.id_folios','folios.id_supre'
+                    'contratos.unidad_capacitacion', 'contratos.municipio', 'contratos.fecha_firma',
+                    'folios.permiso_editar','contratos.docs',
+                    'contratos.observacion', 'folios.status', 'folios.id_folios','folios.id_supre','folios.recepcion'
                 ]);
                 break;
         }
@@ -269,6 +271,57 @@ class PagoController extends Controller
         $director = directorio::SELECT('nombre','apellidoPaterno','apellidoMaterno','id')->WHERE('id', '=', $data_directorio->contrato_iddirector)->FIRST();
 
         return view('layouts.pages.vsthistorialvalidarpago', compact('contratos','director','datapago'));
+    }
+
+    public function documentospago_reporte()
+    {
+        $unidades = tbl_unidades::SELECT('ubicacion')->WHERE('id', '!=', '0')->ORDERBY('ubicacion','asc')
+                                ->GROUPBY('ubicacion')
+                                ->GET();
+
+        return view('layouts.pages.vstareportedocumentospago', compact('unidades'));
+    }
+
+    public function tramitesrecepcionados_pdf(Request $request)
+    {
+        // dd($request);
+        $data = contratos::SELECT('contratos.fecha_status', 'contratos.numero_contrato',
+            'contratos.chk_rechazado', 'contratos.fecha_rechazo', 'folios.recepcion', 'tbl_cursos.clave',
+		    'tbl_cursos.inicio', 'tbl_cursos.nombre','folios.status')
+            ->JOIN('folios', 'folios.id_folios', '=', 'contratos.id_folios')
+            ->JOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
+            ->JOIN('tbl_unidades', 'tbl_unidades.unidad', '=', 'tbl_cursos.unidad')
+            ->WHERE('contratos.id_contrato', '=', '4228')
+            // ->WHERE('tbl_unidades.ubicacion', '=', $request->unidad)
+            // ->WHERE('tbl_cursos.tipo_curso', '=', $request->tipo)
+            // ->WHERE('tbl_cursos.tcapacitacion', '=', $request->modalidad)
+            // ->WHEREBETWEEN('tbl_cursos.inicio', [$request->fecha1, $request->fecha2])
+            ->ORDERBY('tbl_cursos.inicio', 'ASC')
+            ->GET();
+            // dd($data);
+        // dd($data[1]->fecha_rechazo);
+        if ($request->tipo == 'CURSO')
+        {
+            $tipo = 'HONORARIOS';
+        }
+        else
+        {
+            $tipo = 'CERTIFICACIONES EXTRAORDINARIAS';
+        }
+
+        if ($request->modalidad == 'PRESENCIAL')
+        {
+            $modalidad = 'PRESENCIAL';
+        }
+        else
+        {
+            $modalidad = 'A DISTANCIA';
+        }
+        $unidad = $request->unidad;
+
+        $pdf = PDF::loadView('layouts.pdfpages.reportetramitesrecepcionados', compact('data','tipo', 'modalidad','unidad'));
+        $pdf->setPaper('legal', 'Landscape');
+        return $pdf->Stream('Tramites recepcionados de la unidad '. $request->unidad . $request->fecha1 . ' - '. $request->fecha2 .'.pdf');
     }
 
     public function  reporte_validados_recepcionados(Request $request)

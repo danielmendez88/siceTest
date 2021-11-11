@@ -20,14 +20,17 @@ class aperturasController extends Controller
         session_start();
         $this->ejercicio = date("y");         
         $this->middleware('auth');
-        $this->path_pdf = "/UNIDAD/arc01/";        
-        $this->path_files = env("APP_URL").'/storage/uploadFiles';    
-    $this->movARC01 = ['RETORNADO'=>'RETORNAR A UNIDAD'/*,'EN FIRMA'=>'ASIGNAR CLAVES','AUTORIZADO'=>'ENVIAR AUTORIZACION'*/];
-    $this->movARC02 = ['RETORNADO'=>'RETORNAR A UNIDAD'/*"CANCELADO"=>"CANCELAR APERTURA", "EN CORRECCION"=>"EN CORRECCION" ,"AUTORIZADO" => "ENVIAR AUTORIZACION"*/];
+        $this->path_pdf = "DTA/autorizado_arc01/";
+        $this->path_files = env("APP_URL").'/storage/uploadFiles';
+
+        $this->movARC01 = ['RETORNADO'=>'RETORNAR A UNIDAD'/*,'EN FIRMA'=>'ASIGNAR CLAVES','AUTORIZADO'=>'ENVIAR AUTORIZACION'*/];
+        $this->movARC02 = ['RETORNADO'=>'RETORNAR A UNIDAD'/*"CANCELADO"=>"CANCELAR APERTURA", "EN CORRECCION"=>"EN CORRECCION" ,"AUTORIZADO" => "ENVIAR AUTORIZACION"*/];
 
         $this->middleware(function ($request, $next) {
             $this->id_user = Auth::user()->id;
-            $this->realizo = Auth::user()->name;  
+            $this->realizo = mb_strtoupper(Auth::user()->name,'utf-8');
+            $this->puesto = mb_strtoupper(Auth::user()->puesto,'utf-8');
+
             $this->id_unidad = Auth::user()->unidad;
             
             $this->data = $this->unidades_user('unidad');
@@ -37,48 +40,199 @@ class aperturasController extends Controller
     }
     
     public function index(Request $request){
-        $opt = $memo = $message = $file = $movimientos = NULL;
-        $memo = $request->memo; 
-        $opt = $request->opt; 
-        /*
+        $opt = $memo = $message = $file = NULL;
+        //$memo = $request->memo; 
+        //$opt = $request->opt; 
+        
         if($request->memo)  $memo = $request->memo; 
         elseif(isset($_SESSION['memo'])) $memo = $_SESSION['memo'];
   
         if($request->opt)  $opt = $request->opt; 
         elseif(isset($_SESSION['opt'])) $opt = $_SESSION['opt'];
-        */
-        $_SESSION['grupos'] = NULL;        
-        $grupos = [];
         
+        $_SESSION['grupos'] = NULL;        
+        $grupos = $movimientos = [];
+        //echo $memo;
         if($memo){            
             $grupos = DB::table('tbl_cursos as tc')->select('tc.*',DB::raw("'$opt' as option"),'ar.turnado as turnado_solicitud')
                 ->leftjoin('alumnos_registro as ar','ar.folio_grupo','tc.folio_grupo');
-                //->where('status_curso','<>',null);
                if($opt == 'ARC01') $grupos = $grupos->where('tc.munidad',$memo);
                else $grupos = $grupos->where('tc.nmunidad',$memo);
-               //if($_SESSION['unidades']) $grupos = $grupos->whereIn('tc.unidad',$_SESSION['unidades']);
-               $grupos = $grupos->groupby('tc.id','ar.turnado')->get(); 
-
-            if(count($grupos)>0){
-                if($opt == 'ARC01' AND $grupos[0]->file_arc01) $file =  $this->path_files.$grupos[0]->file_arc01;
-                elseif($opt == 'ARC02' AND $grupos[0]->file_arc02) $file =  $this->path_files.$grupos[0]->file_arc02;
-            }          
-        
+               $grupos = $grupos->groupby('tc.id','ar.turnado')->get();           
+            //var_dump($grupos);exit;
+            
             if(count($grupos)>0){
                 $_SESSION['grupos'] = $grupos;
                 $_SESSION['memo'] = $memo;
                 $_SESSION['opt'] = $opt;
-                if($opt == "ARC01") $movimientos = $this->movARC01;
-                else $movimientos = $this->movARC02;
-            }elseif($memo AND $opt) $message = "No se encuentran registros que mostrar.";
-            //echo $file; exit;
-            //var_dump($grupos);exit;
+                $estatus = DB::table('tbl_cursos')->wherein('status_curso', ['SOLICITADO','EN FIRMA','AUTORIZADO']);
+                if($opt == 'ARC01') $estatus = $estatus->where('munidad',$memo);
+                else $estatus = $estatus->where('nmunidad',$memo);
+                $estatus = $estatus->value('status_curso');
+                //var_dump($estatus);exit;
+
+                switch($opt){
+                    case 'ARC01':
+                        if($grupos[0]->file_arc01) $file =  $this->path_files.$grupos[0]->file_arc01;
+                        switch($estatus){
+                            case 'SOLICITADO':
+                                $movimientos = ['' => '- SELECCIONAR -', 'RETORNADO'=>'RETORNAR A UNIDAD','EN FIRMA'=>'ASIGNAR CLAVES'];
+                            break;
+                            case 'EN FIRMA':
+                                $movimientos = ['' => '- SELECCIONAR -', 'AUTORIZADO'=>'ENVIAR AUTORIZACION','CAMBIAR' => 'CAMBIAR MEMORÁNDUM','DESHACER'=>'DESHACER CLAVES'];
+                            break;
+
+                        }
+                    break;
+                    case 'ARC02':
+                        if($grupos[0]->file_arc02) $file =  $this->path_files.$grupos[0]->file_arc02;                        
+                        switch($estatus){
+                            case 'SOLICITADO':
+                                $movimientos = ['RETORNADO'=>'RETORNAR A UNIDAD','EN FIRMA'=>'EN FIRMA'];
+                            break;
+                            case 'EN FIRMA':
+                                $movimientos = ['' => '- SELECCIONAR -', 'AUTORIZADO'=>'ENVIAR AUTORIZACION','CAMBIAR' => 'CAMBIAR MEMORÁNDUM'];
+                            break;
+
+                        }                        
+                    break;
+                }
+            }else $message = "No se encuentran registros que mostrar.";
            
         }
         if(session('message')) $message = session('message');
+        //var_dump($grupos);exit;
         return view('solicitudes.aperturas.index', compact('message','grupos','memo', 'file','opt', 'movimientos'));
     }  
+
+    public function autorizar(Request $request){ //ENVIAR PDF DE AUTORIZACIÓN Y CAMBIAR ESTATUS A AUTORIZADO
+        $result = NULL;
+        $message = 'Operación fallida, vuelva a intentar..'; 
+        if($_SESSION['memo'] AND $_SESSION['opt'] ){
+            if ($request->hasFile('file_autorizacion')) {               
+                $name_file = str_replace('/','-',$_SESSION['memo'])."_".date('ymdHis')."_".$this->id_user;                      
+                $file = $request->file('file_autorizacion');
+                $file_result = $this->upload_file($file,$name_file);                
+                $url_file = "https://www.sivyc.icatech.gob.mx/storage/uploadFiles/".$file_result["url_file"];
+
+                if($file_result){
+                    switch($_SESSION['opt'] ){
+                        case "ARC01":                      
+                            $result = DB::table('tbl_cursos')->where('munidad',$_SESSION['memo'])
+                            ->where('clave','<>','0')
+                            ->where('turnado','UNIDAD')
+                            ->where('status_curso','EN FIRMA')
+                            ->where('status','NO REPORTADO')
+                            ->update(['status_curso' => 'AUTORIZADO', 'updated_at'=>date('Y-m-d H:i:s'), 'pdf_curso' => $url_file]);
+                        break;
+                        case "ARC02": 
+                            $result = DB::table('tbl_cursos')->where('nmunidad',$_SESSION['memo'])
+                            ->where('clave','<>','0')
+                            ->where('turnado','UNIDAD')
+                            ->where('status_curso','EN FIRMA')
+                            ->whereIn('status',['NO REPORTADO','RETORNO_UNIDAD'])
+                            ->update(['status_curso' => 'AUTORIZADO', 'arc'=>'02','updated_at'=>date('Y-m-d H:i:s'), 'pdf_curso' => $url_file]);                                            
+                        break;
+                    }
+                    if($result)$message = "La AUTORIZACIÓN fué enviada correctamente"; 
+                    
+                }else $message = "Error al subir el archivo, volver a intentar.";
+            }else $message = "Archivo inválido";
+        }
+        return redirect('solicitudes/aperturas')->with('message',$message);        
+    }
+
+    public function cambiarmemo(Request $request){ //CAMBIAR NÚMERO DE MEMORÁNDUM Y QUIEN VALIDÓ
+        $message = 'Operación fallida, vuelva a intentar..';
+        if($_SESSION['memo'] AND $_SESSION['opt'] AND $request->mrespuesta AND $request->fecha ){ 
+            $mrespuesta = $request->mrespuesta;
+            $fecha = $request->fecha;
+            switch($_SESSION['opt']){
+                case "ARC01":
+                        $result = DB::table('tbl_cursos')->where('munidad',$_SESSION['memo'])
+                        ->where('clave','<>','0')
+                        ->where('turnado','UNIDAD')
+                        ->where('status_curso','EN FIRMA')
+                        ->where('status','NO REPORTADO')
+                        ->update([ 'mvalida' => $mrespuesta, 'fecha_apertura' => $fecha, 'valido' => $this->realizo]);                             
+                        if($result)$message = "OPERACIÓN EXITOSA!!";
+                break;
+                case "ARC02":    
+                    $result = DB::table('tbl_cursos')->where('nmunidad',$_SESSION['memo'])
+                        ->where('clave','<>','0')
+                        ->where('turnado','UNIDAD')
+                        ->where('status_curso','EN FIRMA')
+                        ->whereIn('status',['NO REPORTADO','RETORNO_UNIDAD'])
+                        ->update([ 'nmacademico' => $mrespuesta, 'fecha_modificacion' => $fecha, 'valido' => $this->realizo]);                             
+                        if($result)$message = "OPERACIÓN EXITOSA!!";                       
+                break;
+            }
+        }else $message = "NO OLVIDE INGRESAR NÚMERO Y FECHA DE MEMORÁNDUM";
+        return redirect('solicitudes/aperturas')->with('message',$message);        
+    }
    
+    public function deshacer(Request $request){ //DESHACER CLAVES
+        $message = 'Operación fallida, vuelva a intentar..';
+        if($_SESSION['memo'] AND $_SESSION['opt']){ 
+            switch($_SESSION['opt']){
+                case "ARC01":
+                        $result = DB::table('tbl_cursos')->where('munidad',$_SESSION['memo'])
+                        ->where('clave','<>','0')
+                        ->where('turnado','UNIDAD')
+                        ->where('status_curso','EN FIRMA')
+                        ->where('status','NO REPORTADO')
+                        ->update(['clave' => '0', 'status_curso' => 'SOLICITADO', 'mvalida' => '0','valido' => 'SIN VALIDAR']);                             
+                        if($result)$message = "OPERACIÓN EXITOSA!!";
+                break;
+                case "ARC02":                           
+                break;
+            }
+        }
+        return redirect('solicitudes/aperturas')->with('message',$message);        
+    }
+
+    public function asignar(Request $request){
+        $message = 'Operación fallida, vuelva a intentar..';
+        if($_SESSION['memo'] AND $request->mrespuesta AND $request->fecha AND $_SESSION['opt']){
+            $mrespuesta = $request->mrespuesta;
+            $fecha = $request->fecha;
+            switch($_SESSION['opt'] ){
+                case "ARC01":                    
+                    $result = DB::table('tbl_cursos as tc')
+                        ->select('tc.id',DB::raw("CONCAT(
+                            SUBSTRING(tc.cct,LENGTH(tc.cct)-4,4)::INT*1,
+                            SUBSTRING(tc.cct,LENGTH(tc.cct),1),'-',
+                            SUBSTRING(EXTRACT(YEAR FROM tc.inicio)::TEXT,3,2),'-',
+                            e.prefijo,'-',tc.mod
+                            ) as cve"))                            
+                        ->leftjoin('especialidades as e','e.id','tc.id_especialidad')                        
+                        ->where('tc.clave','0')
+                        ->where('tc.turnado','UNIDAD')
+                        ->where('tc.status_curso','SOLICITADO')
+                        ->where('tc.status','NO REPORTADO')
+                        ->where('tc.munidad',$_SESSION['memo'])->orderby('termino','ASC')->orderby('hfin','ASC')
+                        ->get();
+                        // var_dump($result);exit;
+                        foreach($result as $r){
+                            $clave = DB::table('tbl_cursos')->where('clave','like',$r->cve.'%')->max('clave');
+                            if($clave) $clave =  $r->cve.'-'.str_pad(intval(substr($clave,strlen($clave)-4,4))+1, 4, "0", STR_PAD_LEFT);
+                            else $clave = $r->cve.'-0001'; 
+
+                            $rest = DB::table('tbl_cursos')->where('id',$r->id)->update(['clave' => $clave, 'status_curso' => 'EN FIRMA', 'mvalida' => $mrespuesta,'fecha_apertura' => $fecha,'valido' => $this->realizo]);  
+                            if($rest)$message = "Claves Asignadas Correctamente!!";
+                        }
+                  
+                break;
+                case "ARC02": 
+                    $rest = DB::table('tbl_cursos')->where('nmunidad',$_SESSION['memo'])->update(['status_curso' => 'EN FIRMA', 'nmacademico' => $mrespuesta,'fecha_modificacion' => $fecha,'valido' => $this->realizo]);  
+                    if($rest)$message = "Operación Exitosa!!";
+                               
+                break;
+            }
+        } else $message = "NO OLVIDE INGRESAR NÚMERO Y FECHA DE MEMORÁNDUM";
+        return redirect('solicitudes/aperturas')->with('message',$message); 
+    }
+
     public function retornar(Request $request){
         $message = 'Operación fallida, vuelva a intentar..';
         if($_SESSION['memo']){ 
@@ -113,42 +267,7 @@ class aperturasController extends Controller
         }
         return redirect('solicitudes/aperturas')->with('message',$message);        
    }
-   /*
-   public function enviar(Request $request){            
-        $result = NULL;
-        $message = 'Operación fallida, vuelva a intentar..';        
 
-        if($_SESSION['memo']){
-            if ($request->hasFile('file_autorizacion')) {               
-                $name_file = $this->id_unidad."_".str_replace('/','-',$_SESSION['memo'])."_".date('ymdHis')."_".$this->id_user;                                
-                $file = $request->file('file_autorizacion');
-                $file_result = $this->upload_file($file,$name_file);                
-                $url_file = $file_result["url_file"];
-                if($file_result){
-                    switch($_SESSION['opt'] ){
-                        case "ARC01":
-                            $folios = array_column(json_decode(json_encode($_SESSION['grupos']), true), 'folio_grupo');
-                            $alumnos = DB::table('alumnos_registro')->whereIn('folio_grupo',$folios)->update(['turnado' => "DTA",'fecha_turnado' => date('Y-m-d')]);                    
-                            if($alumnos){
-                                $result = DB::table('tbl_cursos')->where('munidad',$_SESSION['memo'])
-                                ->update(['status_curso' => 'SOLICITADO', 'updated_at'=>date('Y-m-d H:i:s'), 'file_arc01' => $url_file]);                                
-                                              
-                            }else $message = "Error al turnar la solictud, volver a intentar.";
-                        break;
-                        case "ARC02":    
-                            $result = DB::table('tbl_cursos')->where('nmunidad',$_SESSION['memo'])
-                            ->update(['status_curso' => 'SOLICITADO', 'updated_at'=>date('Y-m-d H:i:s'), 'file_arc02' => $url_file]);    
-                            //echo $result; exit;                      
-                        break;
-                    }
-                    if($result)$message = "La solicitud fué turnada correctamente a la DTA"; 
-                    
-                }else $message = "Error al subir el archivo, volver a intentar.";
-            }else $message = "Archivo inválido";
-        }
-        return redirect('solicitud/apertura/turnar')->with('message',$message);   
-   }
-   
    protected function upload_file($file,$name){       
         $ext = $file->getClientOriginalExtension(); // extension de la imagen
         $ext = strtolower($ext);
@@ -163,58 +282,48 @@ class aperturasController extends Controller
         }else $msg= "Formato de Archivo no válido, sólo PDF.";
                 
         $data_file = ["message"=>$msg, 'url_file'=>$path];
-       
+    
         return $data_file;
     }
-   
-   public function pdfARC01(Request $request){
+
+    public function pdfAutoriza(Request $request){
         if($request->fecha AND $request->memo){        
             $fecha_memo =  $request->fecha;
             $memo_apertura =  $request->memo;
-            $fecha_memo=date('d-m-Y',strtotime($fecha_memo));
+            $fecha_memo=date('d/M/Y',strtotime($fecha_memo));
+            $opt = $request->opt;        
 
             $reg_cursos = DB::table('tbl_cursos')->SELECT('id','unidad','nombre','clave','mvalida','mod','espe','curso','inicio','termino','dia','dura',
-                DB::raw("concat(hini,' A ',hfin) AS horario"),'horas','plantel','depen','muni','nota','munidad','efisico','hombre','mujer','tipo','opcion',
-                'motivo','cp','ze','tcapacitacion','tipo_curso');                
-            if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);                
-            $reg_cursos = $reg_cursos->WHERE('munidad', $memo_apertura)->orderby('espe')->get();
-                
+                DB::raw("concat(hini,' A ',hfin) AS horario"),'horas','plantel','depen','muni','nota','munidad','nmunidad','efisico','hombre','mujer','tipo','opcion',
+                'motivo','cp','ze','tcapacitacion','tipo_curso','fecha_apertura','fecha_modificacion','observaciones','valido','realizo','mvalida','nmacademico');                
+            if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);   
+            switch($_SESSION['opt'] ){
+                case "ARC01":            
+                     $reg_cursos = $reg_cursos->WHERE('munidad', $memo_apertura)->orderby('espe')->get();
+
+                break;
+                case "ARC02": 
+                    $reg_cursos = $reg_cursos->WHERE('nmunidad', $memo_apertura)->orderby('espe')->get();
+
+                break;
+            }
+
+           // var_dump($reg_cursos);exit;
             if(count($reg_cursos)>0){     
-                $reg_unidad=DB::table('tbl_unidades')->select('dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico','pvinculacion');
-                if($_SESSION['unidades'])$reg_unidad = $reg_unidad->whereIn('unidad',$_SESSION['unidades']);                            
-                $reg_unidad = $reg_unidad->first();            
-                
-                $pdf = PDF::loadView('solicitud.turnar.pdfARC01',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura'));
+                $unidad = DB::table('tbl_unidades')->where('unidad',$reg_cursos[0]->unidad)->value('ubicacion');
+
+                $distintivo= DB::table('tbl_instituto')->pluck('distintivo')->first(); 
+                $reg_unidad=DB::table('tbl_unidades')->select('dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico','pvinculacion','jcyc','dacademico','pjcyc','pdacademico','ubicacion')
+                ->where('unidad',$unidad)->first();   
+
+                if($opt=="ARC01") $opt = "ARC-01";
+                else $opt = "ARC-02";
+                $realizo = $this->realizo;
+                $puesto = $this->puesto;
+                $pdf = PDF::loadView('solicitudes.aperturas.pdfAutoriza',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura','opt','distintivo','realizo','puesto'));
                 $pdf->setpaper('letter','landscape');
-                return $pdf->stream('ARC01.pdf');
+                return $pdf->stream('AutorizacionARC.pdf');
             }else return "MEMORANDUM NO VALIDO PARA LA UNIDAD";exit;
         }return "ACCIÓN INVÁlIDA";exit;
     }
-    
-    public function pdfARC02(Request $request) { 
-        if($request->fecha AND $request->memo){      
-            $fecha_memo =  $request->fecha;
-            $memo_apertura =  $request->memo;
-            $fecha_memo=date('d-m-Y',strtotime($fecha_memo));
-
-            $reg_cursos = DB::table('tbl_cursos')->SELECT('id','unidad','nombre','clave','mvalida','mod','curso','inicio','termino','dura',
-                'efisico','opcion','motivo','nmunidad','observaciones','realizo','tcapacitacion');
-            if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);                
-            $reg_cursos = $reg_cursos->WHERE('nmunidad', '=', $memo_apertura)->orderby('espe')->get();
-                
-            if(count($reg_cursos)>0){
-                $instituto = DB::table('tbl_instituto')->first();
-               // var_dump($instituto);exit;
-
-                $reg_unidad=DB::table('tbl_unidades')->select('unidad','dunidad','academico','vinculacion','dacademico','pdacademico','pdunidad','pacademico','pvinculacion');                
-                if($_SESSION['unidades'])$reg_cursos = $reg_cursos->whereIn('unidad',$_SESSION['unidades']);           
-                $reg_unidad = $reg_unidad->first();                
-                    
-                $pdf = PDF::loadView('solicitud.turnar.pdfARC02',compact('reg_cursos','reg_unidad','fecha_memo','memo_apertura','instituto'));
-                $pdf->setpaper('letter','landscape');
-                return $pdf->stream('ARC02.pdf');
-            }else return "MEMORANDUM NO VALIDO PARA LA UNIDAD";exit;   
-        }
-    }
-   */
 }

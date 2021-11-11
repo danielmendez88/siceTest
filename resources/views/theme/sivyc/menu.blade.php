@@ -136,9 +136,11 @@
                             <a class="dropdown-item" href="{{route('reportes.rcdod11.index')}}">RCDOD-11</a>
                         @endcan
                         @can('financieros.reportevalrec')
-                        <a class="dropdown-item" data-toggle="modal" data-placement="top"
-                                data-target="#ModalFinanciero">TRAMITES VALIDADOS Y RECEPCIONADOS</a>
+                        {{-- <a class="dropdown-item" data-toggle="modal" data-placement="top"
+                                data-target="#ModalFinanciero">TRAMITES VALIDADOS Y RECEPCIONADOS</a>--}}
+                            <a class="dropdown-item" href="{{route('docummentospago.reporte')}}">TRAMITES RECEPCIONADOS</a>
                         @endcan
+
                         {{-- <a class="dropdown-item" href="{{route('vista_formatot')}}">Formato T</a> --}}
                     </div>
                 </li>
@@ -328,13 +330,26 @@
                         </div>
                     </li>
                 @endcan
-                
+
             </ul>
             <ul class="navbar-nav ml-auto nav-flex-icons">
-                <li class="nav-item g-mx-5--lg">
-                    <a class="nav-link">
-                        Notificaciones <span class="badge badge-pill badge-primary ml-2">1</span>
+                <li class="nav-item g-mx-5-lg dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-55" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Notificaciones
+                        @if(count(auth()->user()->unreadNotifications))
+                            <span class="badge badge-pill badge-primary ml-2">
+                                {{count(auth()->user()->unreadNotifications)}}
+                            </span>
+                        @endif
                     </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        @foreach (auth()->user()->unreadNotifications as $cadwell)
+                            <a href={{$cadwell->data['url']}} class="dropdown-item">
+                                <i class="fas fa-envelope mr-2"></i> {{$cadwell->data['titulo']}}
+                                <br><span class="float-right text-muted text-sm">{{$cadwell->created_at->diffForHumans()}}</span>
+                            </a>
+                        @endforeach
+                    </div>
                 </li>
                 <li class="nav-item avatar dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-55" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -358,7 +373,6 @@
                         </form>
                     </div>
                 </li>
-
             </ul>
         @endguest
     </div>

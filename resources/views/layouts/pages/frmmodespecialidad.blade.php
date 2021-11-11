@@ -274,7 +274,7 @@
                         <div class="row" role="row">
                             <div class="col-md-3" role="gridcell">
                                 <label><h5>NOMBRE</h5></label>
-                                <div class="form-control-plaintext text-truncate">{{$itemDataCatCurso->nombre_curso}}</div>
+                                <div class="form-control-plaintext">{{$itemDataCatCurso->nombre_curso}} // {{$itemDataCatCurso->id_especialidad}}</div>
                             </div>
                             <div class="col-md-3" role="gridcell">
                                 <label><h5>RANGOS</h5></label>
@@ -283,7 +283,7 @@
                             <div class="col-md-3" role="gridcell">
                                 <label><h5>TIPO DE CURSO</h5></label>
                                 <div class="form-control-plaintext text-truncate">
-                                    @if ($itemDataCatCurso->tipo_curso === "ONLINE")
+                                    @if ($itemDataCatCurso->tipo_curso === "A DISTANCIA")
                                         A DISTANCIA
                                     @else
                                         PRESENCIAL
@@ -298,7 +298,6 @@
                                         @if($itemDataCatCurso->activo == TRUE)
                                             checked
                                         @endif
-
                                         data-toggle="toggle"
                                         data-style="ios"
                                         data-on="ON"
@@ -307,7 +306,6 @@
                                         data-offstyle="danger"
                                         name="itemEdit[{{$itemDataCatCurso->id}}][check_cursos_edit]"
                                         value="{{$itemDataCatCurso->id}}">
-
                                 </div>
                             </div>
                         </div>

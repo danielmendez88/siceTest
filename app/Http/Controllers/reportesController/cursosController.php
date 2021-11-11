@@ -264,8 +264,12 @@ class cursosController extends Controller
                 $consec_curso = $curso->id_curso; 
                 /*if($curso->servicio == "CERTIFICACION") $duracion = $curso->horas_certificacion;               
                 else */
-                $duracion = $curso->dura;
-
+                //$duracion = $curso->dura;
+                if ($curso->servicio=='CERTIFICACION') {
+                    $duracion = '';
+                }else{
+                    $duracion = $curso->dura;
+                }
                 $data = DB::table('tbl_inscripcion as i')
                     ->select('i.alumno','i.curp',
                         DB::raw("REPLACE('".$curso->curso."','.','') as nombre_curso"),
@@ -273,7 +277,7 @@ class cursosController extends Controller
                         DB::raw("LPAD('".$curso->dia_termino."',2,'0') as dia"),
                         DB::raw("'".$this->mes[$curso->mes_termino]."' as mes"),
                         DB::raw("'".$curso->anio_termino."' as anio"),
-                        DB::raw( $duracion.' as horas'),
+                        DB::raw("'".$duracion."' as horas"),
                         DB::raw("'".$curso->cct."' as cct"),
                         DB::raw("'".$curso->unidad."' as unidad"),
                         DB::raw("'CHIAPAS' as estado"),
