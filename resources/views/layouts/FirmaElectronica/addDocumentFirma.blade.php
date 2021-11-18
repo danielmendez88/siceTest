@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid my-5">
+    <div class="container-fluid my-4">
         <div class="row">
             <div class="col">
                 @if ($message = Session::get('warning'))
@@ -29,13 +29,13 @@
                     <form id="form" action="{{ route('addDocument.guardar') }}" method="post" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="col my-2">
-                            <div class="custom-file">
+                        {{-- <div class="col my-2"> --}}
+                            <div class="custom-file my-2">
                                 <input type="file" id="doc" name="doc" class="custom-file-input" accept="application/pdf"
                                     lang="es">
                                 <label class="custom-file-label" for="doc">Seleccionar Archivo</label>
                             </div>
-                        </div>
+                        {{-- </div> --}}
 
                         <div class="row py-3">
                             <div class="col">
@@ -207,6 +207,8 @@
                         <input type="text" class="d-none" name="firmas[]" value="${tipo}-${result['id']}" input">
                     </div>
                 `;
+            $('#email').val('');
+            $('#tipoUser').val('');
         }
 
         $('#form').validate({

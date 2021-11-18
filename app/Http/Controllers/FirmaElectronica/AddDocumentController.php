@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Models\FirmaElectronica\DocumentosFirmar;
+use App\Models\FirmaElectronica\Tokens_icti;
+use App\User;
 
 class AddDocumentController extends Controller {
 
@@ -40,7 +42,11 @@ class AddDocumentController extends Controller {
     }
 
     public function save(Request $request) {
-        $dataEmisor = Personal::where('email', Auth::user()->email)->first();
+        $correoEmisor = Auth::user()->email;
+        $dataEmisor = Personal::where('email', $correoEmisor)->first();
+        if (!$dataEmisor) {
+            return redirect()->route('addDocument.inicio')->with('warning', "Error! La información del correo $correoEmisor esta incompleta en la base de datos");
+        }
         if ($request->hasFile('doc')) {
             $data = contratos::where('numero_contrato', $request->no_oficio)->first();
             if ($data) {
@@ -81,6 +87,8 @@ class AddDocumentController extends Controller {
                         $array = explode('-', $firmante);
                         if ($array[0] == 'Instructor') {
                             $dataFirmante = instructor::where('id', '=', $array[1])->first();
+                            
+
                             $temp = ['_attributes' => 
                                 [
                                     'curp_firmante' => $dataFirmante->curp, 
@@ -129,6 +137,8 @@ class AddDocumentController extends Controller {
                         array_push($arrayFirmantes, $temp);
                         array_push($arrayFirmantes2, $temp2);
                     }
+
+                    $md5 = md5_file($request->file('doc'), false);
                     
                     $text = Pdf::getText($request->file('doc'), 'c:/Program Files/Git/mingw64/bin/pdftotext');
                     $text = str_replace("\f",' ',$text);
@@ -138,15 +148,15 @@ class AddDocumentController extends Controller {
                             '_attributes' => [
                                 'nombre_emisor' => $dataEmisor->nombre.' '.$dataEmisor->apellidoPaterno.' '.$dataEmisor->apellidoMaterno,
                                 'cargo_emisor' => $dataEmisor->puesto,
-                                'dependencia_emisor' => 'INSTITUTO DE CAPACITACION Y VINCULACION TECNOLOGICA'
+                                'dependencia_emisor' => 'Instituto de Capacitación y Vinculación Tecnológica del Estado de Chiapas'
                             ],
                         ],
                         'archivo' => [
                             '_attributes' => [
                                 'nombre_archivo' => $nameFileOriginal,
-                                'checksum_archivo' => utf8_encode($text)
+                                // 'checksum_archivo' => utf8_encode($text)
                             ],
-                            'cuerpo' => ['Por medio de la presente me permito solicitar el archivo '.$nameFile]
+                            'cuerpo' => [utf8_encode($text)]
                         ],
                         'firmantes' => [
                             '_attributes' => [
@@ -163,16 +173,16 @@ class AddDocumentController extends Controller {
                             '_attributes' => [
                                 'nombre_emisor' => $dataEmisor->nombre.' '.$dataEmisor->apellidoPaterno.' '.$dataEmisor->apellidoMaterno,
                                 'cargo_emisor' => $dataEmisor->puesto,
-                                'dependencia_emisor' => 'INSTITUTO DE CAPACITACION Y VINCULACION TECNOLOGICA',
+                                'dependencia_emisor' => 'Instituto de Capacitación y Vinculación Tecnológica del Estado de Chiapas',
+                                'curp_emisor' => $dataEmisor->curp,
                                 'email' => Auth::user()->email
                             ],
                         ],
                         'archivo' => [
                             '_attributes' => [
                                 'nombre_archivo' => $nameFileOriginal,
-                                'checksum_archivo' => utf8_encode($text)
                             ],
-                            'cuerpo' => ['Por medio de la presente me permito solicitar el archivo '.$nameFile]
+                            'cuerpo' => [utf8_encode($text)]
                         ],
                         'firmantes' => [
                             '_attributes' => [
@@ -195,10 +205,10 @@ class AddDocumentController extends Controller {
                     $result = ArrayToXml::convert($ArrayXml, [
                         'rootElementName' => 'DocumentoChis',
                         '_attributes' => [
-                            'version' => '1.0',
+                            'version' => '2.0',
                             'fecha_creacion' => $dateFormat,
                             'no_oficio' => $nameFile,
-                            'dependencia_origen' => 'INSTITUTO DE CAPACITACION Y VINCULACION TECNOLOGICA DEL ESTADO DE CHIAPAS',
+                            'dependencia_origen' => 'Instituto de Capacitación y Vinculación Tecnológica del Estado de Chiapas',
                             'asunto_docto' => $request->tipo_documento,
                             'tipo_docto' => 'CNT',
                             'xmlns' => 'http://firmaelectronica.chiapas.gob.mx/GCD/DoctoGCD',
@@ -208,10 +218,10 @@ class AddDocumentController extends Controller {
                     $result2 = ArrayToXml::convert($ArrayXml2, [
                         'rootElementName' => 'DocumentoChis',
                         '_attributes' => [
-                            'version' => '1.0',
+                            'version' => '2.0',
                             'fecha_creacion' => $dateFormat,
                             'no_oficio' => $nameFile,
-                            'dependencia_origen' => 'INSTITUTO DE CAPACITACION Y VINCULACION TECNOLOGICA DEL ESTADO DE CHIAPAS',
+                            'dependencia_origen' => 'Instituto de Capacitación y Vinculación Tecnológica del Estado de Chiapas',
                             'asunto_docto' => $request->tipo_documento,
                             'tipo_docto' => 'CNT',
                             'xmlns' => 'http://firmaelectronica.chiapas.gob.mx/GCD/DoctoGCD',
@@ -219,26 +229,38 @@ class AddDocumentController extends Controller {
                     ]);
 
                     $xmlBase64 = base64_encode($result);
-                    $response = Http::post('https://interopera.chiapas.gob.mx/FirmadoElectronicoDocumentos/api/v1/DocumentoXml/CadenaOriginalBase64', [
+                    $getToken = Tokens_icti::all()->last();
+                    if($getToken) {
+                        $response = $this->getCadenaOriginal($xmlBase64, $getToken->token);
+                        if ($response->json() == null) {
+                            $token = $this->generarToken();
+                            $response = $this->getCadenaOriginal($xmlBase64, $token);
+                        }
+                    } else {
+                        $token = $this->generarToken();
+                        $response = $this->getCadenaOriginal($xmlBase64, $token);
+                    }
+
+                    /* $response = Http::post('https://interopera.chiapas.gob.mx/FirmadoElectronicoDocumentos/api/v1/DocumentoXml/CadenaOriginalBase64', [
                         'xml_OriginalBase64' => $xmlBase64,
                         'apiKey' => 'dwLChYOVylB9htqD9qIaSVHddKzWKiqXqmh7fFRHwFJk2x'
-                    ]);
+                    ]); */
 
                     if ($response->json()['cadenaOriginal'] != null) {
-                        $urlFile = $this->uploadFileServer($request->file('doc'), $nameFileOriginal);
-                        $datas = explode('*',$urlFile);
+                        $urlFile = $this->uploadFileServer($request->file('doc'), $nameFile);
 
                         $dataInsert = new DocumentosFirmar();
                         $dataInsert->obj_documento = json_encode($ArrayXml);
                         $dataInsert->obj_documento_interno = json_encode($ArrayXml2);
                         $dataInsert->status = 'EnFirma';
-                        $dataInsert->link_pdf = $datas[0];
+                        $dataInsert->link_pdf = $urlFile;
                         $dataInsert->cadena_original = $response->json()['cadenaOriginal'];
                         $dataInsert->tipo_archivo = $request->tipo_documento;
                         $dataInsert->numero_o_clave = $request->no_oficio;
-                        $dataInsert->nombre_archivo = $datas[1];
+                        $dataInsert->nombre_archivo = $nameFile;
                         $dataInsert->documento = $result;
                         $dataInsert->documento_interno = $result2;
+                        $dataInsert->md5_file = $md5;
                         $dataInsert->save();
 
                         return redirect()->route('addDocument.inicio')->with('warning', 'Se agrego el documento correctamente, puede ver el status en el que se encuentra en el apartado Firma Electronica');
@@ -246,22 +268,47 @@ class AddDocumentController extends Controller {
                         return back()->with('warning', 'Ocurrio un error al obtener la cadena original, por favor intente de nuevo');
                     }
                 } else {
-                    return back()->with('warning', 'No se agregaron firmantes');
+                    return back()->with('warning', 'Error! No se agregaron firmantes');
                 }
             } else {
-                return back()->with('warning', 'No se encontro el contrato con el número ingresado');
+                return back()->with('warning', 'Error! No se encontro el contrato con el número ingresado');
             }
         } else {
-            return redirect()->route('addDocument.inicio')->with('warning', 'Debe seleccionar un archivo PDF');
+            return redirect()->route('addDocument.inicio')->with('warning', 'Error!  Debe seleccionar un archivo PDF');
         }
     }
 
     protected function uploadFileServer($file, $name) {
-        // $extensionFile = $file->getClientOriginalExtension();
-        // $path = '/'.$subPath;
-        $name = trim(date('YmdHis').'_'.$name);
         $file->storeAs('/uploadFiles/DocumentosFirmas/'.Auth::user()->id, $name);
         $url = Storage::url('/uploadFiles/DocumentosFirmas/'.Auth::user()->id.'/'.$name);
-        return $url.'*'.$name;
+        return $url;
+    }
+
+    // obtener la cadena original
+    public function getCadenaOriginal($xmlBase64, $token) {
+        $response1 = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer '.$token,
+        ])->post('https://apiprueba.firma.chiapas.gob.mx/FEA/v2/Tools/generar_cadena_original', [
+            'xml_OriginalBase64' => $xmlBase64
+        ]);
+
+        return $response1;
+    }
+
+    //obtener el token
+    public function generarToken() {
+        $resToken = Http::withHeaders([
+            'Accept' => 'application/json'
+        ])->post('https://interopera.chiapas.gob.mx/gobid/api/Auth/TokenAppAuth', [ 
+            'nombre' => 'Firma Electronica', 
+            'key' => '4E520F58-7103-479B-A2EC-FEE907409053' 
+        ]);
+        $token = $resToken->json();
+
+        Tokens_icti::create([
+            'token' => $token
+        ]);
+        return $token;
     }
 }
