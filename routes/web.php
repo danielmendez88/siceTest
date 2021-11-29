@@ -733,3 +733,7 @@ Route::post('financieros/tramites-recepcionados/pdf', 'webController\PagoControl
 
  //Consulta de cursos validados por unidad y accion movil con XLS 17112021
  Route::get('/consulta/cursos-validados', 'webController\CursoValidadoController@consulta')->name('consulta-cursosval');
+
+//  autocomplete localidad inscripcion alumnos
+Route::get('inscripciones/localidad', 'webController\AlumnoController@localidadAutocomplete')->name('autocomplete.localidad');
+
