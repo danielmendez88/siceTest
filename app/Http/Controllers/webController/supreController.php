@@ -23,6 +23,7 @@ use App\Exports\FormatoTReport; // agregamos la exportación de FormatoTReport
 use App\Models\pago;
 use Illuminate\Support\Facades\Auth;
 use App\Events\NotificationEvent;
+use App\Listeners\NotificationListener;
 use App\User;
 
 class supreController extends Controller
@@ -163,16 +164,16 @@ class supreController extends Controller
                 }
             }
             // Notificacion!
-            $letter = [
+            $users = User::where('id', 287)->get();
+
+            $dataNotification = [
                 'titulo' => 'Suficiencia Presupuestal',
                 'cuerpo' => 'La suficicencia presupuestal ' . $supre->no_memo . ' ha sido agregada para su validación',
                 'memo' => $supre->no_memo,
                 'unidad' => $supre->unidad_capacitacion,
-                'url' => '/supre/validacion/' . $id,
+                'url' => 'https://sivyc.icatech.gob.mx/supre/validacion/' . $id,
             ];
-            //$users = User::where('id', 1)->get();
-            // dd($users);
-            //event((new NotificationEvent($users, $letter)));
+            event(new NotificationEvent($users, $dataNotification));
 
             return view('layouts.pages.suprecheck',compact('id','id_directorio'));
         }
@@ -302,31 +303,32 @@ class supreController extends Controller
         return view('layouts.pages.valsupre',compact('data','getremitente','directorio'));
     }
 
-    public function supre_rechazo(Request $request){
+    public function supre_rechazo(Request $request) {
         $supre = supre::find($request->id);
+
         $supre->observacion = $request->comentario_rechazo;
         $supre->fecha_status = carbon::now();
         $supre->fecha_rechazado = carbon::now();
         $supre->status = 'Rechazado';
-        //dd($supre);
         $supre->save();
 
         // Notificacion!
-        $letter = [
+        $dataNotification = [
             'titulo' => 'Suficiencia Presupuestal Rechazada',
             'cuerpo' => 'La suficicencia presupuestal ' . $supre->no_memo . ' ha sido rechazada',
             'memo' => $supre->no_memo,
             'unidad' => $supre->unidad_capacitacion,
-            'url' => '/supre/solicitud/modificar/' . $supre->id,
+            'url' => 'https://sivyc.icatech.gob.mx/supre/solicitud/modificar/' . $supre->id,
         ];
-        //$users = User::where('id', 1)->get();
-        // dd($users);
-        //event((new NotificationEvent($users, $letter)));
-            return redirect()->route('supre-inicio')
-                    ->with('success','Suficiencia Presupuestal Rechazado');
+        $users = $this->getDataNotification($request->id);
+        event(new NotificationEvent($users, $dataNotification));
+
+        return redirect()->route('supre-inicio')->with('success','Suficiencia Presupuestal Rechazado');
     }
 
     public function supre_validado(Request $request){
+        $users = $this->getDataNotification($request->id);
+
         $supre = supre::find($request->id);
         $supre->status = 'Validado';
         $supre->folio_validacion = $request->folio_validacion;
@@ -348,16 +350,16 @@ class supreController extends Controller
         $directorio_id = $request->directorio_id;
 
         // Notificacion!
-        $letter = [
+        $dataNotification = [
             'titulo' => 'Suficiencia Presupuestal Validada',
             'cuerpo' => 'La suficicencia presupuestal ' . $supre->no_memo . ' ha sido validada',
             'memo' => $supre->no_memo,
             'unidad' => $supre->unidad_capacitacion,
             'url' => '/supre/validacion/pdf/' . $supre->id,
         ];
-        //$users = User::where('id', 1)->get();
-        // dd($users);
-        //event((new NotificationEvent($users, $letter)));
+        $users = $this->getDataNotification($request->id);
+        event(new NotificationEvent($users, $dataNotification));
+
         return view('layouts.pages.valsuprecheck', compact('id', 'directorio_id'));
     }
 
@@ -590,7 +592,7 @@ class supreController extends Controller
     public function cancelFolio(Request $request)
     {
         $userName = Auth::user()->name;
-//a
+        //a
         $folio = folio::find($request->idf);
         $folio->observacion_cancelacion = $request->observaciones;
         $folio->cancelo = $userName;
@@ -1475,4 +1477,28 @@ class supreController extends Controller
             return Excel::download(new FormatoTReport($data,$cabecera, $titulo), $nombreLayout);
         }
     }
+
+    public function getDataNotification($idSuficiencia) { 
+        $usersNotificacion = User::join('role_user as ru', 'ru.user_id', 'users.id')
+                            ->where('users.unidades', '!=', 'null')
+                            ->where('role_id', 2)
+                            ->get();
+        foreach ($usersNotificacion as $key => $value) {
+            print_r($value->user_id.',');
+        }
+        dd($usersNotificacion);
+        $dataSuficiencia = supre::select('tabla_supre.*', 'u.ubicacion as uCapacitacion')
+                            ->join('tbl_unidades as u', 'tabla_supre.unidad_capacitacion', 'u.unidad')
+                            ->where('tabla_supre.id', $idSuficiencia)
+                            ->first();
+        foreach ($usersNotificacion as $key => $value) {
+            $partUnity = explode(',', $value->unidades);
+            if (!in_array($dataSuficiencia->uCapacitacion, $partUnity)) {
+                unset($usersNotificacion[$key]);
+            }
+        }
+
+        return $usersNotificacion;
+    }
+
 }
