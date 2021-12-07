@@ -1483,10 +1483,7 @@ class supreController extends Controller
                             ->where('users.unidades', '!=', 'null')
                             ->where('role_id', 2)
                             ->get();
-        foreach ($usersNotificacion as $key => $value) {
-            print_r($value->user_id.',');
-        }
-        dd($usersNotificacion);
+        
         $dataSuficiencia = supre::select('tabla_supre.*', 'u.ubicacion as uCapacitacion')
                             ->join('tbl_unidades as u', 'tabla_supre.unidad_capacitacion', 'u.unidad')
                             ->where('tabla_supre.id', $idSuficiencia)
