@@ -2,6 +2,7 @@
 //Creado por Orlando Chavez
 namespace App\Http\Controllers\WebController;
 
+use App\Events\NotificationEvent;
 use Illuminate\Support\Facades\View;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -19,13 +20,16 @@ use App\Models\tbl_curso;
 use App\Models\contrato_directorio;
 use App\Models\especialidad;
 use App\Models\instructor;
+use App\Models\Permission;
 use PDF;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\tbl_unidades;
+use App\Models\User;
 use Illuminate\Pagination\Paginator;
 use DateTime;
+use phpDocumentor\Reflection\Types\This;
 
 class ContratoController extends Controller
 {
@@ -199,6 +203,8 @@ class ContratoController extends Controller
 
     public function contrato_save(Request $request)
     {
+        $unidad = tbl_unidades::where('unidad', $request->unidad_capacitacion)->first();
+
         $check_contrato = contratos::SELECT('numero_contrato')
             ->WHERE('numero_contrato', '=', $request->numero_contrato)
             ->FIRST();
@@ -240,16 +246,22 @@ class ContratoController extends Controller
         $idc = $id_contrato->id_contrato;
 
         //Notificacion
-        $letter = [
+        $dataNotificacion = [
             'titulo' => 'Solicitud de Contrato',
             'cuerpo' => 'La solicitud de contrato ' . $contrato->numero_contrato . ' ha sido agregada para su validación',
             'memo' => $contrato->numero_contrato,
             'unidad' => $contrato->unidad_capacitacion,
-            'url' => '/contrato/validar/' . $contrato->id,
+            'url' => 'https://sivyc.icatech.gob.mx/contrato/validar/' . $contrato->id,
         ];
-        //$users = User::where('id', 1)->get();
-        // dd($users);
-        //event((new NotificationEvent($users, $letter)));
+
+        $usersNotification = User::wherein('id', [323, 324, 427])->get();
+        foreach ($usersNotification as $key => $value) {
+            $partsUnity = explode(',', $value->unidades);
+            if (!in_array($unidad->ubicacion, $partsUnity)) {
+                unset($usersNotification[$key]);
+            }
+        }
+        event(new NotificationEvent($usersNotification, $dataNotificacion));
 
         return view('layouts.pages.contratocheck', compact('idc'));
     }
@@ -370,8 +382,10 @@ class ContratoController extends Controller
         return view('layouts.pages.vstvalidarcontrato', compact('data','director','testigo1','testigo2','testigo3','cupo'));
     }
 
-    public function rechazar_contrato(Request $request){
+    public function rechazar_contrato(Request $request) {
         $contrato = contratos::find($request->idContrato);
+        $unidad = tbl_unidades::where('unidad', $contrato->unidad_capacitacion)->first();
+
         $contrato->observacion = $request->observaciones;
         $contrato->chk_rechazado = TRUE;
         $contrato->fecha_status = carbon::now();
@@ -394,19 +408,17 @@ class ContratoController extends Controller
         $folio->save();
 
         //Notificacion!
-        $letter = [
+        $dataNotification = [
             'titulo' => 'Solicitud de Contrato Rechazada',
             'cuerpo' => 'La solicitud de contrato ' . $contrato->numero_contrato . ' ha sido rechazada',
             'memo' => $contrato->numero_contrato,
             'unidad' => $contrato->unidad_capacitacion,
-            'url' => '/contrato/modificar/' . $contrato->id,
+            'url' => 'https://sivyc.icatech.gob.mx/contrato/modificar/' . $contrato->id,
         ];
-        //$users = User::where('id', 1)->get();
-        // dd($users);
-        //event((new NotificationEvent($users, $letter)));
+        $users = $this->getDataNotification($unidad->ubicacion);
+        event(new NotificationEvent($users, $dataNotification));
 
-        return redirect()->route('contrato-inicio')
-                        ->with('success','Contrato Rechazado Exitosamente');
+        return redirect()->route('contrato-inicio')->with('success','Contrato Rechazado Exitosamente');
     }
 
     public function valcontrato(Request $request){
@@ -415,24 +427,24 @@ class ContratoController extends Controller
                   'observacion' => $request->observaciones]);
 
         $contrato = contratos::WHERE('id_folios', '=', $request->id)->FIRST();
+        $unidad = tbl_unidades::where('unidad', $contrato->unidad_capacitacion)->first();
 
         $folio = folio::find($request->id);
         $folio->status = "Contratado";
         $folio->save();
-        return redirect()->route('contrato-inicio')
-                        ->with('success','Contrato Validado Exitosamente');
-
+        
         //Notificacion!
-        $letter = [
+        $dataNotification = [
             'titulo' => 'Solicitud de Contrato Validada',
             'cuerpo' => 'La solicitud de contrato ' . $contrato->numero_contrato . ' ha sido validada',
             'memo' => $contrato->numero_contrato,
             'unidad' => $contrato->unidad_capacitacion,
-            'url' => '/contrato/' . $contrato->id,
+            'url' => 'https://sivyc.icatech.gob.mx/contrato/' . $contrato->id,
         ];
-        //$users = User::where('id', 1)->get();
-        // dd($users);
-        //event((new NotificationEvent($users, $letter)));
+        $users = $this->getDataNotification($unidad->ubicacion);
+        event(new NotificationEvent($users, $dataNotification));
+
+        return redirect()->route('contrato-inicio')->with('success','Contrato Validado Exitosamente');
     }
 
     public function solicitud_pago($id){
@@ -1029,5 +1041,29 @@ class ContratoController extends Controller
         $part[0] = number_format($part['0']);
         $cadwell = implode(".", $part);
         return ($cadwell);
+    }
+
+    public function getDataNotification($unidadContrato) {
+        $usersNotification = Permission::select('u.*')->join('permission_role as pr', 'permissions.id','pr.permission_id')
+                                ->join('roles as r', 'pr.role_id', 'r.id')
+                                ->join('role_user as ru', 'r.id', 'ru.role_id')
+                                ->join('users as u', 'ru.user_id', 'u.id')
+                                ->where('u.unidades', '!=', 'null')
+                                ->where('permissions.slug', 'contratos.create')
+                                ->get();
+        
+        foreach ($usersNotification as $key => $value) {
+            $partsUnity = explode(',', $value->unidades);
+            if (!in_array($unidadContrato, $partsUnity)) {
+                unset($usersNotification[$key]);
+            }
+        }
+        $ids = [];
+        foreach ($usersNotification as $value) {
+            array_push($ids, $value->id);
+        }
+        $usersNotification = User::wherein('id', $ids)->get();
+
+        return $usersNotification;
     }
 }

@@ -24,6 +24,7 @@ use App\Models\pago;
 use Illuminate\Support\Facades\Auth;
 use App\Events\NotificationEvent;
 use App\Listeners\NotificationListener;
+use App\Models\Permission;
 use App\User;
 
 class supreController extends Controller
@@ -327,8 +328,6 @@ class supreController extends Controller
     }
 
     public function supre_validado(Request $request){
-        $users = $this->getDataNotification($request->id);
-
         $supre = supre::find($request->id);
         $supre->status = 'Validado';
         $supre->folio_validacion = $request->folio_validacion;
@@ -1478,24 +1477,34 @@ class supreController extends Controller
         }
     }
 
-    public function getDataNotification($idSuficiencia) { 
-        $usersNotificacion = User::join('role_user as ru', 'ru.user_id', 'users.id')
-                            ->where('users.unidades', '!=', 'null')
-                            ->where('role_id', 2)
+    public function getDataNotification($idSuficiencia) {
+        $usersNotification = Permission::select('u.*')->join('permission_role as pr', 'permissions.id','pr.permission_id')
+                            ->join('roles as r', 'pr.role_id', 'r.id')
+                            ->join('role_user as ru', 'r.id', 'ru.role_id')
+                            ->join('users as u', 'ru.user_id', 'u.id')
+                            ->where('u.unidades', '!=', 'null')
+                            ->where('permissions.slug', 'supre.create')
                             ->get();
         
         $dataSuficiencia = supre::select('tabla_supre.*', 'u.ubicacion as uCapacitacion')
                             ->join('tbl_unidades as u', 'tabla_supre.unidad_capacitacion', 'u.unidad')
                             ->where('tabla_supre.id', $idSuficiencia)
                             ->first();
-        foreach ($usersNotificacion as $key => $value) {
-            $partUnity = explode(',', $value->unidades);
-            if (!in_array($dataSuficiencia->uCapacitacion, $partUnity)) {
-                unset($usersNotificacion[$key]);
+
+        foreach ($usersNotification as $key => $value) {
+            $partsUnity = explode(',', $value->unidades);
+            if (!in_array($dataSuficiencia->uCapacitacion, $partsUnity)) {
+                unset($usersNotification[$key]);
             }
         }
 
-        return $usersNotificacion;
+        $ids = [];
+        foreach ($usersNotification as $value) {
+            array_push($ids, $value->id);
+        }
+        $usersNotification = User::wherein('id', $ids)->get();
+
+        return $usersNotification;
     }
 
 }
