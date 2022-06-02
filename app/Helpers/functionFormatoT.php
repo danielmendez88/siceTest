@@ -371,6 +371,8 @@ function dataFormatoT($unidad, $status, $fecha) {
             ),
 
             DB::raw("c.observaciones_formato_t->'OBSERVACION_RETORNO_UNIDAD' AS observaciones_enlaces"),
+            'c.status_solicitud_arc02',
+            'c.arc',
 
 
         )
@@ -385,6 +387,16 @@ function dataFormatoT($unidad, $status, $fecha) {
         ->WHERE('c.clave', '!=', 'null')
         ->where('ins.calificacion', '>', '0')
         ->where('m.id_estado', '=', '7')
+        // ->orwhere('c.arc', '=', '2')
+        // ->where('c.status_solicitud_arc02', '=', 'VALIDADO')
+        // ->WHERE('c.file_arc02', '!=', null)
+        // ->WHERE('u.ubicacion', '=', $unidad)
+        // ->WHEREIN('c.status', $status)
+        // ->WHERE('c.status_curso', '=', 'AUTORIZADO')
+        // ->where('ins.status', '=', 'INSCRITO')
+        // ->WHERE('c.clave', '!=', 'null')
+        // ->where('ins.calificacion', '>', '0')
+        // ->where('m.id_estado', '=', '7')
         ->groupby(
             'c.id',
             'c.status',
