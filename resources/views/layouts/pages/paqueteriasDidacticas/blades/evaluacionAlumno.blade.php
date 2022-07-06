@@ -44,8 +44,6 @@
                     </div>
                 </div>
 
-
-
                 <div class="form-row col-md-7 opcion-area-p1" id="pregunta1-opc">
                     <input type="text" hidden id="pregunta1-opc-answer" name="pregunta1-opc-answer">
                     <div class="input-group mb-3 ">
