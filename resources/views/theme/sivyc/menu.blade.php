@@ -16,11 +16,13 @@
             </ul>
         @else
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link g-mx-5--lg" href="{{ route('cursos_validados.index') }}">
-                        Cursos Validados
-                    </a>
-                </li>
+                @can('show.cursos.validados')
+                    <li class="nav-item active">
+                        <a class="nav-link g-mx-5--lg" href="{{ route('cursos_validados.index') }}">
+                            Cursos Validados
+                        </a>
+                    </li>
+                @endcan
                 {{--  <!--SUPERVISIONES
                 @can('supervision.escolar')
                     <li class="nav-item g-mx-5--lg dropdown">
@@ -71,14 +73,14 @@
                             @can('supre.index')                    
                                 <a class="dropdown-item" href="{{route('supre-inicio')}}">Suficiencia Presupuestal</a>                    
                             @endcan
-                            @can('contratos.index')                    
-                                <a class="dropdown-item" href="{{route('contrato-inicio')}}">Contratos</a>                    
+                            @can('contratos.index')
+                                <a class="dropdown-item" href="{{route('contrato-inicio')}}">Contratos</a>
                             @endcan
                             @can('pagos.inicio')
                                 <a class="dropdown-item" href="{{route('pago-inicio')}}">Pagos</a>
                             @endcan
                         </div>
-                    </li>                
+                    </li>
                 {{--  <!--@endcan-->  --}}
                 {{-- Grupo calificaciones --}}
                 @can('grupos.calificaciones')
@@ -184,7 +186,9 @@
                         @can('cursos.index')
                              <a class="dropdown-item" href="{{route('curso-inicio')}}">Cursos</a>
                         @endcan
-                        <a class="dropdown-item" href="{{route('instructor-inicio')}}">Instructor</a>
+                        @can('instructor.index')
+                            <a class="dropdown-item" href="{{route('instructor-inicio')}}">Instructor</a>
+                        @endcan
                         @can('organismo.inicio')
                         <a class="dropdown-item" href="{{route('organismos.index')}}">Organismos Publicos</a>
                         @endcan
@@ -209,6 +213,8 @@
                         @can('instituto.inicio')
                             <a class="dropdown-item" href="{{route('instituto.inicio')}}">Acerca del instituto</a>
                         @endcan
+
+
                     </div>
                 </li>
                 <li class="nav-item g-mx-5--lg dropdown">
@@ -275,7 +281,7 @@
                         @endcan
                         @can('planeacion.ingresos.propios')
                             <a class="dropdown-item" href="{{route('reportes.planeacion.ingresos_propios')}}">Ingresos Propios</a>
-                        @endcan                        
+                        @endcan
                         @can('consultas.cursosefisico')
                             <a class="dropdown-item" href="{{route('consultas.cursosefisico')}}">Cursos EFisico</a>
                         @endcan
@@ -289,14 +295,14 @@
                 </li>
 
                 @can('estadisticas.ecursos')
-                    
+
                     <li class="nav-item g-mx-5--lg dropdown">
                         <a class="nav-link g-color-white--hover" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Estadísticas
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <a class="dropdown-item" href="{{route('estadisticas.ecursos')}}">Cursos Impartidos</a>
-                                @can('tablero.metas.index')                       
+                                @can('tablero.metas.index')
                                     <a class="dropdown-item" href="{{route('tablero.metas.index')}}">Tablero de Control</a>
                                 @endcan
                         </div>
@@ -371,7 +377,7 @@
 </nav>
 <!--/.Navbar -->
 <!-- Modal Cancel Folio -->
-<div class="modal fade" id="ModalFinanciero" role="dialog">
+{{-- <div class="modal fade" id="ModalFinanciero" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -434,7 +440,7 @@
             </form>
         </div>
     </div>
-</div>
+</div> --}}
 <!-- END -->
 <!-- Modal Cancel Folio -->
 <div class="modal fade" id="ModalExpIns" role="dialog">

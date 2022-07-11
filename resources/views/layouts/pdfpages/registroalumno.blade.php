@@ -38,20 +38,18 @@
     img.derecha {
         float: right;
         width: 2.5cm;
-        height: 2.5cm;
+        height: 3.0cm;
       }
 </style>
 <body>
-    <div>
-        <div><img class="izquierda" src="{{ public_path('img/sep1.png') }}"></div>
-        <div>
-           @if ($alumnos->chk_fotografia == TRUE)
+    <div style="text-align: center;">
+        <img class="izquierda" src="{{ public_path('img/sep1.png') }}">
+        @if ($alumnos->chk_fotografia == TRUE)
            <img class="derecha img-thumbnail mb-3" src="{{ public_path($pathimg) }}">
-           @else
+        @else
            <img class="derecha img-thumbnail mb-3" src="{{ public_path('img/blade_icons/nophoto.png') }}">
-           @endif
-        </div>
-        <div style="text-align:center;" class="demo"><b>SUBSECRETARIA DE EDUCACIÓN MEDIA SUPERIOR <br>DIRECCIÓN GENERAL DE CENTROS DE FORMACIÓN PARA EL TRABAJO <br>SOLICITUD DE INSCRIPCIÓN <br> ( SID - 01 )</b></div>
+        @endif
+        <p><b>SUBSECRETARIA DE EDUCACIÓN MEDIA SUPERIOR <br>DIRECCIÓN GENERAL DE CENTROS DE FORMACIÓN PARA EL TRABAJO <br>SOLICITUD DE INSCRIPCIÓN <br> ( SID - 01 )</b></p>
     </div>
     <br>
     <div>
@@ -106,7 +104,7 @@
                     <td><b>EDAD:</b> </td>
                     <td>{{$edad}} AÑOS</td>
                     <td><b>TELEFONO:</b></td>
-                    <td>@php if($alumnos->telefono){echo ($alumnos->telefono); }else{if($alumnos->telefono_casa){echo($alumnos->telefono_casa);}else{echo($alumnos->telefono_personal);} } @endphp</td>
+                    <td>@php if($alumnos->telefono_casa){echo ($alumnos->telefono_casa); }else{if($alumnos->telefono_personal){echo($alumnos->telefono_personal);}else{echo($alumnos->telefono);} } @endphp</td>
                 </tr>
                 <tr>
                     <td><b>DOMICILIO: </b></td>
