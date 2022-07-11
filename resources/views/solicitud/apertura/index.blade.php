@@ -67,7 +67,11 @@
                 <div class="form-group col-md-3">&Aacute;REA: <b>{{ $grupo->area }}</b></div>
                 <div class="form-group col-md-2">MODALIDAD: <b>{{ $grupo->mod}}</b></div>
                 <div class="form-group col-md-3">TIPO CAPACITACI&Oacute;N: <b>{{ $grupo->tcapacitacion}}</b></div>            
-                <div class="form-group col-md-4">DURACI&Oacute;N: <b>{{ $grupo->dura }} hrs.</b></div>    <input type="hidden" name="hini" id="hini" value="{{$hini}}">
+                <div class="form-group col-md-4">DURACI&Oacute;N: <b>@if ($grupo->dura)
+                    {{ $grupo->dura }}
+                @else
+                    {{ $grupo->horas }}
+                @endif hrs.</b></div>    <input type="hidden" name="hini" id="hini" value="{{$hini}}">
                 <div class="form-group col-md-3" id="hora">HORARIO: <b>{{ $grupo->horario }}</b></div> <input type="hidden" name="hfin" id="hfin" value="{{$hfin}}">
                 <div class="form-group col-md-2">COSTO ALUMNO: <b>{{ $grupo->costo_individual }}</b></div>
                 <div class="form-group col-md-3">HOMBRES: <b>{{ $grupo->hombre }}</b></div>
@@ -281,7 +285,7 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        @if ($grupo->turnado != 'DTA' AND (!$grupo->status_solicitud OR $grupo->status_solicitud=='RETORNO'))
+                        @if ($grupo->turnado != 'DTA' AND (!$grupo->status_solicitud OR $grupo->status_solicitud=='RETORNO') AND !$exonerado)
                         <button id="btnAgregar" type="button" class="btn btn-success">Agregar</button>
                         {{--<button id="btnModificar" class="btn btn-warning">Modificar</button>--}}
                         <button id="btnBorrar" class="btn btn-danger">Borrar</button>
