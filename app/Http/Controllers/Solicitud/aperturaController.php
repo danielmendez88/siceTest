@@ -66,7 +66,7 @@ class aperturaController extends Controller
 
     public function index(Request $request){
         $valor = $efisico = $grupo = $alumnos = $message = $medio_virtual = $depen = $exoneracion = $instructor = $plantel = $programa = $sector = $tcurso = $tcuota =
-        $muni = $instructores = $convenio = $localidad = $comprobante = NULL;
+        $muni = $instructores = $convenio = $localidad = $comprobante = $exonerado = NULL;
         if($request->valor)  $valor = $request->valor;
         elseif(isset($_SESSION['folio'])) $valor = $_SESSION['folio'];
         $_SESSION['alumnos'] = NULL;
@@ -150,6 +150,7 @@ class aperturaController extends Controller
                 $exoneracion = $this->exoneracion($this->id_unidad);
                 $exoneracion["NINGUNO"] = "NINGUNO";
                 $efisico = $this->efisico();
+                $exonerado = DB::table('exoneraciones')->where('folio_grupo',$grupo->folio_grupo)->where('status','<>',null)->where('status','<>','CANCELADO')->exists();
 
                 $medio_virtual = $this->medio_virtual();
 
@@ -162,7 +163,8 @@ class aperturaController extends Controller
         }
         $tinscripcion = $this->tinscripcion();
         if(session('message')) $message = session('message');//dd($grupo);
-        return view('solicitud.apertura.index', compact('comprobante','efisico','message','grupo','alumnos','plantel','depen','sector','programa','instructor','exoneracion','medio_virtual','tcurso','tinscripcion','tcuota','muni','instructores','convenio','localidad'));
+        return view('solicitud.apertura.index', compact('comprobante','efisico','message','grupo','alumnos','plantel','depen','sector','programa',
+            'instructor','exoneracion','medio_virtual','tcurso','tinscripcion','tcuota','muni','instructores','convenio','localidad','exonerado'));
     }
 
     public function cgral(Request $request){
@@ -181,15 +183,19 @@ class aperturaController extends Controller
    public function regresar(Request $request){
        $message = 'Operación fallida, vuelva a intentar..';
         if($_SESSION['folio']){
-            $result = DB::table('alumnos_registro')->where('folio_grupo',$_SESSION['folio'])->update(['turnado' => "VINCULACION",'fecha_turnado' => date('Y-m-d')]);
-            $agenda = DB::table('agenda')->where('id_curso', $_SESSION['folio'])->delete();
-            $curso = DB::table('tbl_cursos')->where('folio_grupo', $_SESSION['folio'])->update(['tdias'=>null,'dia'=>null,'fecha_arc01'=>null,
-                                                                                                'id_instructor'=>0]);
-            //$_SESSION['folio'] = null;
-           // unset($_SESSION['folio']);
-           if($result){
-                $message = "El grupo fué turnado correctamente a VINCULACIÓN";
-                unset($_SESSION['folio']);
+            if (DB::table('exoneraciones')->where('folio_grupo',$_SESSION['folio_grupo'])->where('status','!=', null)->where('status','!=','CANCELADO')->exists()) {
+                $message = "Solicitud de Exoneración o Reducción de couta en Proceso..";
+            } else {
+                $result = DB::table('alumnos_registro')->where('folio_grupo',$_SESSION['folio'])->update(['turnado' => "VINCULACION",'fecha_turnado' => date('Y-m-d')]);
+                $agenda = DB::table('agenda')->where('id_curso', $_SESSION['folio'])->delete();
+                $curso = DB::table('tbl_cursos')->where('folio_grupo', $_SESSION['folio'])->update(['tdias'=>null,'dia'=>null,'fecha_arc01'=>null,
+                                                                                                    'id_instructor'=>0]);
+                //$_SESSION['folio'] = null;
+                // unset($_SESSION['folio']);
+                if($result){
+                    $message = "El grupo fué turnado correctamente a VINCULACIÓN";
+                    unset($_SESSION['folio']);
+                }
             }
         }
         return redirect('solicitud/apertura')->with('message',$message);
