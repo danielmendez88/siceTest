@@ -92,6 +92,9 @@ class ExoneracionController extends Controller
                 if (($curso->tipo != 'EXO') AND (count(DB::table('alumnos_registro')->where('folio_grupo',$curso->folio_grupo)->where('tinscripcion','=','EXONERACION')->get())>0)) {
                     return redirect()->route('solicitud.exoneracion')->with(['message' => 'EL GRUPO NO DEBE TENER EXONERADOS PARA SOLICITUD DE REDUCIÓN DE CUOTA..']);
                 }
+                if (DB::table('exoneraciones')->where('folio_grupo',$curso->folio_grupo)->where(function($query) { $query->where('status','!=','CANCELADO')->orWhere('status', null); })->exists()) {
+                    return redirect()->route('solicitud.exoneracion')->with(['message' => 'EL GRUPO SE ENCUENTRA EN USO..']);
+                }
                 if (($curso->dura == $curso->horas_agenda)) {
                     $organismo = null;
                     if ($_SESSION['revision']) {
@@ -290,7 +293,8 @@ class ExoneracionController extends Controller
                                     ->first(); //dd($reg_unidad);
                 $depen = $cursos[0]->depen;
                 $date = $cursos[0]->fecha_memorandum;
-                $mexoneracion = $cursos[0]->no_memorandum;
+                if($cursos[0]->no_memorandum)$mexoneracion = $cursos[0]->no_memorandum;
+                else $mexoneracion = $cursos[0]->nrevision;
                 foreach ($cursos as $key => $value) {
                     $alumnos = DB::table('alumnos_registro as ar')
                                     ->select('ap.apellido_paterno','ap.apellido_materno','ap.nombre','ap.sexo','ar.costo',DB::raw("CONCAT(ap.apellido_paterno,' ', ap.apellido_materno,' ',ap.nombre) as alumno"),
