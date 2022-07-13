@@ -13,7 +13,6 @@
         $hfin = $termino = $inicio = $id_localidad = $id_muni = $organismo = $modalidad = "";       
         if($curso){
             $id_curso = $curso->id;
-            $tipo = $curso->tipo_curso;
             $id_cerss = $alumnos[0]->id_cerss;
         }
         if($alumnos){ 
@@ -30,7 +29,8 @@
             $folio = $alumnos[0]->folio_grupo;
             $turnado = $alumnos[0]->turnado;   
             $id_vulnerable = $alumnos[0]->id_vulnerable;  
-            $modalidad = $alumnos[0]->mod;                  
+            $modalidad = $alumnos[0]->mod; 
+            $tipo = $alumnos[0]->tipo_curso;                 
         }
         if($turnado!='VINCULACION' AND !$message AND $turnado) $message = "Grupo turnado a  ".$turnado;
         $consec = 1;
@@ -153,10 +153,8 @@
                 <br />   
                              
             </form>
-        </div>    
-              
-    </div>
-
+        </div> 
+    </div>   
     @section('script_content_js') 
         <script src="{{asset('js/preinscripcion/grupo.js')}}"></script>        
         <script src="{{asset('js/preinscripcion/tableAlumnos.js')}}"></script>        	
@@ -166,7 +164,8 @@
                 $("#nuevo").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.nuevo')}}"); $('#frm').submit(); });
                 $("#update").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.update')}}"); $('#frm').submit(); });
                 $("#turnar").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.turnar')}}"); $('#frm').submit(); });
-                $("#comprobante").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.comprobante')}}"); $('#frm').submit(); }); 
+                $("#comprobante").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.comprobante')}}"); $('#frm').submit(); });
+                $("#btnremplazo").click(function(){if (confirm("Est\u00E1 seguro de ejecutar la acci\u00F3n?")==true) {$('#frm').attr('action', "{{route('preinscripcion.grupo.remplazar')}}"); $('#frm').submit();}}); 
 
             });
         </script>
