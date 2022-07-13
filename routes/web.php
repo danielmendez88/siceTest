@@ -199,6 +199,8 @@ Route::middleware(['auth'])->group(function () {
      */
     //Route::get('/alumnos/indice', 'webController\AlumnoController@index')
         //   ->name('alumnos.index')->middleware('can:alumnos.index');
+    Route::post('/alumnos/exoneracion/permiso','webController\AlumnoController@activarPermiso')->name('activar.permiso.exo');
+    Route::get('/alumnos/exoneracion/permiso/desactivar','webController\AlumnoController@quitarPermiso')->name('quitar.permiso.exo');
     Route::get('/alumnos/indice', 'webController\AlumnoController@index')
         ->name('alumnos.index')->middleware('can:alumnos.index');
 
@@ -544,8 +546,8 @@ Route::middleware(['auth'])->group(function () {
     /*POA & AUTORIZADO*/
     Route::get('/consultas/poa/index', 'Consultas\poaController@index')->name('consultas.poa')->middleware('can:consultas.poa');
     Route::post('/consultas/poa/index', 'Consultas\poaController@index')->name('consultas.poa')->middleware('can:consultas.poa');
-    Route::post('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls');
-    Route::get('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls');
+    Route::post('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls')->middleware('can:consultas.poa');
+    Route::get('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls')->middleware('can:consultas.poa');
 
 
 
