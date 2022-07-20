@@ -199,6 +199,8 @@ Route::middleware(['auth'])->group(function () {
      */
     //Route::get('/alumnos/indice', 'webController\AlumnoController@index')
         //   ->name('alumnos.index')->middleware('can:alumnos.index');
+    Route::post('/alumnos/exoneracion/permiso','webController\AlumnoController@activarPermiso')->name('activar.permiso.exo');
+    Route::get('/alumnos/exoneracion/permiso/desactivar','webController\AlumnoController@quitarPermiso')->name('quitar.permiso.exo');
     Route::get('/alumnos/indice', 'webController\AlumnoController@index')
         ->name('alumnos.index')->middleware('can:alumnos.index');
 
@@ -544,8 +546,8 @@ Route::middleware(['auth'])->group(function () {
     /*POA & AUTORIZADO*/
     Route::get('/consultas/poa/index', 'Consultas\poaController@index')->name('consultas.poa')->middleware('can:consultas.poa');
     Route::post('/consultas/poa/index', 'Consultas\poaController@index')->name('consultas.poa')->middleware('can:consultas.poa');
-    Route::post('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls');
-    Route::get('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls');
+    Route::post('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls')->middleware('can:consultas.poa');
+    Route::get('/consultas/poa/xls', 'Consultas\poaController@xls')->name('consultas.poa.xls')->middleware('can:consultas.poa');
 
 
 
@@ -642,6 +644,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/solicitudes/exoneracion/cancelar','Solicitudes\ExoneracionesController@cancelar')->name('solicitudes.exoneracion.cancelar')->middleware('can:solicitudes.exoneracion');
     Route::post('/solicitudes/exoneracion/regresar_validado','Solicitudes\ExoneracionesController@retornar_validado')->name('solicitudes.exoneracion.rvalidado')->middleware('can:solicitudes.exoneracion');
     Route::post('/solicitudes/exoneracion/editar','Solicitudes\ExoneracionesController@editar')->name('solicitudes.exoneracion.editar')->middleware('can:solicitudes.exoneracion');
+    Route::post('/solicitudes/exoneracion/actualizar','Solicitudes\ExoneracionesController@asoporte')->name('solicitudes.exoneracion.asoporte')->middleware('can:solicitudes.exoneracion');
 
     //paqueterias didacticas
     Route::get('paqueterias/{idCurso}', 'webController\PaqueteriaDidacticaController@index')->name('paqueteriasDidacticas')->middleware('can:paqueteriasdidacticas');

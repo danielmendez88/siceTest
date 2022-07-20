@@ -9,7 +9,7 @@
       <th class="h6" scope="col" width="8%">Fec. Nac.</th>
       <th class="h6" scope="col">Escolaridad</th>
       <th scope="col" class="h6">TIPO DE INSCRIPCI&Oacute;N</th>
-      <th scope="col" class="h6 text-center">COUTA</th>
+      <th scope="col" class="h6 text-center" width="7%">COUTA</th>
       <th class="h6 text-center" scope="col"> @if($activar){{'Eliminar'}}@endif</th>                               
       <th class="h6 text-center" scope="col">SID</th>
       <th class="h6 text-center" scope="col">CURP</th>
@@ -21,7 +21,14 @@
   </thead>                                    
   <tbody>
     @if(count($alumnos)>0)
-      @foreach($alumnos as $a)                               
+      @foreach($alumnos as $a)   
+        @php
+          if ($costo < $a->costo) {
+            $class= 'form-control numero bg-danger';
+          } else {
+            $class = 'form-control numero';
+          }  
+        @endphp                            
         <tr id="{{$a->id_reg}}">
           <th scope="row"> {{ $consec++ }} </th>
           <th>{{ $a->curp }}</th>
@@ -31,7 +38,9 @@
           <th>{{ $a->fnacimiento }}</th>
           <th>{{ $a->ultimo_grado_estudios }}</th>
           <th>{{$a->tinscripcion}}</th>
-          <th class="text-center">{{ Form::text('costo['.$a->id_reg.']', $a->costo , ['id'=>'costo['.$a->id_reg.']', 'class' => 'form-control numero', 'size' => 1, 'maxlength' => '7']) }}</th>
+          <th class="text-center">
+            {{ Form::text('costo['.$a->id_reg.']', $a->costo , ['id'=>'costo['.$a->id_reg.']', 'size' => 1, 'maxlength' => '7', 'class' => $class]) }}
+          </th>
           <th class="text-center">
             @if($activar)
               <a class="nav-link" ><i class="fa fa-remove  fa-2x fa-lg text-danger" onclick="eliminar({{$a->id_reg}},'{{ route('preinscripcion.grupo.eliminar') }}');" title="Eliminar"></i></a>
