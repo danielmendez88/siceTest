@@ -82,7 +82,10 @@ class ExoneracionController extends Controller
                          'tc.dura','tc.status_curso','ar.id_organismo','ar.folio_grupo')
                         ->leftJoin('alumnos_registro as ar','tc.folio_grupo','=','ar.folio_grupo')
                         ->where('tc.status_curso','=',null)
-                        ->where('tc.status_solicitud','=',null)
+                        ->where(function($query) {
+                            $query->where('tc.status_solicitud','=',null)
+                                  ->orWhere('tc.status_solicitud', '=', 'RETORNO');
+                        })
                         ->where('ar.turnado','=','UNIDAD')
                         // ->where('tc.mod','=','CAE')
                         ->where('ar.id_organismo','!=',242)
@@ -115,7 +118,7 @@ class ExoneracionController extends Controller
                         }  
                     }
                     if (!$_SESSION['revision'] AND $curso) {
-                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW('max(cast(substring(nrevision,9,4) as int))'))) + 1;
+                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW("max(cast(substring(nrevision from '.{4}$') as int))"))) + 1;
                         $consec = str_pad($consec, 4, "0", STR_PAD_LEFT);
                         $revision = "EXO-".$curso->cct.$curso->ejercicio.$consec;
                         $_SESSION['revision'] = $revision;
