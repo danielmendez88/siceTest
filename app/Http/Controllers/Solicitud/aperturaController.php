@@ -167,6 +167,24 @@ class aperturaController extends Controller
             'instructor','exoneracion','medio_virtual','tcurso','tinscripcion','tcuota','muni','instructores','convenio','localidad','exonerado'));
     }
 
+    public function search(Request $request){
+        $_SESSION = null;
+        $aperturas = DB::table('tbl_cursos as tc')
+            ->select('tc.unidad','tc.num_revision','tc.munidad','tc.file_arc01','tc.turnado','tc.status_curso','tc.status_solicitud','tc.status','tc.pdf_curso','tc.fecha_apertura')
+            ->leftJoin('alumnos_registro as a','tc.folio_grupo','=','a.folio_grupo')
+            ->leftJoin('tbl_unidades as u', 'tc.unidad','=','u.unidad')
+            ->where('a.turnado','<>','VINCULACION')
+            ->where('u.id','=',Auth::user()->unidad);
+        if ($request->valor) {
+            $aperturas = $aperturas->where('tc.munidad','=',$request->valor)
+                ->orWhere('tc.num_revision','=',$request->valor);
+        }
+        $aperturas = $aperturas->groupBy('tc.unidad','tc.num_revision','tc.munidad','tc.file_arc01','tc.turnado','tc.status_curso','tc.status_solicitud','tc.status','tc.pdf_curso','tc.fecha_apertura')
+            ->orderBy('tc.fecha_apertura','desc')
+            ->paginate(50);
+        return view('solicitud.apertura.buzon',compact('aperturas'));
+    }
+
     public function cgral(Request $request){
         $convenio = $json = [];
         if($request->id AND $request->mod=='CAE')
@@ -673,6 +691,25 @@ class aperturaController extends Controller
                     ->get();
         if (count($evento) > 0) {
             $isEquals = true;
+        }
+        //VALIDACION DISPONIBILIDAD FECHA Y HORA X ALUMNO
+        $alumnos = DB::table('alumnos_registro as ar')->select('ar.id_pre','ap.curp')
+            ->leftJoin('alumnos_pre as ap','ar.id_pre','=','ap.id')
+            ->where('ar.folio_grupo',$id_curso)->where('ar.eliminado',false)->get();
+        if (count($alumnos)>0) {
+            foreach ($alumnos as $key => $value) {
+                $existe_dupli = DB::table('agenda as a')
+                    ->select('a.id_curso')
+                    ->leftJoin('alumnos_registro as ar','a.id_curso','=','ar.folio_grupo')
+                    ->whereRaw("((date(a.start) >= '$fi' and date(a.start) <= '$ft' and cast(a.start as time) >= '$hi' and cast(a.start as time) < '$ht') OR
+                    (date(a.end) >= '$fi' and date(a.end) <= '$ft' and cast(a.end as time) > '$hi' and cast(a.end as time) <= '$ht'))")
+                    ->where('ar.eliminado',false)
+                    ->where('ar.id_pre',$value->id_pre)
+                    ->get();
+                if (count($existe_dupli)>0) {
+                    return "iguales8";
+                }
+            }
         }
         //CRITERIO 8hrs
         foreach ($period as $value) {
