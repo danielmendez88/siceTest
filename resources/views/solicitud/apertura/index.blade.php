@@ -179,6 +179,12 @@
                     <label>Observaciones:</label>
                     <textarea name='observaciones' id='observaciones'  class="form-control" rows="5" >{{$grupo->nota}}</textarea>
                 </div>
+            </div>
+            <div class="form-row">
+                <div class="custom-file form-group col-md-3">
+                    <input type="file" id="file_pago" name="file_pago" accept="application/pdf" class="custom-file-input"/>
+                    <label for="file_pago" class="custom-file-label">PDF COMPROBANTE DE PAGO</label>
+                </div>
             </div><br />
                     
            
@@ -323,7 +329,11 @@
                 $("#regresar" ).click(function(){if(confirm("Esta seguro de ejecutar la acción?")==true){$('#frm').attr('action', "{{route('solicitud.apertura.regresar')}}"); $('#frm').submit();}}); 
                 $("#guardar" ).click(function(){
                     validaCERT();
-                    if(confirm("Esta seguro de ejecutar la acción?")==true){$('#frm').attr('action', "{{route('solicitud.apertura.guardar')}}"); $('#frm').submit();}
+                    if(confirm("Esta seguro de ejecutar la acción?")==true){
+                        $('#frm').attr('action', "{{route('solicitud.apertura.guardar')}}"); 
+                        $('#frm').attr('enctype', "multipart/form-data");
+                        $('#frm').submit();
+                    }
                 }); 
                 $("#inscribir" ).click(function(){if(confirm("Esta seguro de ejecutar la acción?")==true){$('#frm').attr('action', "{{route('solicitud.apertura.aceptar')}}"); $('#frm').submit();}});
 
@@ -591,6 +601,10 @@
                             }else if (msg == 'iguales7') {
                                 $('#titleToast').html('Horario incorrecto');
                                 $("#msgVolumen").html("La diferencia de tiempo de viaje entre unidades no es valida");
+                                $(".toast").toast("show");
+                            }else if (msg == 'iguales8') {
+                                $('#titleToast').html('Duplicidad en alumnos');
+                                $("#msgVolumen").html("El alumno no se encuentra disponible en fecha y hora");
                                 $(".toast").toast("show");
                             }else if (msg == 'duplicado') {
                                 $('#titleToast').html('Datos incorrectos');

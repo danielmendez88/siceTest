@@ -232,7 +232,7 @@ class aperturaController extends Controller
                     ->withInput();
         }else
         */
-        
+
         if($_SESSION['folio'] AND $_SESSION['grupo'] AND $_SESSION['alumnos']){
                 $grupo = $_SESSION['grupo'];   //var_dump($grupo);exit;
                 $horas = round((strtotime($request->hfin)-strtotime($request->hini))/3600,2);
@@ -260,14 +260,14 @@ class aperturaController extends Controller
                         ->LEFTJOIN('criterio_pago', 'criterio_pago.id', '=', 'especialidad_instructores.criterio_pago_id')
                         ->first();
                    // var_dump($instructor);exit;
-                    
+
                     if($instructor){
                         //VALIDANDO INSTRUCTOR
                        $existe_instructor = DB::table('tbl_cursos')->where('folio_grupo','<>',$_SESSION['folio'])->where('curp', $instructor->curp)
                             ->where('inicio',$request->inicio)->where('termino',$request->termino)->where('hini',$hini)->where('hfin',$hfin)
                             ->where('dia', trim($request->dia))->where('status_curso','<>','CANCELADO')
                             ->exists();
-                            
+
                         if(!$existe_instructor){
                             /** CRITERIO DE PAGO */
                             if($instructor->cp > $grupo->cp)$cp = $grupo->cp;
@@ -332,7 +332,7 @@ class aperturaController extends Controller
 
                             $created_at = DB::table('tbl_cursos')->where('unidad',$grupo->unidad)->where('folio_grupo',$_SESSION['folio'])->value('created_at');
                             if ($created_at) {
-                                $updated_at = date('Y-m-d H:i:s'); 
+                                $updated_at = date('Y-m-d H:i:s');
                             } else {
                                 $created_at = date('Y-m-d H:i:s');
                                 $updated_at = date('Y-m-d H:i:s');
@@ -348,13 +348,35 @@ class aperturaController extends Controller
                                 $tipo_honorario = 'HONORARIOS';
                             }
                             $exonerado = DB::table('exoneraciones')->where('folio_grupo',$grupo->folio_grupo)->where('status','<>',null)->where('status','<>','CANCELADO')->exists();
+                            if ($request->hasFile('file_pago')) {
+                                $file = $request->file_pago;
+                                $tamanio = $file->getSize(); #obtener el tamaño del archivo del cliente
+                                $ext = $file->getClientOriginalExtension(); // extension de la imagen
+                                if ($ext == "pdf") {
+                                    # nuevo nombre del archivo
+                                    $documentFile = trim("comprobante_pago" . "_" . $grupo->folio_grupo . "_" . date('YmdHis') . "." . $ext);
+                                    $path_pdf = "/UNIDAD/comprobantes_pagos/";
+                                    $path = $path_pdf . $documentFile;
+                                    Storage::disk('custom_folder_1')->put($path, file_get_contents($file)); // guardamos el archivo en la carpeta storage
+                                    //$documentUrl = storage::url($path); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
+                                    $documentUrl = $path;
+                                    $res = DB::table('alumnos_registro')->where('folio_grupo',$_SESSION['folio'])->update(['comprobante_pago'=>$documentUrl]);
+                                }else {
+                                    return redirect('solicitud/apertura')->with('message',"Formato de Archivo no válido, sólo PDF.");
+                                }
+                            }else {
+                                $documentUrl = $grupo->comprobante_pago;
+                            }
                             if ($exonerado) {
                                 $result = DB::table('tbl_cursos')->where('clave','0')->updateOrInsert(
                                     ['folio_grupo' => $_SESSION['folio']],
                                     ['nota' => $request->observaciones,
                                     'programa' => $request->programa,
                                     'cespecifico' => strtoupper($request->cespecifico),
-                                    'fcespe' => $request->fcespe]
+                                    'fcespe' => $request->fcespe,
+                                    'munidad' => $request->munidad,
+                                    'plantel' => $request->plantel,
+                                    'comprobante_pago'=>$documentUrl]
                                 );
                             }else {
                                 $result =  DB::table('tbl_cursos')->where('clave','0')->updateOrInsert(
@@ -437,7 +459,7 @@ class aperturaController extends Controller
                                     'instructor_tipo_identificacion'=>$instructor->tipo_identificacion,
                                     'instructor_folio_identificacion'=>$instructor->folio_ine,
                                     'num_revision' => $request->munidad,
-                                    'comprobante_pago'=>$grupo->comprobante_pago
+                                    'comprobante_pago'=>$documentUrl
                                 ]);
                                 $agenda = DB::table('agenda')->where('id_curso',$_SESSION['folio'])->update(['id_instructor' => $instructor->id]);
                             }
@@ -619,7 +641,7 @@ class aperturaController extends Controller
             ->orderBy('dias')
             ->pluck('dias');//dd($total_dias);
             $tdias = 0;
-            
+
             foreach ($total_dias as $key => $value) {
                 if ($key > 0) {
                     if ($value != $total_dias[$key-1]) {
@@ -664,11 +686,30 @@ class aperturaController extends Controller
                     ->join('tbl_cursos','agenda.id_curso','=','tbl_cursos.folio_grupo')
                     ->where('agenda.id_instructor',$id_instructor)
                     ->where('tbl_cursos.status','!=','CANCELADO')
-                    ->whereRaw("((date(agenda.start) >= '$fi' and date(agenda.start) <= '$ft' and cast(agenda.start as time) >= '$hi' and cast(agenda.start as time) < '$ht') OR 
+                    ->whereRaw("((date(agenda.start) >= '$fi' and date(agenda.start) <= '$ft' and cast(agenda.start as time) >= '$hi' and cast(agenda.start as time) < '$ht') OR
                                 (date(agenda.end) >= '$fi' and date(agenda.end) <= '$ft' and cast(agenda.end as time) > '$hi' and cast(agenda.end as time) <= '$ht'))")
                     ->get();
         if (count($evento) > 0) {
             $isEquals = true;
+        }
+        //VALIDACION DISPONIBILIDAD FECHA Y HORA X ALUMNO
+        $alumnos = DB::table('alumnos_registro as ar')->select('ar.id_pre','ap.curp')
+            ->leftJoin('alumnos_pre as ap','ar.id_pre','=','ap.id')
+            ->where('ar.folio_grupo',$id_curso)->where('ar.eliminado',false)->get();
+        if (count($alumnos)>0) {
+            foreach ($alumnos as $key => $value) {
+                $existe_dupli = DB::table('agenda as a')
+                    ->select('a.id_curso')
+                    ->leftJoin('alumnos_registro as ar','a.id_curso','=','ar.folio_grupo')
+                    ->whereRaw("((date(a.start) >= '$fi' and date(a.start) <= '$ft' and cast(a.start as time) >= '$hi' and cast(a.start as time) < '$ht') OR
+                    (date(a.end) >= '$fi' and date(a.end) <= '$ft' and cast(a.end as time) > '$hi' and cast(a.end as time) <= '$ht'))")
+                    ->where('ar.eliminado',false)
+                    ->where('ar.id_pre',$value->id_pre)
+                    ->get();
+                if (count($existe_dupli)>0) {
+                    return "iguales8";
+                }
+            }
         }
         //CRITERIO 8hrs
         foreach ($period as $value) {
@@ -835,7 +876,8 @@ class aperturaController extends Controller
         //CRITERIO 5 MESES
         for ($i=1; $i < 6; $i++) {
             $f = DB::table('tbl_cursos')->where('folio_grupo',$id_curso)->value('inicio');
-            $mesActivo= Carbon::parse($f)->addMonth($i);
+            $finicio = Carbon::parse($f)->firstOfMonth();
+            $mesActivo= Carbon::parse($finicio)->addMonth($i);
             $mes = Carbon::parse($mesActivo)->format('d-m-Y');
             $mesInicio = Carbon::parse($mes)->firstOfMonth();
             $mesFin = Carbon::parse($mes)->endOfMonth();
@@ -856,7 +898,8 @@ class aperturaController extends Controller
         }
         for ($i=1; $i < 6; $i++) {
             $f = DB::table('tbl_cursos')->where('folio_grupo',$id_curso)->value('inicio');
-            $mesActivoSub= Carbon::parse($f)->subMonth($i);
+            $finicio = Carbon::parse($f)->firstOfMonth();
+            $mesActivoSub= Carbon::parse($finicio)->subMonth($i);
             $mes = Carbon::parse($mesActivoSub)->format('d-m-Y');
             $mesInicio = Carbon::parse($mes)->firstOfMonth();
             $mesFin = Carbon::parse($mes)->endOfMonth();
@@ -1061,7 +1104,7 @@ class aperturaController extends Controller
             ->orderBy('dias')
             ->pluck('dias');//dd($total_dias);
             $tdias = 0;
-            
+
             foreach ($total_dias as $key => $value) {
                 if ($key > 0) {
                     if ($value != $total_dias[$key-1]) {

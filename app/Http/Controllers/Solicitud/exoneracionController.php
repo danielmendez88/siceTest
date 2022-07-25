@@ -53,7 +53,7 @@ class ExoneracionController extends Controller
                 if ($cursos[0]->memo_soporte_dependencia) {
                     $pdf = $this->path_files.$cursos[0]->memo_soporte_dependencia;
                 }
-                $movimientos = ['SOLICITUD EDITAR'=>'EDITAR LISTA DE ALUMNOS','SOLICITUD CANCELAR'=>'CANCELACIÓN'];
+                $movimientos = ['SOPORTES ACTUALIZACION'=>'ACTUALIZACION DE SOPORTES','SOLICITUD EDITAR'=>'EDITAR LISTA DE ALUMNOS','SOLICITUD CANCELAR'=>'CANCELACIÓN'];
             }else{
                 $message = "No se encuentran registros que mostrar.";
                 $valor = null;
@@ -82,9 +82,13 @@ class ExoneracionController extends Controller
                          'tc.dura','tc.status_curso','ar.id_organismo','ar.folio_grupo')
                         ->leftJoin('alumnos_registro as ar','tc.folio_grupo','=','ar.folio_grupo')
                         ->where('tc.status_curso','=',null)
-                        ->where('tc.status_solicitud','=',null)
+                        ->where(function($query) {
+                            $query->where('tc.status_solicitud','=',null)
+                                  ->orWhere('tc.status_solicitud', '=', 'RETORNO');
+                        })
                         ->where('ar.turnado','=','UNIDAD')
-                        ->where('tc.mod','=','CAE')
+                        // ->where('tc.mod','=','CAE')
+                        ->where('ar.id_organismo','!=',242)
                         ->whereIn('tc.tipo',['EXO','EPAR'])
                         ->where('tc.folio_grupo',$request->grupo)
                         ->first();
@@ -114,7 +118,7 @@ class ExoneracionController extends Controller
                         }  
                     }
                     if (!$_SESSION['revision'] AND $curso) {
-                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW('max(cast(substring(nrevision,9,4) as int))'))) + 1;
+                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW("max(cast(substring(nrevision from '.{4}$') as int))"))) + 1;
                         $consec = str_pad($consec, 4, "0", STR_PAD_LEFT);
                         $revision = "EXO-".$curso->cct.$curso->ejercicio.$consec;
                         $_SESSION['revision'] = $revision;
@@ -249,8 +253,13 @@ class ExoneracionController extends Controller
     public function generar(Request $request){
         if ($request->memo AND $_SESSION['revision']) {
             $_SESSION['memo'] = $request->memo;
+            if (DB::table('exoneraciones')->where('nrevision',$_SESSION['revision'])->value('fecha_memorandum')) {
+                $fecha = DB::table('exoneraciones')->where('nrevision',$_SESSION['revision'])->value('fecha_memorandum');
+            } else {
+                $fecha = $request->fecha;
+            }
             $result = DB::table('exoneraciones')->where('nrevision', $_SESSION['revision'])
-                ->update(['no_memorandum' => $_SESSION['memo'], 'fecha_memorandum' => $request->fecha]);
+                ->update(['no_memorandum' => $_SESSION['memo'], 'fecha_memorandum' => $fecha]);
             $cursos = DB::table('exoneraciones')->where('no_memorandum',$_SESSION['memo'])->get();
             foreach ($cursos as $key => $value) {
                 $year = date('y');
@@ -286,6 +295,7 @@ class ExoneracionController extends Controller
                                 'tc.nombre','e.tipo_exoneracion','e.no_convenio','e.noficio','e.foficio','e.razon_exoneracion','e.observaciones',
                                 'tc.depen','e.id_unidad_capacitacion','tc.mod','ar.horario','tc.efisico','tc.tcapacitacion','tc.medio_virtual','tc.dia','tc.folio_grupo',
                                 'e.no_memorandum','e.fecha_memorandum')
+                                ->orderBy('e.fini','asc')
                                 ->get();    //dd($cursos);
                 $reg_unidad = DB::table('tbl_unidades')->select('ubicacion','dgeneral','dunidad','academico','vinculacion','dacademico','pdgeneral','pdacademico',
                                     'pdunidad','pacademico','pvinculacion','municipio')

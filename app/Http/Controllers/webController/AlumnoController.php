@@ -1794,7 +1794,7 @@ class AlumnoController extends Controller {
                 //$documentUrl = storage::url($path); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
                 $documentUrl = $path;
                 if ($documentUrl) {
-                    $soporte[] = $documentUrl;
+                    $soporte[] = ['url'=>$documentUrl,'user_id'=>Auth::user()->id,'date'=>date('d-m-Y H:i')];
                     $soportes = json_decode(DB::table('alumnos_pre')->where('curp',$curp)->value('soporte_permiso_exoneracion'));
                     if ($soportes) {
                         foreach ($soportes as $key => $value) {
@@ -1812,7 +1812,18 @@ class AlumnoController extends Controller {
                 $message = "Formato de Archivo no válido, sólo PDF.";
             }
         } else {
-            $message = "Ingrese el archivo pdf.";
+            // $message = "Ingrese el archivo pdf.";
+            $soporte[] = ['url'=>'','user_id'=>Auth::user()->id,'date'=>date('d-m-Y H:i')];
+            $soportes = json_decode(DB::table('alumnos_pre')->where('curp',$curp)->value('soporte_permiso_exoneracion'));
+            if ($soportes) {
+                foreach ($soportes as $key => $value) {
+                    $soporte[] = $value;
+                }
+            }
+            $result = DB::table('alumnos_pre')->where('curp',$curp)->update(['permiso_exoneracion'=>true,'soporte_permiso_exoneracion'=>json_encode($soporte)]);
+            if ($result) {
+                $message = "Operación exitosa!";
+            }
         }
         return redirect()->route('alumnos.index')->with('success',$message);
     }
