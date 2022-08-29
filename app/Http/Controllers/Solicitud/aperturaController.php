@@ -77,7 +77,8 @@ class aperturaController extends Controller
                 'tc.nota',DB::raw(" COALESCE(tc.clave, '0') as clave"),'ar.id_muni','ar.clave_localidad','ar.organismo_publico','ar.id_organismo','tc.status_solicitud',
                 'tc.id_municipio','tc.status_curso','tc.plantel', 'tc.dia', 'tdias', 'id_vulnerable', 'ar.turnado','tc.instructor_mespecialidad','tc.dura',
                 'tc.sector','tc.programa','tc.efisico','tc.depen','tc.cgeneral','tc.fcgen','tc.cespecifico','tc.fcespe','tc.mexoneracion','tc.medio_virtual',
-                'tc.id_instructor','tc.tipo','tc.link_virtual','tc.munidad','tc.costo','tc.tipo','tc.status','tc.id','e.clave as clave_especialidad','tc.arc','tc.tipo_curso','ar.id_cerss','c.rango_criterio_pago_maximo as cp')
+                'tc.id_instructor','tc.tipo','tc.link_virtual','tc.munidad','tc.costo','tc.tipo','tc.status','tc.id','e.clave as clave_especialidad','tc.arc','tc.tipo_curso','ar.id_cerss','c.rango_criterio_pago_maximo as cp',
+                'ar.folio_pago','ar.fecha_pago')
                 ->join('alumnos_pre as ap','ap.id','ar.id_pre')
                 ->join('cursos as c','ar.id_curso','c.id')
                 ->join('especialidades as e','e.id','c.id_especialidad') ->join('area as a','a.id','c.area')
@@ -86,13 +87,16 @@ class aperturaController extends Controller
                 ->where('ar.folio_grupo',$valor);
             if($_SESSION['unidades']) $grupo = $grupo->whereIn('ar.unidad',$_SESSION['unidades']);
             $grupo = $grupo->groupby('ar.mod','ar.id_curso','ar.unidad','ar.horario', 'ar.folio_grupo','ar.tipo_curso','ar.horario','tc.arc','ar.id_cerss','ar.clave_localidad','ar.organismo_publico','ar.id_organismo',
-                'e.id','a.formacion_profesional','tc.id','c.id','ar.inicio','ar.termino','ar.comprobante_pago','ar.id_muni','ar.id_vulnerable','ar.turnado')->first(); //dd($grupo);
+                'e.id','a.formacion_profesional','tc.id','c.id','ar.inicio','ar.termino','ar.comprobante_pago','ar.id_muni','ar.id_vulnerable','ar.turnado',
+                'ar.folio_pago','ar.fecha_pago')->first(); //dd($grupo);
 
             // var_dump($grupo);exit;
             if($grupo){
                 $_SESSION['folio'] = $grupo->folio_grupo;
                 $anio_hoy = date('y');
-                $comprobante = $this->path_files.$grupo->comprobante_pago;
+                if ($grupo->comprobante_pago) {
+                    $comprobante = $this->path_files.$grupo->comprobante_pago;
+                }
                 $muni = DB::table('tbl_municipios')->where('id_estado','7')->where('id',$grupo->id_muni)->orderby('muni')->pluck('muni')->first();
                 $localidad = DB::table('tbl_localidades')->where('clave',$grupo->clave_localidad)->pluck('localidad')->first();
 
@@ -165,6 +169,24 @@ class aperturaController extends Controller
         if(session('message')) $message = session('message');//dd($grupo);
         return view('solicitud.apertura.index', compact('comprobante','efisico','message','grupo','alumnos','plantel','depen','sector','programa',
             'instructor','exoneracion','medio_virtual','tcurso','tinscripcion','tcuota','muni','instructores','convenio','localidad','exonerado'));
+    }
+
+    public function search(Request $request){
+        $_SESSION = null;
+        $aperturas = DB::table('tbl_cursos as tc')
+            ->select('tc.unidad','tc.num_revision','tc.munidad','tc.file_arc01','tc.turnado','tc.status_curso','tc.status_solicitud','tc.status','tc.pdf_curso','tc.fecha_apertura')
+            ->leftJoin('alumnos_registro as a','tc.folio_grupo','=','a.folio_grupo')
+            ->leftJoin('tbl_unidades as u', 'tc.unidad','=','u.unidad')
+            ->where('a.turnado','<>','VINCULACION')
+            ->where('u.id','=',Auth::user()->unidad);
+        if ($request->valor) {
+            $aperturas = $aperturas->where('tc.munidad','=',$request->valor)
+                ->orWhere('tc.num_revision','=',$request->valor);
+        }
+        $aperturas = $aperturas->groupBy('tc.unidad','tc.num_revision','tc.munidad','tc.file_arc01','tc.turnado','tc.status_curso','tc.status_solicitud','tc.status','tc.pdf_curso','tc.fecha_apertura')
+            ->orderBy('tc.fecha_apertura','desc')
+            ->paginate(50);
+        return view('solicitud.apertura.buzon',compact('aperturas'));
     }
 
     public function cgral(Request $request){
@@ -358,8 +380,12 @@ class aperturaController extends Controller
                                     'fcespe' => $request->fcespe,
                                     'munidad' => $request->munidad,
                                     'plantel' => $request->plantel,
-                                    'comprobante_pago'=>$documentUrl]
+                                    'comprobante_pago'=>$documentUrl,
+                                    'folio_pago'=>$request->folio_pago,
+                                    'fecha_pago'=>$request->fecha_pago]
                                 );
+                                $fpago = DB::table('alumnos_registro')->where('folio_grupo',$_SESSION['folio'])->update(['folio_pago'=>$request->folio_pago,
+                                'fecha_pago'=>$request->fecha_pago]);
                             }else {
                                 $result =  DB::table('tbl_cursos')->where('clave','0')->updateOrInsert(
                                     ['folio_grupo' => $_SESSION['folio']],
@@ -441,8 +467,12 @@ class aperturaController extends Controller
                                     'instructor_tipo_identificacion'=>$instructor->tipo_identificacion,
                                     'instructor_folio_identificacion'=>$instructor->folio_ine,
                                     'num_revision' => $request->munidad,
-                                    'comprobante_pago'=>$documentUrl
+                                    'comprobante_pago'=>$documentUrl,
+                                    'folio_pago'=>$request->folio_pago,
+                                    'fecha_pago'=>$request->fecha_pago
                                 ]);
+                                $fpago = DB::table('alumnos_registro')->where('folio_grupo',$_SESSION['folio'])->update(['folio_pago'=>$request->folio_pago,
+                                'fecha_pago'=>$request->fecha_pago]);
                                 $agenda = DB::table('agenda')->where('id_curso',$_SESSION['folio'])->update(['id_instructor' => $instructor->id]);
                             }
                             if($result)$message = 'Operación Exitosa!!';
@@ -637,7 +667,7 @@ class aperturaController extends Controller
         return response()->json($id);
     }
     public function storeCalendar(Request $request) {
-
+        set_time_limit(0);
         $isEquals = false;
         $isEquals2 = false;
         $isEquals3 = false;
@@ -673,6 +703,25 @@ class aperturaController extends Controller
                     ->get();
         if (count($evento) > 0) {
             $isEquals = true;
+        }
+        //VALIDACION DISPONIBILIDAD FECHA Y HORA X ALUMNO
+        $alumnos = DB::table('alumnos_registro as ar')->select('ar.id_pre','ap.curp')
+            ->leftJoin('alumnos_pre as ap','ar.id_pre','=','ap.id')
+            ->where('ar.folio_grupo',$id_curso)->where('ar.eliminado',false)->get();
+        if (count($alumnos)>0) {
+            foreach ($alumnos as $key => $value) {
+                $existe_dupli = DB::table('agenda as a')
+                    ->select('a.id_curso')
+                    ->leftJoin('alumnos_registro as ar','a.id_curso','=','ar.folio_grupo')
+                    ->whereRaw("((date(a.start) >= '$fi' and date(a.start) <= '$ft' and cast(a.start as time) >= '$hi' and cast(a.start as time) < '$ht') OR
+                    (date(a.end) >= '$fi' and date(a.end) <= '$ft' and cast(a.end as time) > '$hi' and cast(a.end as time) <= '$ht'))")
+                    ->where('ar.eliminado',false)
+                    ->where('ar.id_pre',$value->id_pre)
+                    ->get();
+                if (count($existe_dupli)>0) {
+                    return "iguales8";
+                }
+            }
         }
         //CRITERIO 8hrs
         foreach ($period as $value) {

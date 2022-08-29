@@ -489,6 +489,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/solicitudes/aperturas/retornar', 'Solicitudes\aperturasController@retornar')->name('solicitudes.aperturas.retornar')->middleware('can:solicitudes.aperturas.retornar');
     Route::post('/solicitudes/aperturas/asignar', 'Solicitudes\aperturasController@asignar')->name('solicitudes.aperturas.asignar')->middleware('can:solicitudes.aperturas.asignar');
     Route::get('/solicitudes/aperturas/asignar', 'Solicitudes\aperturasController@asignar')->name('solicitudes.aperturas.asignar')->middleware('can:solicitudes.aperturas.asignar');
+    Route::get('/solicitudes/aperturas/busqueda', 'Solicitudes\aperturasController@search')->name('solicitudes.aperturas.search')->middleware('can:solicitudes.aperturas');
+    Route::post('/solicitudes/aperturas/busqueda', 'Solicitudes\aperturasController@search')->name('solicitudes.aperturas.search')->middleware('can:solicitudes.aperturas');
 
     Route::post('/solicitudes/aperturas/deshacer', 'Solicitudes\aperturasController@deshacer')->name('solicitudes.aperturas.deshacer')->middleware('can:solicitudes.aperturas.deshacer');
     Route::get('/solicitudes/aperturas/deshacer', 'Solicitudes\aperturasController@deshacer')->name('solicitudes.aperturas.deshacer')->middleware('can:solicitudes.aperturas.deshacer');
@@ -556,6 +558,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/preinscripcion/grupo/cmbcursos', 'Preinscripcion\grupoController@cmbcursos')->name('preinscripcion.grupo.cmbcursos');
     Route::post('/preinscripcion/grupo/guardar', 'Preinscripcion\grupoController@save')->name('preinscripcion.grupo.save')->middleware('can:preinscripcion.grupo.save');
     Route::post('/preinscripcion/grupo/update', 'Preinscripcion\grupoController@update')->name('preinscripcion.grupo.update')->middleware('can:preinscripcion.grupo.update');
+    Route::post('/preinscripcion/grupo/generar', 'Preinscripcion\grupoController@generar')->name('preinscripcion.grupo.generar');
     Route::get('/preinscripcion/grupo/nuevo', 'Preinscripcion\grupoController@nuevo')->name('preinscripcion.grupo.nuevo');
     Route::post('/preinscripcion/grupo/nuevo', 'Preinscripcion\grupoController@nuevo')->name('preinscripcion.grupo.nuevo');
     Route::post('/preinscripcion/grupo/turnar', 'Preinscripcion\grupoController@turnar')->name('preinscripcion.grupo.turnar')->middleware('can:preinscripcion.grupo.turnar');
@@ -573,6 +576,8 @@ Route::middleware(['auth'])->group(function () {
     /*Solicitud de Apertura ARC01 y ARC02 RPN*/
     Route::get('/solicitud/apertura', 'Solicitud\aperturaController@index')->name('solicitud.apertura')->middleware('can:solicitud.apertura');
     Route::post('/solicitud/apertura', 'Solicitud\aperturaController@index')->name('solicitud.apertura')->middleware('can:solicitud.apertura');
+    Route::get('/solicitud/apertura/busqueda', 'Solicitud\aperturaController@search')->name('solicitud.apertura.search')->middleware('can:solicitud.apertura');
+    Route::post('/solicitud/apertura/busqueda', 'Solicitud\aperturaController@search')->name('solicitud.apertura.search')->middleware('can:solicitud.apertura');
     //Route::get('/solicitud/apertura/cgral', 'Solicitud\aperturaController@cgral')->name('solicitud.apertura.cgral');
     //Route::post('/solicitud/apertura/cgral', 'Solicitud\aperturaController@cgral')->name('solicitud.apertura.cgral');
     Route::get('/solicitud/apertura/mexon', 'Solicitud\aperturaController@mexoneracion')->name('solicitud.apertura.mexon');
