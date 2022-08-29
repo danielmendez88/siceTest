@@ -81,6 +81,9 @@
                             @can('pagos.inicio')
                                 <a class="dropdown-item" href="{{route('pago-inicio')}}">Pagos</a>
                             @endcan
+                            @can('paqueteriasdidacticas')
+                                <a class="dropdown-item" href="{{route('buzon.paqueterias')}}">Paqueterias Didacticas</a>
+                            @endcan
                         </div>
                     </li>
                 {{--  <!--@endcan-->  --}}
