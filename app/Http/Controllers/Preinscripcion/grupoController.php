@@ -15,6 +15,7 @@ use App\Models\cat\catApertura;
 use App\Models\Alumno;
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Support\Facades\Storage;
+use PDF;
 
 
 class grupoController extends Controller
@@ -46,7 +47,7 @@ class grupoController extends Controller
         $es_vulnerable = $edicion = false;
         $unidades = $this->data['unidades'];
         $unidad = $this->data['unidad'];
-        $message = $comprobante = NULL;
+        $message = $comprobante = $folio_pago = $fecha_pago = NULL;
         if (isset($_SESSION['folio_grupo'])) {  //echo $_SESSION['folio_grupo'];exit;
             $anio_hoy = date('y');  //dd($_SESSION);
             $alumnos = DB::table('alumnos_registro as ar')->select(
@@ -76,6 +77,8 @@ class grupoController extends Controller
                 'ar.folio_grupo',
                 'ap.curp',
                 'comprobante_pago',
+                'ar.folio_pago',
+                'ar.fecha_pago',
                 'ap.requisitos',
                 'ap.documento_curp',
                 'ap.id_gvulnerable',
@@ -96,6 +99,8 @@ class grupoController extends Controller
                 $id_curso = $alumnos[0]->id_curso;
                 $tipo = $alumnos[0]->tipo_curso;
                 $mod = $alumnos[0]->mod;
+                $folio_pago = $alumnos[0]->folio_pago;
+                $fecha_pago = $alumnos[0]->fecha_pago;
                 if($alumnos[0]->comprobante_pago)$comprobante = $this->path_files.$alumnos[0]->comprobante_pago;
                 if ($alumnos[0]->turnado == 'VINCULACION' and isset($this->data['cct_unidad'])) $this->activar = true;
                 else $this->activar = false;
@@ -132,7 +137,7 @@ class grupoController extends Controller
         $grupo_vulnerable = DB::table('grupos_vulnerables')->orderBy('grupo')->pluck('grupo','id');
         if (session('message')) $message = session('message');
         $tinscripcion = $this->tinscripcion();
-        return view('preinscripcion.index', compact('cursos', 'alumnos', 'unidades', 'cerss', 'unidad', 'folio_grupo', 'curso', 'activar',
+        return view('preinscripcion.index', compact('cursos', 'alumnos', 'unidades', 'cerss', 'unidad', 'folio_grupo', 'curso', 'activar', 'folio_pago', 'fecha_pago',
                 'es_vulnerable', 'message', 'tinscripcion', 'municipio', 'dependencia', 'localidad','grupo_vulnerable','comprobante','edicion'));
     }
 
@@ -202,6 +207,8 @@ class grupoController extends Controller
                             $id_vulnerable = $a_reg->id_vulnerable;
                             $comprobante_pago = $a_reg->comprobante_pago;
                             $modalidad = $a_reg->mod;
+                            $folio_pago = $a_reg->folio_pago;
+                            $fecha_pago =  $a_reg->fecha_pago;
                         } else {
                             $id_especialidad = DB::table('cursos')->where('estado', true)->where('id', $request->id_curso)->value('id_especialidad');
                             $id_unidad = DB::table('tbl_unidades')->select('id', 'plantel')->where('unidad', $request->unidad)->value('id');
@@ -220,26 +227,14 @@ class grupoController extends Controller
                             $id_vulnerable = $request->grupo_vulnerable;
                             $comprobante_pago = null;
                             $modalidad = $request->modalidad;
+                            $folio_pago = $request->folio_pago;
+                            $fecha_pago =  $request->fecha_pago;
                         }
                         if ($id_cerss) $cerrs = true;
                         else $cerrs = NULL;
                         if ($_SESSION['folio_grupo']) {
                             if ((((explode('-',$inicio))[0]) == date('Y')) AND ((explode('-',$termino))[0]) == date('Y')) {
                                 if ($inicio <= $termino) {
-                                    $disponible = DB::table('alumnos_registro as ar')
-                                        ->select('ar.id_curso')
-                                        ->leftJoin('alumnos_pre as ap', 'ar.id_pre', '=', 'ap.id')
-                                        ->where('ap.curp', $curp)
-                                        ->where('ar.eliminado', false)
-                                        ->whereRaw(
-                                            "ar.ejercicio >= 22 and 
-                                            ((date(ar.inicio) >= '$request->inicio' and date(ar.inicio) <= '$request->termino' and 
-                                            cast(substring(ar.horario,1,5) as time) >= '$request->hini' and cast(substring(ar.horario,1,5) as time) < '$request->hfin') OR 
-                                            (date(ar.termino) >= '$request->inicio' and date(ar.termino) <= '$request->termino' and 
-                                            cast(substring(horario,9,5) as time) > '$request->hini' and cast(substring(horario,9,5) as time) <= '$request->hfin'))"
-                                        )
-                                        ->get();
-                                    if (count($disponible) < 1) {
                                         $result = DB::table('alumnos_registro')->UpdateOrInsert(
                                             ['id_pre' => $alumno->id_pre, 'folio_grupo' => $_SESSION['folio_grupo']],
                                             [
@@ -248,13 +243,11 @@ class grupoController extends Controller
                                                 'cct' => $this->data['cct_unidad'], 'realizo' => str_replace('ñ','Ñ',strtoupper($this->realizo)), 'no_control' => $matricula, 'ejercicio' => $this->ejercicio, 'id_muni' => $id_muni,
                                                 'folio_grupo' => $_SESSION['folio_grupo'], 'iduser_created' => $this->id_user, 'comprobante_pago' => $comprobante_pago,
                                                 'created_at' => date('Y-m-d H:i:s'), 'fecha' => date('Y-m-d'), 'id_cerss' => $id_cerss, 'cerrs' => $cerrs, 'mod' => $modalidad,
-                                                'grupo' => $_SESSION['folio_grupo'], 'eliminado' => false, 'grupo_vulnerable' => $grupo_vulnerable, 'id_vulnerable' => $id_vulnerable
+                                                'grupo' => $_SESSION['folio_grupo'], 'eliminado' => false, 'grupo_vulnerable' => $grupo_vulnerable, 'id_vulnerable' => $id_vulnerable,
+                                                'folio_pago'=>$folio_pago, 'fecha_pago'=>$fecha_pago
                                             ]
                                         );
                                         if ($result) $message = "Operación Exitosa!!";
-                                    } else {
-                                        $message = 'El alumno no se encuentra disponible en fecha y hora';
-                                    }
                                 } else {
                                     $message = 'La fecha de termino no puede ser menor a la de inicio';
                                 }
@@ -340,7 +333,8 @@ class grupoController extends Controller
                                 'id_especialidad' =>  $id_especialidad, 'horario' => $horario, 'unidad' => $request->unidad, 'tipo_curso' => $request->tipo, 'mod' => $request->modalidad,
                                 'iduser_updated' => $this->id_user, 'updated_at' => date('Y-m-d H:i:s'), 'fecha' => date('Y-m-d'), 'id_muni' => $request->id_municipio,
                                 'inicio' => $request->inicio, 'termino' => $request->termino, 'id_organismo' => $id_organismo, 'id_vulnerable' => $request->grupo_vulnerable,
-                                'id_cerss' => $request->cerss, 'cerrs' => $cerrs, 'id_muni' => $request->id_municipio, 'grupo_vulnerable' => $grupo_vulnerable, 'comprobante_pago' => $url_comprobante
+                                'id_cerss' => $request->cerss, 'cerrs' => $cerrs, 'id_muni' => $request->id_municipio, 'grupo_vulnerable' => $grupo_vulnerable, 'comprobante_pago' => $url_comprobante,
+                                'folio_pago'=>$request->folio_pago, 'fecha_pago'=>$request->fecha_pago
                             ]
                         );
                     if ($result) $message = "Operación Exitosa!!";
@@ -393,55 +387,27 @@ class grupoController extends Controller
                         $conteo += 1;
                     }
                 }
-                if ($costo > 0) {
-                    if ($comprobante) {
-                        foreach ($alumnos as $a) {
-                            if ($a->mod=='CAE' AND $a->abrinscri!='PI') {
-                                $exoneraciones = DB::table('alumnos_registro')
-                                    ->where('id_pre',$a->id_pre)
-                                    ->where('eliminado',false)
-                                    ->where('ejercicio',date('y'))
-                                    ->where('abrinscri','!=','PI')
-                                    ->where('mod','CAE')
-                                    ->where('turnado','!=','VINCULACION')
-                                    ->value(DB::raw('count(id)'));
-                                if ($exoneraciones > 2) {
-                                    if (DB::table('alumnos_pre')->where('id',$a->id_pre)->value('permiso_exoneracion')==true) {
-                                        $quitar_permiso = DB::table('alumnos_pre')->where('id',$a->id_pre)->update(['permiso_exoneracion'=>false]);
-                                    } else {
-                                        $message = "El alumno excede el limite de exoneraciones permitidas " .$a->curp. ".";
-                                        return redirect()->route('preinscripcion.grupo')->with(['message' => $message]);
-                                    }
-                                }
-                            }
-                        }
-                    $result = DB::table('alumnos_registro')->where('folio_grupo', $_SESSION['folio_grupo'])->update(['turnado' => 'UNIDAD', 'fecha_turnado' => date('Y-m-d')]);
-                    }else {
-                        return redirect()->route('preinscripcion.grupo')->with(['message' => 'FAVOR DE CARGAR EL COMPROBANTE DE PAGO']);
-                    }
-                } else {
-                    foreach ($alumnos as $a) {
-                        if ($a->mod=='CAE' AND $a->abrinscri!='PI') {
-                            $exoneraciones = DB::table('alumnos_registro')
-                                ->where('id_pre',$a->id_pre)
-                                ->where('eliminado',false)
-                                ->where('ejercicio',date('y'))
-                                ->where('abrinscri','!=','PI')
-                                ->where('mod','CAE')
-                                ->where('turnado','!=','VINCULACION')
-                                ->value(DB::raw('count(id)'));
-                            if ($exoneraciones > 2) {
-                                if (DB::table('alumnos_pre')->where('id',$a->id_pre)->value('permiso_exoneracion')==true) {
-                                    $quitar_permiso = DB::table('alumnos_pre')->where('id',$a->id_pre)->update(['permiso_exoneracion'=>false]);
-                                } else {
-                                    $message = "El alumno excede el limite de exoneraciones permitidas " .$a->curp. ".";
-                                    return redirect()->route('preinscripcion.grupo')->with(['message' => $message]);
-                                }
-                            }
-                        }
-                    }
-                    $result = DB::table('alumnos_registro')->where('folio_grupo', $_SESSION['folio_grupo'])->update(['turnado' => 'UNIDAD', 'fecha_turnado' => date('Y-m-d'), 'comprobante_pago' => null]);
-                }
+                // foreach ($alumnos as $a) {
+                //     if ($a->mod=='CAE' AND $a->abrinscri!='PI') {
+                //         $exoneraciones = DB::table('alumnos_registro')
+                //             ->where('id_pre',$a->id_pre)
+                //             ->where('eliminado',false)
+                //             ->where('ejercicio',date('y'))
+                //             ->where('abrinscri','!=','PI')
+                //             ->where('mod','CAE')
+                //             ->where('turnado','!=','VINCULACION')
+                //             ->value(DB::raw('count(id)'));
+                //         if ($exoneraciones > 2) {
+                //             if (DB::table('alumnos_pre')->where('id',$a->id_pre)->value('permiso_exoneracion')==true) {
+                //                 $quitar_permiso = DB::table('alumnos_pre')->where('id',$a->id_pre)->update(['permiso_exoneracion'=>false]);
+                //             } else {
+                //                 $message = "El alumno excede el limite de exoneraciones permitidas " .$a->curp. ".";
+                //                 return redirect()->route('preinscripcion.grupo')->with(['message' => $message]);
+                //             }
+                //         }
+                //     }
+                // }
+                $result = DB::table('alumnos_registro')->where('folio_grupo', $_SESSION['folio_grupo'])->update(['turnado' => 'UNIDAD', 'fecha_turnado' => date('Y-m-d')]);
             }
         }
         return redirect()->route('preinscripcion.grupo');
@@ -533,14 +499,14 @@ class grupoController extends Controller
                             } else {
                                 $message = "Los generos no coiniciden..";
                             }
-                            
+
                         } else {
                             $message ="La edad del alumno invalida..";
                         }
-                        
+
                     } else {
                         $message = "Alumno no registrado " . $request->busqueda1 . ".";
-                    } 
+                    }
                 } else {
                     $message = "Alumno no registrado " . $request->curpo . ".";
                 }
@@ -549,5 +515,32 @@ class grupoController extends Controller
             }
         }
         return redirect()->route('preinscripcion.grupo')->with(['message' => $message]);
+    }
+
+    public function generar(){
+        if ($_SESSION['folio_grupo']) {
+            $distintivo= DB::table('tbl_instituto')->pluck('distintivo')->first(); 
+            $alumnos = DB::table('alumnos_registro as ar')
+                ->select('ap.apellido_paterno','ap.apellido_materno','ap.nombre','ap.sexo',
+                        DB::raw("CONCAT(ap.apellido_paterno,' ', ap.apellido_materno,' ',ap.nombre) as alumno"),
+                        DB::raw("extract(year from (age(ar.inicio,ap.fecha_nacimiento))) as edad"),'c.nombre_curso','c.horas',
+                        DB::raw("to_char(DATE (ar.inicio)::date, 'DD-MM-YYYY') as inicio"),
+                        DB::raw("to_char(DATE (ar.termino)::date, 'DD-MM-YYYY') as termino"),
+                        'ar.horario', 'ar.mod', 'ar.costo','ar.tipo_curso','ar.organismo_publico as depe')
+                ->leftJoin('alumnos_pre as ap','ar.id_pre','ap.id')
+                ->leftJoin('cursos as c','ar.id_curso','c.id')
+                ->where('ar.folio_grupo',$_SESSION['folio_grupo'])
+                ->orderBy('alumno')
+                ->get();//dd($alumnos);
+            if (count($alumnos)>0) {
+                $pdf = PDF::loadView('preinscripcion.listaAlumnos',compact('alumnos','distintivo'));
+                $pdf->setpaper('letter','landscape');
+                return $pdf->stream('LISTA.pdf');
+            }else {
+                return "No se encuentran alumnos registrados, volver a intentar.";exit;
+            }
+        }else{
+            return "ACCIÓN INVÁlIDA";exit;
+        }
     }
 }
