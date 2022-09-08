@@ -155,8 +155,9 @@ class PaqueteriaDidacticaController extends Controller
 
             $contenidoT = 'pregunta' . $i . '-contenidoT';
 
-            if($request->$numPregunta === null)
+            if($request->$numPregunta === null){
                 return redirect()->route('paqueteriasDidacticas', $idCurso)->with('warning', 'NO SE PUEDEN GUARDAR LA PREGUNTAS VACIAS!');
+            }
 
             if ($request->$numPregunta != null || $request->numPreguntas == 1) {
 
