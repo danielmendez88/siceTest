@@ -12,7 +12,7 @@
         body {
             /*margin: 3cm 2cm 2cm;*/
             margin-top: 120px;
-            font-family: sans-serif; font-size: 10px;
+            font-family: sans-serif; font-size: 12px;
         }
         header {
             position: fixed;
@@ -34,9 +34,9 @@
         }
         img.izquierda {float: left;width: 200px;height: 60px;}
         img.derecha {float: right;width: 200px;height: 60px;}
-        .tb {width: 100%; border-collapse: collapse; text-align: center;}
+        .tb {width: 100%; border-collapse: collapse; text-align: center; font-size: 8px;}
         .tb tr, .tb td, .tb th{ border: black 1px solid; padding: 1px;}
-        .tb thead{background: gray;}
+        .tb thead{background: #EAECEE;}
         .page-break {
             page-break-after: always;
         }
@@ -77,7 +77,7 @@
                 <td><b>Unidad de Capacitación {{$reg_unidad->ubicacion}}.</b></td> 
             </tr>
             <tr>
-                <td>Memorándum No. {{$mexoneracion}}.</td>
+                <td>@if ($marca) {{ "Revisión No. "}} @else {{ "Memorándum No. "}} @endif{{$mexoneracion}}.</td>
             </tr>
             <tr>
                 <td>{{$reg_unidad->municipio}}, Chis., {{$date}}.</td>
@@ -103,9 +103,9 @@
                 </tr>
             </table>
             <br>
-            <div>Conforme a las atribuciones que me confiere el artículo 29 fracción II y X del Reglamento Interior de nuestro Instituto, me 
+            <div style="text-align: justify;">Conforme a las atribuciones que me confiere el artículo 42 fracción II, IV y V del Reglamento Interior de nuestro Instituto, me 
                 permito solicitarle la @if ($cursos[0]->tipo_exoneracion=='EXO') {{"Exoneración"}} @else {{"Reducción de Cuota de Recuperación"}} @endif
-                sobre la cuota de recuperación, derivado de la solicitud de {{$depen}},
+                , derivado de la solicitud del @if ($depen=='CAPACITACION ABIERTA') {{"(los) grupo(s) de CAPACITACION ABIERTA"}} @else {{$depen}} @endif
                 que será(n) atendido(s) con el(los) siguiente(s) curso(s) de capacitación, conforme a lo siguiente:
             </div>
             <br>
@@ -115,6 +115,7 @@
                         <th rowspan="2">SERVICIO</th>
                         <th rowspan="2">UNIDAD DE CAPACITACIÓN Y/O ACCIÓN MÓVIL</th> 
                         <th rowspan="2">NOMBRE DEL CURSO</th>
+                        <th rowspan="2">MOD</th>
                         <th rowspan="2">COSTO</th>
                         <th rowspan="2">HORAS</th>
                         <th rowspan="2">FECHA INICIO</th>       
@@ -146,6 +147,7 @@
                         <td>{{$item->tipo_curso}}</td>
                         <td>{{$item->unidad}}</td>
                         <td>{{$item->curso}}</td>
+                        <td>{{$item->mod}}</td>
                         <td>{{$item->costo}}</td>
                         <td>{{$item->dura}}</td>
                         <td>{{$item->inicio}}</td>
@@ -158,7 +160,7 @@
                         <td>{{$item->instructor}}</td>
                         <td >@if ($item->tipo_exoneracion == 'EXO') {{"X"}}  @endif</td>
                         <td >@if ($item->tipo_exoneracion == 'EPAR') {{"X"}} @endif</td>
-                        <td>{{$item->no_convenio}} <br> {{$item->noficio}} <br> {{$item->foficio}}</td>
+                        <td>@if ($item->no_convenio) {{$item->no_convenio}} @else {{$item->noficio}} <br> {{$item->foficio}} @endif</td>
                         <td>{{$item->razon_exoneracion}}</td>
                         <td>{{$item->observaciones}}</td>
                     </tr>
@@ -166,47 +168,30 @@
                 </tbody>                   
             </table>
             <br>
-            <table style="width: 100%; border-collapse: collapse; border: black 1px solid;">
-                <tr>
-                    <td>GLOSARIO: </td>
-                    <td>EXO <span class="fa-arrow-right"></span> EXONERACIÓN</td>
-                    <td colspan="2">REDU <span class="fa-arrow-right"></span> REDUCCIÓN DE PAGO</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="5">Razón de la exoneración.</td>
-                </tr>
-                <tr>
-                    <td>MS <span class="fa-arrow-right"></span> MADRES SOLTERAS</td>
-                    <td>AM <span class="fa-arrow-right"></span> ADULTOS MAYORES</td>
-                    <td>BR <span class="fa-arrow-right"></span> BAJOS RECURSOS</td>
-                    <td>D <span class="fa-arrow-right"></span> DISCAPACITADOS</td>
-                    <td>PPL <span class="fa-arrow-right"></span> PERSONAS PRIVADAS DE LA LIBERTAD</td>
-                </tr>
-                <tr>
-                    <td>GRS <span class="fa-arrow-right"></span> GRUPOS DE REINSERCIÓN SOCIAL</td>
-                    <td colspan="4">O <span class="fa-arrow-right"></span> OTRO</td>
-                </tr>
-            </table>
+            <p style="width: 100%; border: black 1px solid; font-size: 8px; padding: 1px;">
+                GLOSARIO: <br>
+                Tipo de exoneración:&nbsp;&nbsp;EXO <span class="fa-arrow-right"></span> EXONERACIÓN&nbsp;&nbsp;&nbsp;REDU <span class="fa-arrow-right"></span> REDUCCIÓN DE PAGO <br>
+                Razón de la exoneración:&nbsp;&nbsp;AM <span class="fa-arrow-right"></span> ADULTOS MAYORES&nbsp;&nbsp;BR <span class="fa-arrow-right"></span> BAJOS RECURSOS&nbsp;&nbsp;D <span class="fa-arrow-right"></span> DISCAPACITADOS&nbsp;&nbsp;MS <span class="fa-arrow-right"></span> MADRES SOLTERAS&nbsp;&nbsp;PPL <span class="fa-arrow-right"></span> PERSONAS PRIVADAS DE LA LIBERTAD&nbsp;&nbsp;GRS <span class="fa-arrow-right"></span> GRUPOS DE REINSERCIÓN SOCIAL&nbsp;&nbsp;O <span class="fa-arrow-right"></span> OTRO
+            </p>
             <br>
-            <div>Lo anterior, con la finalidad de atender grupos en situación de vulnerabilidad que por sus características presentan desventaja por sexo, estado civil,
+            <div style="text-align: justify;">Lo anterior, con la finalidad de atender grupos en situación de vulnerabilidad que por sus características presentan desventaja por sexo, estado civil,
                  nivel educativo, origen étnico, situación o condición física y/o mental y requieren de un esfuerzo adicional para incorporarse al desarrollo 
-                y a la convivencia, como  lo señala el artículo 32 de la Ley General de Educación y artículo 3, fracción IV, del Decreto de Creación del Instituto 
-                de Capacitación y Vinculación Tecnológica del Estado de Chiapas. <br>
+                y a la convivencia, como  lo señala el artículo 32 de la Ley General de Educación y artículo 23, de los 
+                lineamientos para los procesos de vinculación y capacitación del Instituto de Capacitación y Vinculación Tecnológica del Estado de Chiapas. <br>
                 Considerando que los costos de los cursos que imparte esta Institución, varían de los $100.00 (Cien pesos 00/100 M.N.) a los $1,200.00 (Mil Doscientos 00/100 M.N.); 
-                según su tipo Oficios, Profesionalización, Especialidad y Salud, así como su clasificación Básico, Medio o Avanzado y duración total de horas de capacitación. <br>
+                según su tipo Oficios, Profesionalización, Especialización y Salud, así como su clasificación Básico, Medio o Avanzado y duración total de horas de capacitación. <br>
                 Se anexa(n) lista de alumnos y solicitud de la parte interesada. <br>
                 Atentamente.
             </div>
-            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse; font-size: 8px;">
                 <tr>
                     <td style="padding: 0px;">
                         <div></div>
                         <div style="border: black 1px solid;">
-                            <b>Elabora</b><br><br>
+                            <br><b>Elabora</b><br><br><br>
                             ________________________________________________ <br>
                             <b>{{$reg_unidad->vinculacion}}</b><br>
-                            Titular del Departamento de Vinculación de la Unidad de Capacitación {{$reg_unidad->ubicacion}}
+                            Titular del Departamento de Vinculación de la Unidad de Capacitación {{$reg_unidad->ubicacion}} <br>
                         </div>
                         <div></div>
                     </td>
@@ -216,10 +201,10 @@
                     <td style="padding: 0px;">
                         <div></div>
                         <div style="border: black 1px solid;">
-                            <b>Valida</b><br><br>
+                            <br><b>Valida</b><br><br><br>
                             ________________________________________________ <br>
                             <b>{{$reg_unidad->dunidad}}</b> <br>
-                            Titular de la Dirección de la Unidad de Capacitación <br> {{$reg_unidad->ubicacion}}
+                            Titular de la Dirección de la Unidad de Capacitación <br> {{$reg_unidad->ubicacion}} <br>
                         </div>
                         <div></div>                        
                     </td>
@@ -227,19 +212,20 @@
                         <div style="width: 30px;"> </div>
                     </td>
                     <td style="padding: 0px;">
-                        <div style="border: black 1px solid;">
-                            <b>Con fundamento en el artículo 14</b><br>
-                            <b>Fracción I, del Reglamento Interior</b><br>
+                        <div style="border: black 1px solid;"><br>
+                            <b>Con fundamento en el artículo 13</b><br>
+                            <b>Fracciones II y XXV del Reglamento Interior del Instituto de</b><br>
+                            <b>Capacitación y Vinculación Tecnológica del Estado de Chiapas</b><br>
                             <b>Autoriza</b><br><br>
                             ________________________________________________ <br>
-                            <b>{{$reg_unidad->dgeneral}}</b> <br>
-                            Director(a) General del ICATECH
+                            <b>{{$reg_unidad->dgeneral}}.</b> <br>
+                            Director(a) General del ICATECH <br>
                         </div>
-                        <div style="border: black 1px solid;">
+                        <div style="border: black 1px solid;"> <br>
                             <b>Vo.Bo.</b><br><br>
                             ________________________________________________ <br>
                             <b>{{$reg_unidad->dacademico}}</b> <br>
-                            Director(a) de Técnica Académica
+                            Director(a) de Técnica Académica <br>
                         </div>
                     </td>
                 </tr>
@@ -267,7 +253,7 @@
                         <th>DURACIÓN EN HORAS</th>
                         <th>{{$item['dura']}}</th>
                         <th colspan="2">HORARIO</th>
-                        <th colspan="3">{{$item['horario']}}</th>
+                        <th colspan="3">{{$item['horario']}} hrs.</th>
                     </tr>
                     <tr>
                         <th>FECHA DE INICIO</th>

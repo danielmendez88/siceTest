@@ -9,7 +9,7 @@
       <th class="h6" scope="col" width="8%">Fec. Nac.</th>
       <th class="h6" scope="col">Escolaridad</th>
       <th scope="col" class="h6">TIPO DE INSCRIPCI&Oacute;N</th>
-      <th scope="col" class="h6 text-center">COUTA</th>
+      <th scope="col" class="h6 text-center" width="8%">COUTA</th>
       <th class="h6 text-center" scope="col"> @if($activar){{'Eliminar'}}@endif</th>                               
       <th class="h6 text-center" scope="col">SID</th>
       <th class="h6 text-center" scope="col">CURP</th>
@@ -21,7 +21,14 @@
   </thead>                                    
   <tbody>
     @if(count($alumnos)>0)
-      @foreach($alumnos as $a)                               
+      @foreach($alumnos as $a)   
+        @php
+          if ($costo < $a->costo) {
+            $class= 'form-control numero bg-danger';
+          } else {
+            $class = 'form-control numero';
+          }  
+        @endphp                            
         <tr id="{{$a->id_reg}}">
           <th scope="row"> {{ $consec++ }} </th>
           <th>{{ $a->curp }}</th>
@@ -31,7 +38,9 @@
           <th>{{ $a->fnacimiento }}</th>
           <th>{{ $a->ultimo_grado_estudios }}</th>
           <th>{{$a->tinscripcion}}</th>
-          <th class="text-center">{{ Form::text('costo['.$a->id_reg.']', $a->costo , ['id'=>'costo['.$a->id_reg.']', 'class' => 'form-control numero', 'size' => 1, 'maxlength' => '7']) }}</th>
+          <th class="text-center">
+            {{ Form::number('costo['.$a->id_reg.']', $a->costo , ['id'=>'costo['.$a->id_reg.']', 'size' => 1, 'maxlength' => '7', 'class' => $class]) }}
+          </th>
           <th class="text-center">
             @if($activar)
               <a class="nav-link" ><i class="fa fa-remove  fa-2x fa-lg text-danger" onclick="eliminar({{$a->id_reg}},'{{ route('preinscripcion.grupo.eliminar') }}');" title="Eliminar"></i></a>
@@ -73,18 +82,26 @@
     @endif                                                                                         
   </tbody>
 </table>
-<div class="col-md-12 text-right">
-  @if ($activar AND $folio_grupo)
-    <div class="custom-file col-md-3 mx-4 text-center">
-      <input type="file" class="custom-file-input" id="customFile" name="customFile" onchange="fileValidationpdf()">
-      <label class="custom-file-label" for="customFile">PDF COMPROBANTE DE PAGO</label>
-    </div>
+@if ($activar AND $folio_grupo)
+  <div class="form-group col-md-2">
+    <input type="text" name="folio_pago" id="folio_pago" class="form-control" placeholder="FOLIO DEL COMPROBANTE DE PAGO" value="{{$folio_pago}}">
+  </div>
+  <div class="form-group col-md-2">
+    <input type="date" name="fecha_pago" id="fecha_pago" class="form-control" placeholder="FECHA PAGO" value="{{$fecha_pago}}">
+  </div>
+  <div class="custom-file col-md-3 text-center">
+    <input type="file" class="custom-file-input" id="customFile" name="customFile" onchange="fileValidationpdf()">
+    <label class="custom-file-label" for="customFile">PDF COMPROBANTE DE PAGO</label>
+  </div>
+  <div class="form-group col-md-1">
     <a class="btn btn-dark-green" href="https://www.ilovepdf.com/es/unir_pdf" target="blank">UNIR PDF´s</a>
-    {{--<button type="button" id="comprobante" class="btn btn-success">SUBIR COMPROBANTE</button>--}}
-  @endif
+  </div>
+@endif
+<div class="col-md-12 text-right">
   @if ($comprobante)
     <a href="{{$comprobante}}" target="_blank" class="btn  bg-warning">IMPRIMIR COMPROBANTE DE PAGO</a>
   @endif
+  <button type="button" class="btn" id="generar">GENERAR LISTA DE ALUMNOS</button>
   <button type="button" class="btn" id="nuevo" >NUEVO GRUPO</button> &nbsp;&nbsp;
   @if($activar AND $folio_grupo)
     <button type="submit" class="btn" id="update" >GUARDAR CAMBIOS </button> &nbsp;&nbsp;                        

@@ -50,8 +50,21 @@ class exoneracionesController extends Controller
                 }else {
                     $movimientos = ['RETORNAR_VALIDADO'=>'RETORNAR','RETORNAR'=>'REINICIAR','CANCELAR'=>'CANCELAR','AUTORIZAR'=>'AUTORIZAR'];
                 }
-                if (($status == 'SOLICITUD EDITAR') OR ($status == 'SOLICITUD CANCELAR')) {
-                    $movimientos = ['SOLICITUD EDITAR'=>'EDITAR','SOLICITUD CANCELAR'=>'CANCELAR'];
+                if (($status == 'SOLICITUD EDITAR') OR ($status == 'SOLICITUD CANCELAR') OR ($status=='SOPORTES ACTUALIZACION')) {
+                    switch ($status) {
+                        case 'SOLICITUD EDITAR':
+                            $movimientos = 'EDICION LISTA DE ALUMNOS';
+                            break;
+                        case 'SOLICITUD CANCELAR':
+                            $movimientos = 'CANCELACION SOLICITUD DE EXONERACION';
+                            break;
+                        case 'SOPORTES ACTUALIZACION':
+                            $movimientos = 'ACTUALIZACION SOPORTES';
+                            break;
+                        default:
+                            $movimientos = '';
+                            break;
+                    }
                     $edicion = $cursos[0]->motivo;
                 }
             } else {
@@ -198,9 +211,9 @@ class exoneracionesController extends Controller
                             ->select('tc.tipo_curso','tc.unidad','tc.curso','c.costo','tc.dura',
                                     DB::raw("to_char(DATE (tc.inicio)::date, 'DD-MM-YYYY') as inicio"),
                                     DB::raw("to_char(DATE (tc.termino)::date, 'DD-MM-YYYY') as termino"),
-                                    'tc.mujer','tc.hombre','e.fini','e.ffin',
+                                    'tc.mujer','tc.hombre','e.fini','e.ffin','e.nrevision',
                                     'tc.nombre as instructor','e.tipo_exoneracion','e.no_convenio','e.noficio',DB::raw("to_char(DATE (e.foficio)::date, 'DD-MM-YYYY') as foficio"),
-                                    'e.razon_exoneracion','e.observaciones',
+                                    'e.razon_exoneracion','e.observaciones','tc.hini','tc.hfin',
                                     'tc.depen','e.id_unidad_capacitacion','tc.mod','ar.horario','tc.efisico','tc.tcapacitacion','tc.medio_virtual','tc.dia',
                                     'tc.folio_grupo','e.no_memorandum',DB::raw("to_char(DATE (e.fecha_memorandum)::date, 'DD-MM-YYYY') as fecha_memorandum"))
                             ->leftJoin('tbl_cursos as tc','e.folio_grupo','=','tc.folio_grupo')
@@ -210,14 +223,15 @@ class exoneracionesController extends Controller
                             ->groupBy('tc.tipo_curso','tc.unidad','tc.curso','c.costo','tc.dura','tc.inicio','tc.termino','tc.mujer','tc.hombre','e.fini','e.ffin',
                             'tc.nombre','e.tipo_exoneracion','e.no_convenio','e.noficio','e.foficio','e.razon_exoneracion','e.observaciones',
                             'tc.depen','e.id_unidad_capacitacion','tc.mod','ar.horario','tc.efisico','tc.tcapacitacion','tc.medio_virtual','tc.dia','tc.folio_grupo',
-                            'e.no_memorandum','e.fecha_memorandum')
+                            'e.no_memorandum','e.fecha_memorandum','e.nrevision','tc.hini','tc.hfin')
                             ->get();    //dd($cursos);
             $reg_unidad = DB::table('tbl_unidades')->select('ubicacion','dgeneral','dunidad','academico','vinculacion','dacademico','pdgeneral','pdacademico',
                                 'pdunidad','pacademico','pvinculacion','municipio')
                                 ->where('id',$cursos[0]->id_unidad_capacitacion)
                                 ->first(); //dd($reg_unidad);
             $depen = $cursos[0]->depen; //ucwords(strtolower($cursos[0]->depen));
-            $date = $cursos[0]->fecha_memorandum;
+            if($cursos[0]->no_memorandum)$mexoneracion = $cursos[0]->no_memorandum;
+            else $mexoneracion = $cursos[0]->nrevision;
             foreach ($cursos as $key => $value) {
                 $alumnos = DB::table('alumnos_registro as ar')
                                 ->select('ap.apellido_paterno','ap.apellido_materno','ap.nombre','ap.sexo','ar.costo',
@@ -225,10 +239,11 @@ class exoneracionesController extends Controller
                                 ->leftJoin('alumnos_pre as ap','ar.id_pre','=','ap.id')
                                 ->where('ar.folio_grupo',$value->folio_grupo)
                                 ->get();
+                $horario = date('H:i', strtotime(str_replace(['a.m.','p.m.'],['am','pm'],$value->hini))).' A '.date('H:i', strtotime(str_replace(['a.m.','p.m.'],['am','pm'],$value->hfin)));
                 $data[$key]['curso'] = $value->curso;
                 $data[$key]['mod'] = $value->mod;
                 $data[$key]['dura'] = $value->dura;
-                $data[$key]['horario'] = $value->horario;
+                $data[$key]['horario'] = $horario;
                 $data[$key]['inicio'] = $value->inicio;
                 $data[$key]['termino'] = $value->termino;
                 if ($value->tcapacitacion=='PRESENCIAL') {
@@ -344,4 +359,31 @@ class exoneracionesController extends Controller
         return redirect()->route('solicitudes.exoneracion')->with(['message'=>$message]);
     }
 
+    public function asoporte(Request $request){
+        $message = 'Operación fallida, vuelva a intentar..';
+        if (isset($_SESSION['memo'])) {
+            if ($request->movimiento) {
+                $result = DB::table('exoneraciones')->where('no_memorandum',$_SESSION['memo'])
+                        ->update(['status'=>'VALIDADO', 'frespuesta'=>date('Y-m-d H:i:s'), 'turnado'=>'UNIDAD']);
+                if ($result) {
+                    $cursos = DB::table('exoneraciones')->where('no_memorandum', $_SESSION['memo'])->get();
+                    foreach ($cursos as $key => $value) {
+                        $result2 = DB::table('history_exoneraciones')->insert([
+                            'id_exoneracion' => $value->id, 'folio_grupo' => $value->folio_grupo, 'id_unidad_capacitacion' => $value->id_unidad_capacitacion,
+                            'no_memorandum' => $value->no_memorandum, 'fecha_memorandum' => $value->fecha_memorandum, 'tipo_exoneracion' => $value->tipo_exoneracion,
+                            'razon_exoneracion' => $value->razon_exoneracion, 'observaciones' => $value->observaciones, 'no_convenio' => $value->no_convenio,
+                            'memo_soporte_dependencia' => $value->memo_soporte_dependencia, 'iduser_created' => $value->iduser_created,
+                            'iduser_updated' => $value->iduser_updated, 'created_at' => $value->created_at, 'updated_at' => $value->updated_at, 'status' => 'ACTUALIZACION SOPORTES',
+                            'nrevision' => $value->nrevision, 'noficio' => $value->noficio, 'foficio' => $value->foficio, 'fini' => $value->fini, 'ffin' => $value->ffin,
+                            'realizo' => $value->realizo, 'valido'=>strtoupper(Auth::user()->name), 'fenvio' => $value->fenvio, 'frespuesta' => $value->frespuesta,
+                            'pobservacion' => $value->pobservacion, 'cct' => $value->cct, 'ejercicio' => $value->ejercicio, 'activo' => $value->activo,
+                            'turnado' => $value->turnado, 'motivo' => $value->motivo
+                        ]); 
+                    }
+                    $message = "La solicitud fue retonado a la Unidad.";
+                }
+            }
+        }
+        return redirect()->route('solicitudes.exoneracion')->with(['message'=>$message]);
+    }
 }

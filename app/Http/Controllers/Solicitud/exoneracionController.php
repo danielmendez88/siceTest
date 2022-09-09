@@ -53,7 +53,7 @@ class ExoneracionController extends Controller
                 if ($cursos[0]->memo_soporte_dependencia) {
                     $pdf = $this->path_files.$cursos[0]->memo_soporte_dependencia;
                 }
-                $movimientos = ['SOLICITUD EDITAR'=>'EDITAR LISTA DE ALUMNOS','SOLICITUD CANCELAR'=>'CANCELACIÓN'];
+                $movimientos = ['SOPORTES ACTUALIZACION'=>'ACTUALIZACION DE SOPORTES','SOLICITUD EDITAR'=>'EDITAR LISTA DE ALUMNOS','SOLICITUD CANCELAR'=>'CANCELACIÓN'];
             }else{
                 $message = "No se encuentran registros que mostrar.";
                 $valor = null;
@@ -82,15 +82,22 @@ class ExoneracionController extends Controller
                          'tc.dura','tc.status_curso','ar.id_organismo','ar.folio_grupo')
                         ->leftJoin('alumnos_registro as ar','tc.folio_grupo','=','ar.folio_grupo')
                         ->where('tc.status_curso','=',null)
-                        ->where('tc.status_solicitud','=',null)
+                        ->where(function($query) {
+                            $query->where('tc.status_solicitud','=',null)
+                                  ->orWhere('tc.status_solicitud', '=', 'RETORNO');
+                        })
                         ->where('ar.turnado','=','UNIDAD')
-                        ->where('tc.mod','=','CAE')
+                        // ->where('tc.mod','=','CAE')
+                        ->where('ar.id_organismo','!=',242)
                         ->whereIn('tc.tipo',['EXO','EPAR'])
                         ->where('tc.folio_grupo',$request->grupo)
                         ->first();
             if ($curso) {
                 if (($curso->tipo != 'EXO') AND (count(DB::table('alumnos_registro')->where('folio_grupo',$curso->folio_grupo)->where('tinscripcion','=','EXONERACION')->get())>0)) {
                     return redirect()->route('solicitud.exoneracion')->with(['message' => 'EL GRUPO NO DEBE TENER EXONERADOS PARA SOLICITUD DE REDUCIÓN DE CUOTA..']);
+                }
+                if (DB::table('exoneraciones')->where('folio_grupo',$curso->folio_grupo)->where(function($query) { $query->where('status','!=','CANCELADO')->orWhere('status', null); })->exists()) {
+                    return redirect()->route('solicitud.exoneracion')->with(['message' => 'EL GRUPO SE ENCUENTRA EN USO..']);
                 }
                 if (($curso->dura == $curso->horas_agenda)) {
                     $organismo = null;
@@ -111,7 +118,7 @@ class ExoneracionController extends Controller
                         }  
                     }
                     if (!$_SESSION['revision'] AND $curso) {
-                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW('max(cast(substring(nrevision,9,4) as int))'))) + 1;
+                        $consec = (DB::table('exoneraciones')->where('ejercicio',$curso->ejercicio)->where('cct',$curso->cct)->value(DB::RAW("max(cast(substring(nrevision from '.{4}$') as int))"))) + 1;
                         $consec = str_pad($consec, 4, "0", STR_PAD_LEFT);
                         $revision = "EXO-".$curso->cct.$curso->ejercicio.$consec;
                         $_SESSION['revision'] = $revision;
@@ -246,8 +253,13 @@ class ExoneracionController extends Controller
     public function generar(Request $request){
         if ($request->memo AND $_SESSION['revision']) {
             $_SESSION['memo'] = $request->memo;
+            if (DB::table('exoneraciones')->where('nrevision',$_SESSION['revision'])->value('fecha_memorandum')) {
+                $fecha = DB::table('exoneraciones')->where('nrevision',$_SESSION['revision'])->value('fecha_memorandum');
+            } else {
+                $fecha = $request->fecha;
+            }
             $result = DB::table('exoneraciones')->where('nrevision', $_SESSION['revision'])
-                ->update(['no_memorandum' => $_SESSION['memo'], 'fecha_memorandum' => $request->fecha]);
+                ->update(['no_memorandum' => $_SESSION['memo'], 'fecha_memorandum' => $fecha]);
             $cursos = DB::table('exoneraciones')->where('no_memorandum',$_SESSION['memo'])->get();
             foreach ($cursos as $key => $value) {
                 $year = date('y');
@@ -272,7 +284,7 @@ class ExoneracionController extends Controller
                                         DB::raw("to_char(DATE (tc.termino)::date, 'DD-MM-YYYY') as termino"),
                                         'tc.mujer','tc.hombre','e.fini','e.ffin',
                                         'tc.nombre as instructor','e.tipo_exoneracion','e.no_convenio','e.noficio',DB::raw("to_char(DATE (e.foficio)::date, 'DD-MM-YYYY') as foficio"),
-                                        'e.razon_exoneracion','e.observaciones',
+                                        'e.razon_exoneracion','e.observaciones','tc.hini','tc.hfin',
                                         'tc.depen','e.id_unidad_capacitacion','tc.mod','ar.horario','tc.efisico','tc.tcapacitacion','tc.medio_virtual','tc.dia',
                                         'tc.folio_grupo','e.no_memorandum',DB::raw("to_char(DATE (e.fecha_memorandum)::date, 'DD-MM-YYYY') as fecha_memorandum"))
                                 ->leftJoin('tbl_cursos as tc','e.folio_grupo','=','tc.folio_grupo')
@@ -282,7 +294,8 @@ class ExoneracionController extends Controller
                                 ->groupBy('tc.tipo_curso','tc.unidad','tc.curso','c.costo','tc.dura','tc.inicio','tc.termino','tc.mujer','tc.hombre','e.fini','e.ffin',
                                 'tc.nombre','e.tipo_exoneracion','e.no_convenio','e.noficio','e.foficio','e.razon_exoneracion','e.observaciones',
                                 'tc.depen','e.id_unidad_capacitacion','tc.mod','ar.horario','tc.efisico','tc.tcapacitacion','tc.medio_virtual','tc.dia','tc.folio_grupo',
-                                'e.no_memorandum','e.fecha_memorandum')
+                                'e.no_memorandum','e.fecha_memorandum','tc.hini','tc.hfin')
+                                ->orderBy('e.fini','asc')
                                 ->get();    //dd($cursos);
                 $reg_unidad = DB::table('tbl_unidades')->select('ubicacion','dgeneral','dunidad','academico','vinculacion','dacademico','pdgeneral','pdacademico',
                                     'pdunidad','pacademico','pvinculacion','municipio')
@@ -290,7 +303,8 @@ class ExoneracionController extends Controller
                                     ->first(); //dd($reg_unidad);
                 $depen = $cursos[0]->depen;
                 $date = $cursos[0]->fecha_memorandum;
-                $mexoneracion = $cursos[0]->no_memorandum;
+                if($cursos[0]->no_memorandum)$mexoneracion = $cursos[0]->no_memorandum;
+                else $mexoneracion = $cursos[0]->nrevision;
                 foreach ($cursos as $key => $value) {
                     $alumnos = DB::table('alumnos_registro as ar')
                                     ->select('ap.apellido_paterno','ap.apellido_materno','ap.nombre','ap.sexo','ar.costo',DB::raw("CONCAT(ap.apellido_paterno,' ', ap.apellido_materno,' ',ap.nombre) as alumno"),
@@ -299,10 +313,11 @@ class ExoneracionController extends Controller
                                     ->where('ar.folio_grupo',$value->folio_grupo)
                                     ->orderBy('alumno')
                                     ->get();
+                    $horario = date('H:i', strtotime(str_replace(['a.m.','p.m.'],['am','pm'],$value->hini))).' A '.date('H:i', strtotime(str_replace(['a.m.','p.m.'],['am','pm'],$value->hfin)));
                     $data[$key]['curso'] = $value->curso;
                     $data[$key]['mod'] = $value->mod;
                     $data[$key]['dura'] = $value->dura;
-                    $data[$key]['horario'] = $value->horario;
+                    $data[$key]['horario'] = $horario;
                     $data[$key]['inicio'] = $value->inicio;
                     $data[$key]['termino'] = $value->termino;
                     if ($value->tcapacitacion=='PRESENCIAL') {

@@ -57,11 +57,11 @@
     </div>
     <div class="form-group col-md-3">
         <label for="tipo" class="contro-label">Tipo</label>
-        <select disabled class="form-control" id="tipo" name="tipo">
+        <select class="form-control" id="tipo" name="tipo">
             <option value="" selected disabled>--SELECCIONAR--</option>
             <option value="A DISTANCIA" {{$curso->tipo_curso == 'A DISTANCIA' ? 'selected' : ''}}>A DISTANCIA</option>
             <option value="PRESENCIAL" {{$curso->tipo_curso == 'PRESENCIAL' ? 'selected' : ''}}>PRESENCIAL</option>
-            <option value="A DISTANCIA Y PRESENCIAL">A DISTANICA Y PRESENCIAL</option>
+            <option value="PRESENCIAL Y A DISTANCIA" {{$curso->tipo_curso == 'PRESENCIAL Y A DISTANCIA' ? 'selected' : ''}}> PRESENCIAL Y A DISTANCIA</option>
         </select>
     </div>
     <div class="form-group col-md-3">
@@ -305,3 +305,13 @@
     </div>
 </div>
 <!-- Full Height Modal Right -->
+<div class="row">
+    <div class="col-lg-12 margin-tb">
+        <div class="pull-right">
+            <!-- @can('cursos.store') -->
+            
+            <a onclick="save('carta')" type="submit" class="btn btn-primary">Guardar</a>
+            <!-- @endcan -->
+        </div>
+    </div>
+</div>

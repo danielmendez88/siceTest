@@ -10,14 +10,15 @@
 @section('content')   
     <?php 
         $id_grupo = $folio = $tipo = $id_curso = $id_cerss = $horario = $turnado = $hini = $id_vulnerable =
-        $hfin = $termino = $inicio = $id_localidad = $id_muni = $organismo = $modalidad = "";       
+        $hfin = $termino = $inicio = $id_localidad = $id_muni = $organismo = $modalidad = "";    $costo = null;   
         if($curso){
             $id_curso = $curso->id;
-            $id_cerss = $alumnos[0]->id_cerss;
+            $costo = $curso->costo;
         }
-        if($alumnos){ 
+        if(count($alumnos)>0){ 
             $hfin = substr($alumnos[0]->horario, 8, 5);
-            $hini = substr($alumnos[0]->horario, 0, 5);                 
+            $hini = substr($alumnos[0]->horario, 0, 5);
+            $id_cerss = $alumnos[0]->id_cerss;               
             //$hini = $alumnos[0]->hini;
             //$hfin = $alumnos[0]->hfin;
             $inicio = $alumnos[0]->inicio;
@@ -160,13 +161,13 @@
         <script src="{{asset('js/preinscripcion/tableAlumnos.js')}}"></script>        	
         <script language="javascript">            
             $(document).ready(function(){    
-                $("#agregar").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.save')}}"); $('#frm').submit(); });
-                $("#nuevo").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.nuevo')}}"); $('#frm').submit(); });
-                $("#update").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.update')}}"); $('#frm').submit(); });
-                $("#turnar").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.turnar')}}"); $('#frm').submit(); });
+                $("#agregar").click(function(){ $('#frm').attr({'action':"{{route('preinscripcion.grupo.save')}}",'target':'_self'}); $('#frm').submit(); });
+                $("#nuevo").click(function(){ $('#frm').attr({'action':"{{route('preinscripcion.grupo.nuevo')}}",'target':'_self'}); $('#frm').submit(); });
+                $("#update").click(function(){ $('#frm').attr({'action':"{{route('preinscripcion.grupo.update')}}",'target':'_self'}); $('#frm').submit(); });
+                $("#turnar").click(function(){ $('#frm').attr({'action':"{{route('preinscripcion.grupo.turnar')}}",'target':'_self'}); $('#frm').submit(); });
                 $("#comprobante").click(function(){ $('#frm').attr('action', "{{route('preinscripcion.grupo.comprobante')}}"); $('#frm').submit(); });
-                $("#btnremplazo").click(function(){if (confirm("Est\u00E1 seguro de ejecutar la acci\u00F3n?")==true) {$('#frm').attr('action', "{{route('preinscripcion.grupo.remplazar')}}"); $('#frm').submit();}}); 
-
+                $("#btnremplazo").click(function(){if (confirm("Est\u00E1 seguro de ejecutar la acci\u00F3n?")==true) {$('#frm').attr({'action':"{{route('preinscripcion.grupo.remplazar')}}",'target':'_self'}); $('#frm').submit();}});
+                $("#generar").click(function(){ $('#frm').attr({'action':"{{route('preinscripcion.grupo.generar')}}", 'target':'_target'}); $('#frm').submit(); });
             });
         </script>
     @endsection
