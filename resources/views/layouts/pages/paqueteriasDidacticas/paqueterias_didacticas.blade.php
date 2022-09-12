@@ -186,39 +186,20 @@
         };
     }
 
-
-    function SimpleUploadAdapterPlugin(editor) {
-        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-
-            // Configure the URL to the upload script in your back-end here!
-            return new MyUploadAdapter(loader);
-        };
-    }
-
     ClassicEditor
-        .create(document.querySelector('#objetivoespecifico'), {
-
-            language: 'es',
-
-        })
+        .create(document.querySelector('#objetivoespecifico'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#aprendizajeesperado'), {
-            language: 'es',
-
-        })
+        .create(document.querySelector('#aprendizajeesperado'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#observaciones'), {
-            language: 'es',
-
-        })
+        .create(document.querySelector('#observaciones'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
@@ -270,18 +251,26 @@
     $(document).ready(function() {
         $("#botonCARTADESCPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
         });
         $("#botonEVALALUMNPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarEvalAlumno',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
         });
         $("#botonEVALINSTRUCTORPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarEvalInstructor')}}");
+            $('#creacion').attr('target', "_blank}");
+            
             $('#creacion').submit();
         });
         $("#botonMANUALDIDPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarManualDidactico',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
             // $('#alert-files').css('display', 'block');
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
@@ -289,6 +278,13 @@
 
 
     });
+
+    function save(blade) {
+        console.log(blade);
+        var $form = $("#creacion");
+        $form.append("<input type='hidden' name='blade' value='"+blade+"'/>");
+        $('#creacion').submit();
+    }
 </script>
 <script src="{{asset('js/catalogos/paqueteriasdidactica/paqueterias.js')}}"></script>
 

@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Str;
 class PaqueteriaDidacticaController extends Controller
 {
     //
@@ -92,8 +92,8 @@ class PaqueteriaDidacticaController extends Controller
     public function store(Request $request, $idCurso)
     {
 
-
-
+        
+        
         $urlImagenes = [];
         $preguntas = ['instrucciones' => $request->instrucciones];
 
@@ -138,48 +138,42 @@ class PaqueteriaDidacticaController extends Controller
 
 
         $i = 0;
+        
+        
 
-        $contPreguntas = 0;
-
-        $auxContPreguntas = $request->numPreguntas;
-
-        while (true) { //ciclo para encontrar las preguntas del formulario
-            $i++;
-            if ($contPreguntas == $auxContPreguntas)
-                break;
-
-            $numPregunta = 'pregunta' . $i;
-            $tipoPregunta = 'pregunta' . $i . '-tipo';
-            $opcPregunta = 'pregunta' . $i . '-opc';
-            $respuesta = 'pregunta' . $i . '-opc-answer';
-
-            $contenidoT = 'pregunta' . $i . '-contenidoT';
-
-            if($request->$numPregunta === null)
-                return redirect()->route('paqueteriasDidacticas', $idCurso)->with('warning', 'NO SE PUEDEN GUARDAR LA PREGUNTAS VACIAS!');
-
-            if ($request->$numPregunta != null || $request->numPreguntas == 1) {
-
-                if ($request->$tipoPregunta == 'multiple') {
-                    $tempPregunta = [
-                        'descripcion' => $request->$numPregunta ?? 'N/A',
-                        'tipo' => $request->$tipoPregunta ?? 'N/A',
-                        'opciones' => $request->$opcPregunta,
-                        'respuesta' => $request->$respuesta ?? 'N/A',
-                        'contenidoTematico' => $request->$contenidoT ?? 'N/A',
-                    ];
-                } else {
-                    $respuesta = 'pregunta' . $i . '-resp-abierta';
-                    $tempPregunta = [
-                        'descripcion' => $request->$numPregunta ?? 'N/A',
-                        'tipo' => $request->$tipoPregunta ?? 'N/A',
-                        'opciones' => $request->$opcPregunta,
-                        'respuesta' => $request->$respuesta ?? 'N/A',
-                        'contenidoTematico' => $request->$contenidoT ?? 'N/A',
-                    ];
+        if($request->blade === 'evaluacion'){
+            foreach($request->toArray() as $key => $value) {
+                $i++;
+                $numPregunta = 'pregunta' . $i;
+                $tipoPregunta = 'pregunta' . $i . '-tipo';
+                $opcPregunta = 'pregunta' . $i . '-opc';
+                $respuesta = 'pregunta' . $i . '-opc-answer';
+    
+                $contenidoT = 'pregunta' . $i . '-contenidoT';
+    
+                if($request->$numPregunta){
+                    
+                    if ($request->$tipoPregunta == 'multiple') {
+                        $tempPregunta = [
+                            'descripcion' => $request->$numPregunta ?? 'N/A',
+                            'tipo' => $request->$tipoPregunta ?? 'N/A',
+                            'opciones' => $request->$opcPregunta,
+                            'respuesta' => $request->$respuesta ?? 'N/A',
+                            'contenidoTematico' => $request->$contenidoT ?? 'N/A',
+                        ];
+                    } else {
+                        $respuesta = 'pregunta' . $i . '-resp-abierta';
+                        $tempPregunta = [
+                            'descripcion' => $request->$numPregunta ?? 'N/A',
+                            'tipo' => $request->$tipoPregunta ?? 'N/A',
+                            'opciones' => $request->$opcPregunta,
+                            'respuesta' => $request->$respuesta ?? 'N/A',
+                            'contenidoTematico' => $request->$contenidoT ?? 'N/A',
+                        ];
+                    }
+                    array_push($preguntas, $tempPregunta);
+                    
                 }
-                array_push($preguntas, $tempPregunta);
-                $contPreguntas++;
             }
         }
 
@@ -195,7 +189,7 @@ class PaqueteriaDidacticaController extends Controller
                     'id_user_updated' => Auth::id()
                 ]);
             DB::commit();
-            return redirect()->route('curso-inicio')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
         } catch (\Exception $e) {
             throw $e;
             DB::rollback();
@@ -279,16 +273,21 @@ class PaqueteriaDidacticaController extends Controller
 
     public function upload(Request $request)
     {
+      
         if ($request->hasFile('upload')) {
             $originName = $request->file('upload')->getClientOriginalName();
-            $fileName = pathinfo($originName, PATHINFO_FILENAME);
+            $fileName = pathinfo(Str::random(10), PATHINFO_FILENAME);
             $extension = $request->file('upload')->getClientOriginalExtension();
             $fileName = $fileName . '.' . $extension;
+            // dump($fileName, $originName, $extension, $request->file('upload'));
 
             $request->file('upload')->move(public_path('images/paqueterias'), $fileName);
             $url = asset('images/paqueterias/' . $fileName);
             @header('Content-type: text/html; charset=utf-8');
             return response()->json(['url' => $url]);
+        }
+        else{
+            dd('no file');
         }
     }
 }
