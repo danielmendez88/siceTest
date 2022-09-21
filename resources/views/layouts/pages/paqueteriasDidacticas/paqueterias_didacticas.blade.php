@@ -13,6 +13,7 @@
 <div class="card-header">
     Formulario de Paqueterias Didacticas
 </div>
+
 <div class="card card-body" style=" min-height:450px;">
     @if ($errors->any())
     <div class="alert alert-danger">
@@ -60,7 +61,11 @@
                 @include('layouts.pages.paqueteriasDidacticas.blades.curso')
             </div>
             <div class="tab-pane fade " id="pills-evalalum" role="tabpanel" aria-labelledby="pills-evalalum-tab">
+                @if($evaluacionAlumno === '[]' || $evaluacionAlumno === '""')
                 @include('layouts.pages.paqueteriasDidacticas.blades.evaluacionAlumno')
+                @else
+                @include('layouts.pages.paqueteriasDidacticas.blades.editarEvaluacionAlumno')
+                @endif
             </div>
             <div class="tab-pane fade" id="pills-paqdid" role="tabpanel" aria-labelledby="pills-paqdid-tab">
                 @include('layouts.pages.paqueteriasDidacticas.blades.descargarPaqueteria')
@@ -84,7 +89,8 @@
     var editorElementoA;
     var editorAuxE;
     var editorReferencias;
-
+    var idCurso = <?php echo json_encode($idCurso); ?>;
+    var numPreguntasaux = <?php echo count((array)$evaluacionAlumno); ?> ;
     //Define an adapter to upload the files
     class MyUploadAdapter {
         constructor(loader) {
@@ -94,6 +100,7 @@
 
             // URL where to send files.
             this.url = '{{ route('ckeditorUpload') }}';
+            
 
             //
         }
@@ -167,8 +174,10 @@
         // Prepares the data and sends the request.
         _sendRequest(file) {
             // Prepare the form data.
+            
             const data = new FormData();
             data.append("upload", file);
+            data.append("idCurso", idCurso);
             // Important note: This is the right place to implement security mechanisms
             // like authentication and CSRF protection. For instance, you can use
             // XMLHttpRequest.setRequestHeader() to set the request headers containing
@@ -186,39 +195,20 @@
         };
     }
 
-
-    function SimpleUploadAdapterPlugin(editor) {
-        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-
-            // Configure the URL to the upload script in your back-end here!
-            return new MyUploadAdapter(loader);
-        };
-    }
-
     ClassicEditor
-        .create(document.querySelector('#objetivoespecifico'), {
-
-            language: 'es',
-
-        })
+        .create(document.querySelector('#objetivoespecifico'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#aprendizajeesperado'), {
-            language: 'es',
-
-        })
+        .create(document.querySelector('#aprendizajeesperado'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#observaciones'), {
-            language: 'es',
-
-        })
+        .create(document.querySelector('#observaciones'), {language: 'es',})
         .catch(error => {
             console.error(error);
         });
@@ -270,18 +260,26 @@
     $(document).ready(function() {
         $("#botonCARTADESCPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
         });
         $("#botonEVALALUMNPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarEvalAlumno',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
         });
         $("#botonEVALINSTRUCTORPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarEvalInstructor')}}");
+            $('#creacion').attr('target', "_blank}");
+            
             $('#creacion').submit();
         });
         $("#botonMANUALDIDPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarManualDidactico',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            
             $('#creacion').submit();
             // $('#alert-files').css('display', 'block');
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
@@ -289,6 +287,16 @@
 
 
     });
+
+    function save(blade) {
+        
+        var $form = $("#creacion");
+        $('#creacion').attr('action', "{{route('paqueteriasGuardar',$idCurso)}}");
+        $('#creacion').removeAttr('target');
+       
+        $form.append("<input type='hidden' name='blade' value='"+blade+"'/>");
+        $('#creacion').submit();
+    }
 </script>
 <script src="{{asset('js/catalogos/paqueteriasdidactica/paqueterias.js')}}"></script>
 
