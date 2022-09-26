@@ -296,4 +296,8 @@ class PaqueteriaDidacticaController extends Controller
             dd('no file');
         }
     }
+
+    public function manual(){
+        
+    }
 }

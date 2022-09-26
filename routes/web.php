@@ -660,6 +660,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('descargar/evaluacioninstructor/', 'webController\PaqueteriaDidacticaController@DescargarPaqueteriaEvalInstructor')->name('DescargarEvalInstructor')->middleware('can:paqueteriasdidacticas');
     Route::post('descargar/manualDidactico/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarManualDidactico')->name('DescargarManualDidactico')->middleware('can:paqueteriasdidacticas');
     Route::post('paqueterias/uploadImg/', 'webController\PaqueteriaDidacticaController@upload')->name('ckeditorUpload')->middleware('can:paqueteriasdidacticas');
+    Route::get('manual/', 'webController\PaqueteriaDidacticaController@manual')->name('manual')->middleware('can:paqueteriasdidacticas');
 });
 /*SUPERVISION ESCOLAR Y ENCUESTA RPN*/
 Route::get('/form/instructor/{url}', 'supervisionController\UrlController@form')->name('form.instructor');
