@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController\Api\PassportController;
-
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,9 +14,9 @@ use App\Http\Controllers\ApiController\Api\PassportController;
 |
 */
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::middleware('auth:api', 'scope:view-user')->get('/user', function (Request $request) {
+    return $request->user();
+});
 
 // Route::post('login', 'ApiController\Api\PassportController@login');
 // Route::get('signup', 'ApiController\Api\PassportController@registerData');

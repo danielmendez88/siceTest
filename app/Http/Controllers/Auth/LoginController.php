@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 class LoginController extends Controller
 {
     /*
@@ -36,5 +37,26 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    public function login(Request $request)
+    {
+
+        switch ($request->sistema) {
+            case 'SIATA':
+                $request->session()->put("state", $state = Str::random(40));
+                dd($request->toArray());
+
+                $query = http_build_query([
+                    "user" => $request->username,
+                    "password" => $request->password,
+                    "response_type" => "code",
+                    "scope" => 'view-user',
+                    "state" => $state
+                ]);
+                return redirect("http://127.0.0.1:9000/login?" . $query);
+
+                break;
+        }
     }
 }
