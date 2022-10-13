@@ -86,7 +86,7 @@ class PaqueteriaDidacticaController extends Controller
         DB::beginTransaction();
         try { //se guarda la informacion inicial de la paqueteria
             $paqueteriasDidacticas = CursoTemp::toBase()->where([['id', $idCurso], ['active', 1]])->first();
-
+            
             if (!isset($paqueteriasDidacticas)) {
                 DB::table('cursos_temp')
                 ->where('id', $idCurso)
@@ -110,8 +110,10 @@ class PaqueteriaDidacticaController extends Controller
         $cartaDescriptiva = [];
         $contenidoT = [];
         $evaluacionAlumno = [];
+        
         // dd(gettype($evaluacionAlumno));
         if (isset($paqueteriasDidacticas)) {
+            
             $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
             $contenidoT = json_decode($cartaDescriptiva->contenidoTematico ?? '');
             $evaluacionAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
@@ -119,7 +121,7 @@ class PaqueteriaDidacticaController extends Controller
             unset($evaluacionAlumno->instrucciones);
             
         }
-        // dd($evaluacionAlumno,isset($evaluacionAlumno), $evaluacionAlumno === '""', $instrucciones);
+        
         $fechaActual = Carbon::now();
         
 
@@ -141,7 +143,7 @@ class PaqueteriaDidacticaController extends Controller
     public function store(Request $request, $idCurso)
     {
 
-        
+        dd($request->toArray());
         
         $urlImagenes = [];
         $preguntas = ['instrucciones' => $request->instrucciones];
@@ -182,7 +184,7 @@ class PaqueteriaDidacticaController extends Controller
         
         
 
-        if($request->blade === 'evaluacion'){
+        if($request->blade === 'evaluacion' || $request->blade === 'ambos'){
             foreach($request->toArray() as $key => $value) {
                 $i++;
                 $numPregunta = 'pregunta' . $i;
@@ -348,7 +350,7 @@ class PaqueteriaDidacticaController extends Controller
         
         $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
 
-        switch($request->paqueteria){
+        switch($reaeteria){
             case 'eval_alumno':
                 $evalAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
                 if (!isset($evalAlumno) || !isset($paqueteriasDidacticas)) {

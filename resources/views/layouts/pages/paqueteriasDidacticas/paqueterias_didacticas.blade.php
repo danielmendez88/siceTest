@@ -154,7 +154,7 @@
                 @include('layouts.pages.paqueteriasDidacticas.blades.curso')
             </div>
             <div class="tab-pane fade " id="pills-evalalum" role="tabpanel" aria-labelledby="pills-evalalum-tab">
-                @if($evaluacionAlumno === '[]' || $evaluacionAlumno === '""')
+                @if($evaluacionAlumno === '[]' || $evaluacionAlumno === "")
                 @include('layouts.pages.paqueteriasDidacticas.blades.evaluacionAlumno')
                 @else
                 @include('layouts.pages.paqueteriasDidacticas.blades.editarEvaluacionAlumno')
@@ -373,8 +373,10 @@
         });
 
     $(document).ready(function() {
+        var $form = $("#creacion");
         $("#guardar").click(function() {
             $('#creacion').attr('action', "{{route('paqueteriasGuardar',$idCurso)}}");
+            $form.append("<input type='hidden' name='blade' value='ambos'/>");
             $('#creacion').submit();
         });
         $("#send_pre_validacion").click(function() {
@@ -393,20 +395,24 @@
         
         $("#botonCARTADESCPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $form.append("<input type='hidden' name='paqueteria' value='carta_descriptiva'/>");
             $('#creacion').attr('target', "_blank");
             
             $('#creacion').submit();
         });
         $("#botonEVALALUMNPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $form.append("<input type='hidden' name='paqueteria' value='eval_alumno'/>");
             $('#creacion').submit();
         });
         $("#botonEVALINSTRUCTORPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $form.append("<input type='hidden' name='paqueteria' value='eval_instructor'/>");
             $('#creacion').submit();
         });
         $("#botonMANUALDIDPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
+            $form.append("<input type='hidden' name='paqueteria' value='manual_didactico'/>");
             $('#creacion').submit();
             // $('#alert-files').css('display', 'block');
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
