@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Str;
 class PaqueteriaDidacticaController extends Controller
 {
     public function buzon(Request $request)
@@ -140,6 +140,9 @@ class PaqueteriaDidacticaController extends Controller
         
     public function store(Request $request, $idCurso)
     {
+
+        
+        
         $urlImagenes = [];
         $preguntas = ['instrucciones' => $request->instrucciones];
 
