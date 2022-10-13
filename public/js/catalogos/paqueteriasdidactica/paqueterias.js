@@ -51,6 +51,7 @@ $(document).ready(function () {
 
 //     if (evaluacion != '' || !evaluacion) {//auto completa formulario de evaluacion de alumno con datos de la DB// 
         
+        $('# ').val(evaluacion.length-1);
 //         $('#numPreguntas').val(evaluacion.length-1);
         
 //         //evaluacion viene de paqueterias_didacticas.blade 

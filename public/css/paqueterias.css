@@ -129,3 +129,27 @@ input[type=text]:focus {
     height: 510px;
     overflow: auto;
 }
+
+
+.input_memo {
+/* Style the color of the message that says 'No file chosen' */
+    color: #878787;
+}
+.input_memo::-webkit-file-upload-button {
+    background: #ED1C1B;
+    border: 2px solid #ED1C1B;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    outline: none;
+    padding: 10px 25px;
+    text-transform: uppercase;
+    transition: all 1s ease;
+}
+
+.input_memo::-webkit-file-upload-button:hover {
+    background: #fff;
+    border: 2px solid #535353;
+    color: #000;
+}
