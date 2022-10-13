@@ -33,7 +33,10 @@
     <h2>Buzon Solicitudes de Paqueterias</h2>
     <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="pills-autorizados-tab" data-toggle="pill" href="#pills-autorizados" role="tab" aria-controls="pills-autorizados" aria-selected="true">Autorizados</a>
+            <a class="nav-link active" id="pills-nuevo-tab" data-toggle="pill" href="#pills-nuevo" role="tab" aria-controls="pills-autorizados" aria-selected="true">Nueva</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="pills-autorizados-tab" data-toggle="pill" href="#pills-autorizados" role="tab" aria-controls="pills-autorizados" aria-selected="true">Autorizados</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="pills-solicitados-tab" data-toggle="pill" href="#pills-solicitados" role="tab" aria-controls="pills-solicitados" aria-selected="false">Solicitados</a>
@@ -42,7 +45,89 @@
 
     <hr style="border-color:dimgray">
     <div class="tab-content" id="pills-tabContent">
-        <div class="tab-pane fade show active" id="pills-autorizados" role="tabpanel" aria-labelledby="pills-autorizados-tab">
+        <div class="tab-pane fade show active" id="pills-nuevo" role="tabpanel" aria-labelledby="pills-nuevo-tab">
+            @if ($message = Session::get('success'))
+            <div class="alert alert-success">
+                <p>{{ $message }}</p>
+            </div>
+            @endif
+            <div class="row">
+                <div class="col-lg-12 margin-tb">
+                    <div class="pull-left">
+                        <h2>Catalogo de Cursos</h2>
+
+                        {!! Form::open(['route' => 'buzon.paqueterias', 'method' => 'GET', 'class' => 'form-inline' ]) !!}
+                        <select name="tipo_curso" class="form-control mr-sm-2" id="tipo_curso">
+                            <option value="">BUSCAR POR TIPO</option>
+                            <option value="especialidad">ESPECIALIDAD</option>
+                            <option value="curso">CURSO</option>
+                            <option value="duracion">DURACIÓN</option>
+                            <option value="modalidad">MODALIDAD</option>
+                            <option value="clasificacion">CLASIFICACIÓN</option>
+                            <option value="anio">AÑO</option>
+                        </select>
+
+                        {!! Form::text('busquedaPorCurso', null, ['class' => 'form-control mr-sm-2', 'placeholder' => 'BUSCAR', 'aria-label' => 'BUSCAR', 'value' => 1]) !!}
+                        <button class="btn btn-outline-info my-2 my-sm-0" type="submit">BUSCAR</button>
+                        {!! Form::close() !!}
+
+                    </div>
+                    <br>
+                    
+                </div>
+            </div>
+
+            <table id="table-instructor" class="table table-bordered Datatables">
+                <caption>Catalogo de Cursos</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Especialidad</th>
+                        <th scope="col">Curso</th>
+                        <th scope="col">Tipo de Curso</th>
+                        <th scope="col">Duración</th>
+                        <th scope="col">Modalidad</th>
+                        <th scope="col">Clasificación</th>
+                        <th scope="col">Costo</th>
+                        @can('paqueteriasdidacticas')
+                        <th scope="col">Paqueterias</th>
+                        @endcan
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(isset($data))
+                    @foreach ($data as $itemData)
+                    <tr>
+                        <th scope="row">{{$itemData->nombre}}</th>
+                        <td>{{$itemData->nombre_curso}}</td>
+                        <td>{{$itemData->tipo_curso}}</td>
+                        <td>{{$itemData->horas}}</td>
+                        <td>{{$itemData->modalidad}}</td>
+                        <td>{{$itemData->clasificacion}}</td>
+                        <td>{{$itemData->costo}}</td>
+
+                       
+                        @can('paqueteriasdidacticas')
+                        <td>
+                            <a href="{{route('paqueteriasDidacticas',$itemData->id)}}" class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Paquetes">
+                                <i class="fa fa-folder"></i>
+                            </a>
+                        </td>
+                        @endcan
+                    </tr>
+                    @endforeach
+                    @endif
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="8">
+                            {{ $data->appends(request()->query())->links() }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            <br>
+        </div>
+        <div class="tab-pane fade" id="pills-autorizados" role="tabpanel" aria-labelledby="pills-autorizados-tab">
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">

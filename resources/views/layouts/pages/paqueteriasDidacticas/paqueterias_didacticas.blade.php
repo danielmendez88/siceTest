@@ -28,7 +28,10 @@
             <p>{{ $message }}</p>
         </div>
         @endif
-
+        <div class="alert-custom" id="alert-validating" style="display: none">
+                <span class="closebtn-p" onclick="this.parentElement.style.display='none';">&times;</span>
+                <strong><label for="" id="validating-msg"></label></strong>
+            </div>
         <div class="row bg-light" style="padding:20px">
             <div class="form-group col-md-4">
                 Solicitud: <b>{{ $curso->tipoSoli }}</b>
@@ -72,16 +75,16 @@
             </div>
             @elseif($curso->estatus_paqueteria == 'PENDIENTE POR TURNAR')
             <div class="col-md-4">
-              
+
                 <div class="col-md-12 col-sm-12">
                     <label for="objetivos col-md-12" class="control-label"></label>
                     <a type="button" class="btn btn-primary" id="turnarDta">Turnar a la DTA</a>
                 </div>
-               
+
             </div>
-            
+
             @elseif($curso->estatus_paqueteria != 'ENVIADO A PREVALIDACION')
-            
+
             <div class="form-group col-md-3">
                 <label for="tipo" class="contro-label">Solicitud</label>
                 <select class="form-control" id="tipo" name="tipoSoli">
@@ -100,15 +103,14 @@
             </div>
 
             <div class="form-group col-md-3">
+
                 <div class="form-group col-md-12 col-sm-12">
-                    <button class="btn btn-primary" id="guardar">Guardar</button>
-                </div>
-                <div class="form-group col-md-12 col-sm-12">
-                    <button class="btn btn-primary" id="send_pre_validacion">Enviar a Pre Validacion</button>
+                    <a class="btn btn-danger" id="send_pre_validacion">Enviar a Pre Validacion</a>
                 </div>
             </div>
             @endif
             @endcan
+            
         </div>
 
 
@@ -147,7 +149,7 @@
             </li>
 
         </ul>
-      
+
         <div class="tab-content" id="pills-tabContent">
             @can('paqueteriasdidacticas.crear')
             <div class="tab-pane fade show active" id="pills-tecnico" role="tabpanel" aria-labelledby="pills-tecnico-tab">
@@ -172,22 +174,22 @@
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
-    <!-- Modal content-->
-    <form action="{{ route('guardar.memo.soli.validacion',$idCurso) }}" enctype="multipart/form-data" id="pdfForm" method="post">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Memoramdum de Solicitud de Paqueterias Didacticas</h4>
-            </div>
-            <div class="modal-body" style="text-align:center">
+        <!-- Modal content-->
+        <form action="{{ route('guardar.memo.soli.validacion',$idCurso) }}" enctype="multipart/form-data" id="pdfForm" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Memoramdum de Solicitud de Paqueterias Didacticas</h4>
+                </div>
+                <div class="modal-body" style="text-align:center">
                     @csrf
-                    <input name="doc_memo" class="input_memo" type="file"/>
+                    <input name="doc_memo" class="input_memo" type="file" />
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-default" >Subir</button>
+                    <button type="submit" class="btn btn-default">Subir</button>
                 </div>
             </div>
-        </div>
+    </div>
     </form>
 </div>
 
@@ -205,7 +207,7 @@
     var editorAuxE;
     var editorReferencias;
     var idCurso = <?php echo json_encode($idCurso); ?>;
-    var numPreguntasaux = <?php echo count((array)$evaluacionAlumno); ?> ;
+    var numPreguntasaux = <?php echo count((array)$evaluacionAlumno); ?>;
     //Define an adapter to upload the files
     class MyUploadAdapter {
         constructor(loader) {
@@ -215,7 +217,7 @@
 
             // URL where to send files.
             this.url = '{{ route('ckeditorUpload') }}';
-            
+
 
             //
         }
@@ -289,7 +291,7 @@
         // Prepares the data and sends the request.
         _sendRequest(file) {
             // Prepare the form data.
-            
+
             const data = new FormData();
             data.append("upload", file);
             data.append("idCurso", idCurso);
@@ -311,19 +313,25 @@
     }
 
     ClassicEditor
-        .create(document.querySelector('#objetivoespecifico'), {language: 'es',})
+        .create(document.querySelector('#objetivoespecifico'), {
+            language: 'es',
+        })
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#aprendizajeesperado'), {language: 'es',})
+        .create(document.querySelector('#aprendizajeesperado'), {
+            language: 'es',
+        })
         .catch(error => {
             console.error(error);
         });
 
     ClassicEditor
-        .create(document.querySelector('#observaciones'), {language: 'es',})
+        .create(document.querySelector('#observaciones'), {
+            language: 'es',
+        })
         .catch(error => {
             console.error(error);
         });
@@ -380,6 +388,11 @@
             $('#creacion').submit();
         });
         $("#send_pre_validacion").click(function() {
+            if ($('#tipo').val() == '' || $('#motivoSoli').val() == '') {
+                $('#alert-validating').css('display', 'block');
+                $('#validating-msg').text("El tipo de solicitud y la descripcion de la solicitud no pueden estar vacias");
+                return;
+            }
             $('#creacion').attr('action', "{{route('buzon.enviar.pre_validacion',$idCurso)}}");
             $('#creacion').submit();
         });
@@ -392,12 +405,12 @@
             $('#creacion').attr('action', "{{route('turnar.soli.dta',$idCurso)}}");
             $('#creacion').submit();
         });
-        
+
         $("#botonCARTADESCPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $form.append("<input type='hidden' name='paqueteria' value='carta_descriptiva'/>");
             $('#creacion').attr('target', "_blank");
-            
+
             $('#creacion').submit();
         });
         $("#botonEVALALUMNPDF").click(function() {
@@ -418,7 +431,7 @@
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
         });
 
-       
+
 
     });
 
@@ -455,12 +468,12 @@
     }
 
     function save(blade) {
-        
+
         var $form = $("#creacion");
         $('#creacion').attr('action', "{{route('paqueteriasGuardar',$idCurso)}}");
         $('#creacion').removeAttr('target');
-       
-        $form.append("<input type='hidden' name='blade' value='"+blade+"'/>");
+
+        $form.append("<input type='hidden' name='blade' value='" + blade + "'/>");
         $('#creacion').submit();
     }
 </script>
@@ -468,7 +481,9 @@
 
 <script defer>
     // $('#preguntas-area-parent .card-paq').remove()
-    var evaluacion = Object.values(JSON.parse({!!json_encode($evaluacionAlumno, JSON_HEX_TAG) !!}));
+    var evaluacion = Object.values(JSON.parse({
+        !!json_encode($evaluacionAlumno, JSON_HEX_TAG) !!
+    }));
     //   console.log(values.length
 </script>
 @endsection
