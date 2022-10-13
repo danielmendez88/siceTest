@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class PaqueteriaDidacticaController extends Controller
 {
@@ -111,15 +110,20 @@ class PaqueteriaDidacticaController extends Controller
         $cartaDescriptiva = [];
         $contenidoT = [];
         $evaluacionAlumno = [];
+        // dd(gettype($evaluacionAlumno));
         if (isset($paqueteriasDidacticas)) {
             $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
             $contenidoT = json_decode($cartaDescriptiva->contenidoTematico ?? '');
-            $evaluacionAlumno = ($paqueteriasDidacticas->eval_alumno);
+            $evaluacionAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
+            $instrucciones = $evaluacionAlumno->instrucciones;
+            unset($evaluacionAlumno->instrucciones);
+            
         }
+        // dd($evaluacionAlumno,isset($evaluacionAlumno), $evaluacionAlumno === '""', $instrucciones);
         $fechaActual = Carbon::now();
         
 
-        return view('layouts.pages.paqueteriasDidacticas.paqueterias_didacticas', compact('idCurso', 'curso', 'area', 'paqueteriasDidacticas', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'fechaActual'));
+        return view('layouts.pages.paqueteriasDidacticas.paqueterias_didacticas', compact('idCurso', 'curso', 'area', 'paqueteriasDidacticas', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'instrucciones', 'fechaActual'));
     }
 
     public function verPaqueterias($idCurso)
@@ -129,11 +133,11 @@ class PaqueteriaDidacticaController extends Controller
         $cartaDescriptiva = json_decode($curso->carta_descriptiva);
         $contenidoT = json_decode($cartaDescriptiva->contenidoTematico ?? '');
         $evaluacionAlumno = ($curso->eval_alumno);
-
+        
         $fechaActual = Carbon::now();
         return view('layouts.pages.paqueteriasDidacticas.blades.validacionPaqueteria', compact('idCurso', 'curso', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'fechaActual'));
     }
-
+        
     public function store(Request $request, $idCurso)
     {
         $urlImagenes = [];
@@ -172,47 +176,45 @@ class PaqueteriaDidacticaController extends Controller
 
 
         $i = 0;
+        
+        
 
-        $contPreguntas = 0;
-
-        $auxContPreguntas = $request->numPreguntas;
-
-        while (true) { //ciclo para encontrar las preguntas del formulario
-            $i++;
-            if ($contPreguntas == $auxContPreguntas)
-                break;
-
-            $numPregunta = 'pregunta' . $i;
-            $tipoPregunta = 'pregunta' . $i . '-tipo';
-            $opcPregunta = 'pregunta' . $i . '-opc';
-            $respuesta = 'pregunta' . $i . '-opc-answer';
-
-            $contenidoT = 'pregunta' . $i . '-contenidoT';
-
-            if ($request->$numPregunta != null || $request->numPreguntas == 1) {
-
-                if ($request->$tipoPregunta == 'multiple') {
-                    $tempPregunta = [
-                        'descripcion' => $request->$numPregunta ?? 'N/A',
-                        'tipo' => $request->$tipoPregunta ?? 'N/A',
-                        'opciones' => $request->$opcPregunta,
-                        'respuesta' => $request->$respuesta ?? 'N/A',
-                        'contenidoTematico' => $request->$contenidoT ?? 'N/A',
-                    ];
-                } else {
-                    $respuesta = 'pregunta' . $i . '-resp-abierta';
-                    $tempPregunta = [
-                        'descripcion' => $request->$numPregunta ?? 'N/A',
-                        'tipo' => $request->$tipoPregunta ?? 'N/A',
-                        'opciones' => $request->$opcPregunta,
-                        'respuesta' => $request->$respuesta ?? 'N/A',
-                        'contenidoTematico' => $request->$contenidoT ?? 'N/A',
-                    ];
+        if($request->blade === 'evaluacion'){
+            foreach($request->toArray() as $key => $value) {
+                $i++;
+                $numPregunta = 'pregunta' . $i;
+                $tipoPregunta = 'pregunta' . $i . '-tipo';
+                $opcPregunta = 'pregunta' . $i . '-opc';
+                $respuesta = 'pregunta' . $i . '-opc-answer';
+    
+                $contenidoT = 'pregunta' . $i . '-contenidoT';
+    
+                if($request->$numPregunta){
+                    
+                    if ($request->$tipoPregunta == 'multiple') {
+                        $tempPregunta = [
+                            'descripcion' => $request->$numPregunta ?? 'N/A',
+                            'tipo' => $request->$tipoPregunta ?? 'N/A',
+                            'opciones' => $request->$opcPregunta,
+                            'respuesta' => $request->$respuesta ?? 'N/A',
+                            'contenidoTematico' => $request->$contenidoT ?? 'N/A',
+                        ];
+                    } else {
+                        $respuesta = 'pregunta' . $i . '-resp-abierta';
+                        $tempPregunta = [
+                            'descripcion' => $request->$numPregunta ?? 'N/A',
+                            'tipo' => $request->$tipoPregunta ?? 'N/A',
+                            'opciones' => $request->$opcPregunta,
+                            'respuesta' => $request->$respuesta ?? 'N/A',
+                            'contenidoTematico' => $request->$contenidoT ?? 'N/A',
+                        ];
+                    }
+                    array_push($preguntas, $tempPregunta);
+                    
                 }
-                array_push($preguntas, $tempPregunta);
-                $contPreguntas++;
             }
         }
+
 
         DB::beginTransaction();
         try {
@@ -314,12 +316,12 @@ class PaqueteriaDidacticaController extends Controller
             $cursoHistory->save();
 
             DB::commit();
-            return redirect()->route('curso-inicio')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
         } catch (\Exception $e) {
             throw $e;
             DB::rollback();
 
-            return redirect()->route('curso-inicio')->with('error', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('curso-inicio')->with('warnining', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
         }
     }
 
@@ -525,20 +527,28 @@ class PaqueteriaDidacticaController extends Controller
             return redirect()->route('buzon.paqueterias')->with('error', 'HUBO UN ERROR AL TURNAR LA SOLICITUD!');
         }
 
+        $curso = curso::toBase()->where('id', $idCurso)->first();
+        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.manualDidactico_pdf', compact('curso', 'paqueteriasDidacticas','contenidos', 'carta_descriptiva'));
+        return $pdf->stream('manualDidactico');
     }
 
     public function upload(Request $request)
     {
+      
         if ($request->hasFile('upload')) {
             $originName = $request->file('upload')->getClientOriginalName();
-            $fileName = pathinfo($originName, PATHINFO_FILENAME);
+            $fileName = pathinfo(Str::random(10), PATHINFO_FILENAME);
             $extension = $request->file('upload')->getClientOriginalExtension();
             $fileName = $fileName . '.' . $extension;
+            // dump($fileName, $originName, $extension, $request->file('upload'));
 
-            $request->file('upload')->move(public_path('images/paqueterias'), $fileName);
-            $url = asset('images/paqueterias/' . $fileName);
+            $request->file('upload')->move(public_path('images/paqueterias/id_curso_'.$request->idCurso), $fileName);
+            $url = asset('images/paqueterias/id_curso_'.$request->idCurso.'/' . $fileName);
             @header('Content-type: text/html; charset=utf-8');
             return response()->json(['url' => $url]);
+        }
+        else{
+            dd('no file');
         }
     }
 }
