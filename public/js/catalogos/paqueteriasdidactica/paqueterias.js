@@ -49,7 +49,7 @@ $(document).ready(function () {
 
     if (evaluacion != '' || !evaluacion) {//auto completa formulario de evaluacion de alumno con datos de la DB// 
         
-        $('#numPreguntas').val(evaluacion.length-1);
+        $('# ').val(evaluacion.length-1);
         
         //evaluacion viene de paqueterias_didacticas.blade 
         var abecedario = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];

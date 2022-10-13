@@ -656,18 +656,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('buzon/paqueterias/', 'webController\PaqueteriaDidacticaController@buzon')->name('buzon.paqueterias')->middleware('can:paqueteriasdidacticas');
     Route::get('buzon/paqueterias/validar/{idCurso}', 'webController\PaqueteriaDidacticaController@verPaqueterias')->name('buzon.ver.paqueteria')->middleware('can:paqueteriasdidacticas.validar');
     Route::post('buzon/pre-validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@enviar_pre_validacion')->name('buzon.enviar.pre_validacion')->middleware('can:paqueteriasdidacticas.crear');
-    Route::post('buzon/pre-validacion/respuesta/{idCurso}', 'webController\PaqueteriaDidacticaController@responder_pre_validacion')->name('buzon.pre_validacion')->middleware('can:paqueteriasdidacticas.validar');
+    Route::post('buzon/pre-validacion/respuesta/{idCurso}', 'webController\PaqueteriaDidacticaController@retornar_pre_validacion')->name('buzon.retornar.pre_validacion')->middleware('can:paqueteriasdidacticas.validar');
 
     Route::get('paqueterias/{idCurso}', 'webController\PaqueteriaDidacticaController@index')->name('paqueteriasDidacticas')->middleware('can:paqueteriasdidacticas');
     Route::post('paqueterias/guardar/{idCurso}', 'webController\PaqueteriaDidacticaController@store')->name('paqueteriasGuardar')->middleware('can:paqueteriasdidacticas');
     Route::get('especialidadBuscador/', 'webController\PaqueteriaDidacticaController@buscadorEspecialidades')->name('BuscadorEspecialidades')->middleware('can:paqueteriasdidacticas');
 
 
-    Route::post('descargar/cartadescriptiva/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarPaqueteria')->name('DescargarPaqueteria')->middleware('can:paqueteriasdidacticas');
-    Route::post('descargar/evaluacionalumno/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarPaqueteriaEvalAlumno')->name('DescargarEvalAlumno')->middleware('can:paqueteriasdidacticas');
-    Route::post('descargar/evaluacioninstructor/', 'webController\PaqueteriaDidacticaController@DescargarPaqueteriaEvalInstructor')->name('DescargarEvalInstructor')->middleware('can:paqueteriasdidacticas');
-    Route::post('descargar/manualDidactico/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarManualDidactico')->name('DescargarManualDidactico')->middleware('can:paqueteriasdidacticas');
-    Route::post('descargar/memovalidacion/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarSoliValidacionPaqueteria')->name('DescargarMemoValidacionPaqueteria')->middleware('can:paqueteriasdidacticas.crear');
+    Route::post('descargar/paqueteria/{idCurso}', 'webController\PaqueteriaDidacticaController@DescargarPaqueteria')->name('DescargarPaqueteria')->middleware('can:paqueteriasdidacticas');
+
+
+    Route::post('generar/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@GenerarSoliValidacionPaqueteria')->name('generar.memo.soli.validacion')->middleware('can:paqueteriasdidacticas.crear');
+    Route::post('subir/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@StoreSoliValidacionPaqueteria')->name('guardar.memo.soli.validacion')->middleware('can:paqueteriasdidacticas.crear');
+    Route::get('descargar/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@downloadSoliValidacionPaqueteria')->name('descargar.memo.soli')->middleware('can:paqueteriasdidacticas');
+    Route::post('generar/memo_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@GenerarMemoValidacionPaqueteria')->name('generar.memo.validacion')->middleware('can:paqueteriasdidacticas.validar');
+    Route::post('subir/memo_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@StoreMemoValidacionPaqueteria')->name('GuardarMemoValidacionPaqueteria')->middleware('can:paqueteriasdidacticas.validar');
+    Route::post('turnar/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@TurnarDta')->name('turnar.soli.dta')->middleware('can:paqueteriasdidacticas.crear');
+
+
     Route::post('paqueterias/uploadImg/', 'webController\PaqueteriaDidacticaController@upload')->name('ckeditorUpload')->middleware('can:paqueteriasdidacticas');
 });
 /*SUPERVISION ESCOLAR Y ENCUESTA RPN*/

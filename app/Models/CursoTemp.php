@@ -2,16 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
-
-class curso extends Model
+class CursoTemp extends Model
 {
     //
-    protected $table = 'cursos';
-
+    protected $table = 'cursos_temp';
     protected $fillable = [
         'id',
         'nombre_curso',
@@ -45,7 +41,20 @@ class curso extends Model
         'estado',
         'dependencia',
         'grupo_vulnerable',
-        'observacion'
+        'observacion',
+        'carta_descriptiva',
+        'eval_alumno',
+        'estatus_paqueteria',
+        'active',
+        'tipoSoli',
+        'motivoSoli',
+        'fecha_alta',
+        'fecha_u_mod',
+        'fecha_baja',
+        'id_user_created',
+        'id_user_edited',
+        'id_user_deleted'
+
     ];
 
     protected $casts = [
@@ -101,16 +110,16 @@ class curso extends Model
                         break;
                     case 'curso':
                         # code...
-                        return $query->where('cursos.nombre_curso', 'LIKE', "%$buscar%");
+                        return $query->where('cursos_temp.nombre_curso', 'LIKE', "%$buscar%");
                         break;
                     case 'duracion':
-                        return $query->where('cursos.horas', '=', "$buscar");
+                        return $query->where('cursos_temp.horas', '=', "$buscar");
                         break;
                     case 'modalidad':
-                        return $query->where('cursos.modalidad', 'LIKE', "%$buscar%");
+                        return $query->where('cursos_temp.modalidad', 'LIKE', "%$buscar%");
                         break;
                     case 'clasificacion':
-                        return $query->where('cursos.clasificacion', 'LIKE', "%$buscar%");
+                        return $query->where('cursos_temp.clasificacion', 'LIKE', "%$buscar%");
                         break;
                     case 'anio':
                         return $query->where(\DB::raw("date_part('year' , fecha_validacion )"), '=', "$buscar");

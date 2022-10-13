@@ -8,11 +8,14 @@ use App\Models\curso;
 use App\Models\CursoTemp;
 use App\Models\ImgPaqueterias;
 use App\Models\PaqueteriasDidacticas;
+use App\Models\Unidad;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PaqueteriaDidacticaController extends Controller
 {
@@ -40,7 +43,7 @@ class PaqueteriaDidacticaController extends Controller
             ->LEFTJOIN('roles', 'roles.id', '=', 'role_user.role_id')
             ->first();
         
-            dd($cursos, $rolUser);
+            // dd($cursos, $rolUser);
         return view('layouts.pages.paqueteriasDidacticas.buzon_paqueterias', compact('cursos','rolUser'));
     }
 
@@ -95,7 +98,7 @@ class PaqueteriaDidacticaController extends Controller
                     'active' => true,
                     'updated_at' => Carbon::now(),
                     'fecha_alta' => Carbon::now(), 
-                    'id_user_creared' => Auth::id(),
+                    'id_user_created' => Auth::id(),
                 ]);
                 
             }
@@ -114,20 +117,21 @@ class PaqueteriaDidacticaController extends Controller
             $evaluacionAlumno = ($paqueteriasDidacticas->eval_alumno);
         }
         $fechaActual = Carbon::now();
-
+        
 
         return view('layouts.pages.paqueteriasDidacticas.paqueterias_didacticas', compact('idCurso', 'curso', 'area', 'paqueteriasDidacticas', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'fechaActual'));
     }
 
     public function verPaqueterias($idCurso)
     {
-        $curso = CursoTemp::toBase()->where('id', $idCurso)->first();
+        $curso = CursoTemp::toBase()->where([['id', $idCurso],['active',1]])->first();
 
         $cartaDescriptiva = json_decode($curso->carta_descriptiva);
         $contenidoT = json_decode($cartaDescriptiva->contenidoTematico ?? '');
         $evaluacionAlumno = ($curso->eval_alumno);
 
-        return view('layouts.pages.paqueteriasDidacticas.blades.validacionPaqueteria', compact('idCurso', 'curso', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno'));
+        $fechaActual = Carbon::now();
+        return view('layouts.pages.paqueteriasDidacticas.blades.validacionPaqueteria', compact('idCurso', 'curso', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'fechaActual'));
     }
 
     public function store(Request $request, $idCurso)
@@ -241,12 +245,12 @@ class PaqueteriaDidacticaController extends Controller
                 ]);
 
             DB::commit();
-            return redirect()->route('buzon.paqueterias')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
         } catch (\Exception $e) {
             throw $e;
             DB::rollback();
 
-            return redirect()->route('buzon.paqueterias')->with('error', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('error', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
         }
     }
 
@@ -260,7 +264,7 @@ class PaqueteriaDidacticaController extends Controller
                 ->update([
                     'tipoSoli' => $request->tipoSoli,
                     'motivoSoli' => $request->motivoSoli,
-                    'estatus_paqueteria' => 'EN PREVALIDACION',
+                    'estatus_paqueteria' => 'ENVIADO A PREVALIDACION',
                     'observaciones' => null,
                     'active' => true,
                     'updated_at' => Carbon::now(),
@@ -271,29 +275,25 @@ class PaqueteriaDidacticaController extends Controller
             $cursoTemp = CursoTemp::find($idCurso);
             $cursoHistory = $cursoTemp->replicate();
             $cursoHistory->setTable('cursos_history');
+            $cursoHistory->id_curso = $idCurso;
+            $cursoHistory->movimiento = 'ENVIADO A PREVALIDACION';
             $cursoHistory->save();
 
-            
-            DB::table('cursos_history')
-                ->where('id', $cursoHistory->id)
-                ->update([
-                    'id_curso' => $idCurso,
-                    'movimiento' => 'EN PRE-VALIDACION'
-                ]);
 
             DB::commit();
-            return redirect()->route('curso-inicio')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('buzon.paqueterias')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
         } catch (\Exception $e) {
             throw $e;
             DB::rollback();
 
-            return redirect()->route('curso-inicio')->with('error', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
+            return redirect()->route('buzon.paqueterias')->with('error', 'HUBO UN ERROR AL GUARDAR LA PAQUETERIA DIDACTICA!');
         }
     }
 
-    public function responder_pre_validacion(Request $request, $idCurso)
+    public function retornar_pre_validacion(Request $request, $idCurso)
     {
         DB::beginTransaction();
+        
         try {
             DB::table('cursos_temp')
                 ->where('id', $idCurso)
@@ -306,26 +306,12 @@ class PaqueteriaDidacticaController extends Controller
                     'id_user_updated' => Auth::id()
                 ]);
 
-
-            
             $cursoTemp = CursoTemp::find($idCurso);
             $cursoHistory = $cursoTemp->replicate();
             $cursoHistory->setTable('cursos_history');
+            $cursoHistory->id_curso = $idCurso;
+            $cursoHistory->movimiento = $request->accion;
             $cursoHistory->save();
-
-            if($request->accion == 'VALIDO')
-                $movimiento = 'VALIDACION';
-            else if($request->accion == 'NO PROCEDE')
-                $movimiento = 'NO PROCEDE';
-            else
-                $movimiento = 'EN PRE-VALIDACION';
-            
-            DB::table('cursos_history')
-                ->where('id', $cursoHistory->id)
-                ->update([
-                    'id_curso' => $idCurso,
-                    'movimiento' => $movimiento
-                ]);
 
             DB::commit();
             return redirect()->route('curso-inicio')->with('success', 'SE HA GUARDADO LA PAQUETERIA DIDACTICA!');
@@ -348,77 +334,197 @@ class PaqueteriaDidacticaController extends Controller
     }
 
 
-    public function DescargarPaqueteria($idCurso)
-    {
-        $paqueteriasDidacticas = PaqueteriasDidacticas::toBase()->where([['id_curso', $idCurso], ['estatus', 1]])->first();
-        if (!isset($paqueteriasDidacticas)) {
-
-            return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
-        }
-        // 
-        $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
-
-
-        $cartaDescriptiva->ponderacion = json_decode($cartaDescriptiva->ponderacion);
-        $cartaDescriptiva->contenidoTematico = json_decode($cartaDescriptiva->contenidoTematico);
-
-
-        $curso = curso::toBase()->where('id', $idCurso)->first();
-
-        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.cartaDescriptiva', compact('cartaDescriptiva'));
-        $pdf->setPaper('A4', 'landscape');
-        return $pdf->stream('paqueteriaDidactica.pdf');
-    }
-    public function DescargarPaqueteriaEvalAlumno($idCurso)
-    {
-        $paqueteriasDidacticas = PaqueteriasDidacticas::toBase()->where([['id_curso', $idCurso], ['estatus', 1]])->first();
-        if (!isset($paqueteriasDidacticas)) {
-            return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
-        }
-        $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
-        $evalAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
-        if (!isset($evalAlumno) || !isset($paqueteriasDidacticas)) {
-            return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
-        }
-        $curso = curso::toBase()->where('id', $idCurso)->first();
-        $abecedario = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
-        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.eval_alumno_pdf', compact('evalAlumno', 'abecedario', 'curso', 'cartaDescriptiva'));
-
-        return $pdf->stream('EvaluacionAlumno.pdf');
-    }
-
-    public function DescargarPaqueteriaEvalInstructor()
-    {
-        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.evaInstructorCurso_pdf');
-        return $pdf->stream('evaluacionInstructor');
-    }
-    public function DescargarManualDidactico($idCurso)
+    public function DescargarPaqueteria(Request $request, $idCurso)
     {
         $paqueteriasDidacticas = CursoTemp::toBase()->where([['id', $idCurso], ['active', 1]])->first();
-        $carta_descriptiva = (json_decode($paqueteriasDidacticas->carta_descriptiva));
-        $contenidos = json_decode($carta_descriptiva->contenidoTematico ?? '');
-
-        if ($contenidos == null)
+        if (!isset($paqueteriasDidacticas)) {
             return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
-
-        // $info_manual_didactico = $contenidos->contenidoExtra;
-        $info_manual_didactico = [];
-        $replace = array(request()->getSchemeAndHttpHost() . '/', '\\');
-        foreach ($contenidos as $manual) {
-            $manual->contenidoExtra = str_replace($replace, '', $manual->contenidoExtra);
         }
+        
+        $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
 
-        $curso = curso::toBase()->where('id', $idCurso)->first();
-        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.manualDidactico_pdf', compact('curso', 'paqueteriasDidacticas', 'contenidos', 'carta_descriptiva'));
-        return $pdf->stream('manualDidactico');
+        switch($request->paqueteria){
+            case 'eval_alumno':
+                $evalAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
+                if (!isset($evalAlumno) || !isset($paqueteriasDidacticas)) {
+                    return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
+                }
+                $curso = curso::toBase()->where('id', $idCurso)->first();
+                $abecedario = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
+                $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.eval_alumno_pdf', compact('evalAlumno', 'abecedario', 'curso', 'cartaDescriptiva'));
+        
+                return $pdf->stream('EvaluacionAlumno.pdf');
+                break;
+
+            case 'eval_instructor':
+                $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.evaInstructorCurso_pdf');
+                return $pdf->stream('evaluacionInstructor');
+                break;
+            
+            case 'manual_didactico':
+                $contenidos = json_decode($cartaDescriptiva->contenidoTematico ?? '');
+
+                if ($contenidos == null)
+                    return redirect()->back()->with('warning', 'No se puede generar pdf con la informacion actual');
+    
+                $info_manual_didactico = [];
+                $replace = array(request()->getSchemeAndHttpHost() . '/', '\\');
+                foreach ($contenidos as $manual) {
+                    $manual->contenidoExtra = str_replace($replace, '', $manual->contenidoExtra);
+                }
+        
+                $curso = curso::toBase()->where('id', $idCurso)->first();
+                
+                $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.manualDidactico_pdf', compact('curso', 'paqueteriasDidacticas', 'contenidos', 'cartaDescriptiva'));
+                return $pdf->stream('manualDidactico');
+                break;
+
+            default:
+                $cartaDescriptiva->ponderacion = json_decode($cartaDescriptiva->ponderacion);
+                $cartaDescriptiva->contenidoTematico = json_decode($cartaDescriptiva->contenidoTematico);
+        
+        
+                $curso = curso::toBase()->where('id', $idCurso)->first();
+        
+                $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.cartaDescriptiva', compact('cartaDescriptiva'));
+                $pdf->setPaper('A4', 'landscape');
+                return $pdf->stream('paqueteriaDidactica.pdf');
+                break;
+        }
+        
+        
     }
-    public function DescargarSoliValidacionPaqueteria($idCurso)
+
+   
+    public function GenerarSoliValidacionPaqueteria(Request $request, $idCurso)
     {
+        
+        $memo = $request->memo;
         $curso = CursoTemp::toBase()->where('id', $idCurso)->first();
         $user_created = User::find(Auth::id());
+        $today = date("D M d, Y G:i");
+        $fecha = Carbon::parse($today);
+        $date = $fecha->locale(); //con esto revise que el lenguaje fuera es 
+        $fecha_actual = $fecha->day.' de '.$fecha->monthName.' del '. $fecha->year; //y con esta obtengo el mes al fin en español!
         
-        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.soli_validacion_paqueteria', compact('curso','user_created'));
-        return $pdf->stream('Memoramdum Solicitud Validacion de Paqueterias');
+        $unidad = Unidad::toBase()->where('id',$user_created->unidad)->first();
+        
+        
+        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.memo_soli_validacion_paqueteria', compact('curso','user_created', 'fecha_actual', 'unidad', 'memo'));
+        return $pdf->stream('Memoramdum Solicitud Validacion de Paqueterias.pdf');
+    }
+    public function StoreSoliValidacionPaqueteria(Request $request, $idCurso){
+        
+        if (!$request->hasFile('doc_memo')) {
+            return ;
+        }
+        Validator::make($request->all(), [
+            'doc_memo' => 'mimes:pdf|max:10240'
+        ]);
+        
+        $file_memo = $request->file('doc_memo'); 
+        DB::beginTransaction();
+        try {
+            DB::table('cursos_temp')
+            ->where('id', $idCurso)
+            ->update([
+                'estatus_paqueteria' => 'PENDIENTE POR TURNAR',
+                'updated_at' => Carbon::now(),
+                'id_user_updated' => Auth::id()
+            ]);
+            $cursoTemp = CursoTemp::find($idCurso);
+            $cursoHistory = $cursoTemp->replicate();
+            $cursoHistory->setTable('cursos_history');
+            $cursoHistory->id_curso = $idCurso;
+            $cursoHistory->movimiento = 'PENDIENTE POR TURNAR';
+            $cursoHistory->save();
+
+
+            $this->upload_memo_file($file_memo, $idCurso, 'paqueterias','memo_soli_paqueteria'); 
+            DB::commit();
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('success', 'EL DOCUMENTO SE HA SUBIDO CON EXITO');
+            
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('error', 'HA OCURRIDO UN ERRO AL SUBIR EL DOCUMENTO');
+            //throw $th;
+        }
+    }
+
+    public function GenerarMemoValidacionPaqueteria(Request $request, $idCurso){
+
+        $memo = $request->memo;
+        $curso = CursoTemp::toBase()->where('id', $idCurso)->first();
+        
+        $user_created = User::find(Auth::id());
+        $today = date("D M d, Y G:i");
+        $fecha = Carbon::parse($today);
+        $date = $fecha->locale(); //con esto revise que el lenguaje fuera es 
+        $fecha_actual = $fecha->day.' de '.$fecha->monthName.' del '. $fecha->year; //y con esta obtengo el mes al fin en español!
+        
+        $unidad = Unidad::toBase()->where('id',$user_created->unidad)->first();
+        
+        $carta_descriptiva = json_decode($curso->carta_descriptiva);
+        dd($carta_descriptiva, $curso);
+        $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.memo_validacion_paqueteria', compact('curso','user_created', 'fecha_actual', 'unidad', 'memo', 'carta_descriptiva'));
+        return $pdf->stream('Memoramdum Validacion de Paqueterias.pdf');
+    }
+
+    protected function upload_memo_file($file, $idCurso, $subpath, $tipo) {
+        
+        $extensionFile = $file->getClientOriginalExtension(); 
+        if($extensionFile == '') 
+            $extensionFile = 'pdf';
+        
+        $documentFile = trim($tipo.".".$extensionFile);
+        $path = '/'.$subpath.'/id_curso_'.$idCurso.'/'.$documentFile;
+        Storage::disk('custom_folder_1')->put($path, file_get_contents($file));
+        $documentUrl = Storage::disk('custom_folder_1')->url('/uploadFiles'.$path); // obtenemos la url donde se encuentra el archivo almacenado en el servidor.
+        return $documentUrl;
+    }
+
+    protected function downloadSoliValidacionPaqueteria($idCurso){
+        $path = Storage::disk('custom_folder_1')->getAdapter()->getPathPrefix();
+        $archivo_memo = '/paqueterias/id_curso_'.$idCurso.'/memo_soli_paqueteria.pdf';
+        $path = $path.''.$archivo_memo;
+        
+        // dd(Storage::disk('custom_folder_1')->getAdapter()->getPathPrefix());
+        return response()->file($path);
+        
+        if (Storage::exists($archivo_memo)) {
+            dd('exist');
+        }else{
+            return response()->json('doesntExist');
+        }
+    }
+    public function TurnarDta($idCurso){
+        DB::beginTransaction();
+        try {
+            DB::table('cursos_temp')
+                ->where('id', $idCurso)
+                ->update([                   
+                    'estatus_paqueteria' => 'TURNADO A DTA',
+                    'updated_at' => Carbon::now(),
+                    'id_user_updated' => Auth::id()
+                ]);
+
+
+            $cursoTemp = CursoTemp::find($idCurso);
+            $cursoHistory = $cursoTemp->replicate();
+            $cursoHistory->setTable('cursos_history');
+            $cursoHistory->id_curso = $idCurso;
+            $cursoHistory->movimiento = 'TURNADO A DTA';
+            $cursoHistory->save();
+
+
+            DB::commit();
+            return redirect()->route('buzon.paqueterias')->with('success', 'SE HA TURNADO A DTA!');
+        } catch (\Exception $e) {
+            throw $e;
+            DB::rollback();
+            return redirect()->route('buzon.paqueterias')->with('error', 'HUBO UN ERROR AL TURNAR LA SOLICITUD!');
+        }
+
     }
 
     public function upload(Request $request)

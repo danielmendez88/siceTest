@@ -13,38 +13,11 @@
 <div class="card-header">
     Formulario de Paqueterias Didacticas
 </div>
-<div class="card card-body" style=" min-height:450px;">
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div><br />
-    @endif
-    <form method="POST" action="{{route('paqueteriasGuardar',$idCurso)}}" id="creacion" enctype="multipart/form-data">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        @csrf
 
-        <div style="text-align: right;width:65%">
-            <label for="tituloformulariocurso">
-
-            </label>
-        </div>
-
-        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="pills-tecnico-tab" data-toggle="pill" href="#pills-tecnico" role="tab" aria-controls="pills-tecnico" aria-selected="true">Informacion Curso</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="pills-evalalum-tab" data-toggle="pill" href="#pills-evalalum" role="tab" aria-controls="pills-evalalum" aria-selected="false">Evaluacion Alumno</a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link " id="pills-paqdid-tab" data-toggle="pill" href="#pills-paqdid" role="tab" aria-controls="pills-paqdid" aria-selected="false">Paqueterias Didacticas</a>
-            </li>
-        </ul>
+<form method="POST" action="{{route('paqueteriasGuardar',$idCurso)}}" id="creacion" enctype="multipart/form-data">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @csrf
+    <div class="card card-body" style=" min-height:150px;">
         @if ($message = Session::get('success'))
         <div class="alert alert-success">
             <p>{{ $message }}</p>
@@ -55,21 +28,164 @@
             <p>{{ $message }}</p>
         </div>
         @endif
+
+        <div class="row bg-light" style="padding:20px">
+            <div class="form-group col-md-4">
+                Solicitud: <b>{{ $curso->tipoSoli }}</b>
+            </div>
+            <div class="form-group col-md-12">
+                Estatus: <b>{{ $curso->estatus_paqueteria }}</b>
+            </div>
+            @if($curso->observaciones)
+            <div class="form-group col-md-12">
+                Observaciones: <b>{{ $curso->observaciones }}</b>
+            </div>
+            @endif
+        </div>
+
+        <div class="form-row">
+            @can('paqueteriasdidacticas.crear')
+            @if($curso->estatus_paqueteria == 'PREVALIDACION ACEPTADA')
+            <div class="form-group col-md-4">
+                <div class="form-group col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label">Memoramdum:</label>
+                    <input type="text" placeholder="No. Memo" class="form-control" id="memo" name="memo">
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <div class="form-group col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label">Fecha :</label>
+                    <input type="date" placeholder="DD/MM/AAAA" class="form-control" id="fecha" name="fecha" value="{{ $fechaActual->format('Y-m-d') }}">
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <div class="form-group col-md-12 col-sm-12">
+                </div>
+                <div class="form-group col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label"></label>
+                    <a type="button" class="btn btn-primary" id="generarMemoBtn">Generar Memoramdum Solicitud</a>
+                </div>
+                <div class="form-group col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label"></label>
+                    <a type="button" class="btn btn-primary" id="subirMemoBtn" data-toggle="modal" data-target="#myModal">Subir Memoramdum Solicitud</a>
+                </div>
+            </div>
+            @elseif($curso->estatus_paqueteria == 'PENDIENTE POR TURNAR')
+            <div class="col-md-4">
+              
+                <div class="col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label"></label>
+                    <a type="button" class="btn btn-primary" id="turnarDta">Turnar a la DTA</a>
+                </div>
+               
+            </div>
+            
+            @elseif($curso->estatus_paqueteria != 'ENVIADO A PREVALIDACION')
+            
+            <div class="form-group col-md-3">
+                <label for="tipo" class="contro-label">Solicitud</label>
+                <select class="form-control" id="tipo" name="tipoSoli">
+                    <option value="" selected disabled>--SELECCIONAR--</option>
+                    <option value="ACTUALIZACION">ACTUALIZACION</option>
+                    <option value="INACTIVIDAD">INACTIVIDAD</option>
+                    <option value="BAJA"> BAJA</option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6">
+                <div class="form-group col-md-12 col-sm-12">
+                    <label for="objetivos col-md-12" class="control-label">Motivo:</label>
+                    <textarea placeholder="Objetivos especificos por tema" class="form-control" id="motivoSoli" name="motivoSoli"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group col-md-3">
+                <div class="form-group col-md-12 col-sm-12">
+                    <button class="btn btn-primary" id="guardar">Guardar</button>
+                </div>
+                <div class="form-group col-md-12 col-sm-12">
+                    <button class="btn btn-primary" id="send_pre_validacion">Enviar a Pre Validacion</button>
+                </div>
+            </div>
+            @endif
+            @endcan
+        </div>
+
+
+    </div>
+
+    <div class="card card-body" style=" min-height:450px;">
+        @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div><br />
+        @endif
+
+
+        <div style="text-align: right;width:65%">
+            <label for="tituloformulariocubuzon_paqueteriasrso">
+
+            </label>
+        </div>
+
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            @can('paqueteriasdidacticas.crear')
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-tecnico-tab" data-toggle="pill" href="#pills-tecnico" role="tab" aria-controls="pills-tecnico" aria-selected="true">Informacion Curso</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-evalalum-tab" data-toggle="pill" href="#pills-evalalum" role="tab" aria-controls="pills-evalalum" aria-selected="false">Evaluacion Alumno</a>
+            </li>
+            @endcan
+
+            <li class="nav-item active">
+                <a class="nav-link " id="pills-paqdid-tab" data-toggle="pill" href="#pills-paqdid" role="tab" aria-controls="pills-paqdid" aria-selected="false">Paqueterias Didacticas</a>
+            </li>
+
+        </ul>
+      
         <div class="tab-content" id="pills-tabContent">
+            @can('paqueteriasdidacticas.crear')
             <div class="tab-pane fade show active" id="pills-tecnico" role="tabpanel" aria-labelledby="pills-tecnico-tab">
                 @include('layouts.pages.paqueteriasDidacticas.blades.curso')
             </div>
             <div class="tab-pane fade " id="pills-evalalum" role="tabpanel" aria-labelledby="pills-evalalum-tab">
                 @include('layouts.pages.paqueteriasDidacticas.blades.evaluacionAlumno')
             </div>
+            @endcan
             <div class="tab-pane fade" id="pills-paqdid" role="tabpanel" aria-labelledby="pills-paqdid-tab">
                 @include('layouts.pages.paqueteriasDidacticas.blades.descargarPaqueteria')
             </div>
         </div>
-    </form>
-    <br>
-</div>
+        <br>
+    </div>
 
+</form>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    <!-- Modal content-->
+    <form action="{{ route('guardar.memo.soli.validacion',$idCurso) }}" enctype="multipart/form-data" id="pdfForm" method="post">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Memoramdum de Solicitud de Paqueterias Didacticas</h4>
+            </div>
+            <div class="modal-body" style="text-align:center">
+                    @csrf
+                    <input name="doc_memo" class="input_memo" type="file"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default" >Subir</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 
 @section('script_content_js')
 <script src="{{asset('vendor/ckeditor5-decoupled-document/ckeditor.js') }}"></script>
@@ -84,6 +200,9 @@
     var editorElementoA;
     var editorAuxE;
     var editorReferencias;
+
+    var $form = $("#creacion");
+
 
     //Define an adapter to upload the files
     class MyUploadAdapter {
@@ -268,27 +387,79 @@
         });
 
     $(document).ready(function() {
+        $("#guardar").click(function() {
+            $('#creacion').attr('action', "{{route('paqueteriasGuardar',$idCurso)}}");
+            $('#creacion').submit();
+        });
+        $("#send_pre_validacion").click(function() {
+            $('#creacion').attr('action', "{{route('buzon.enviar.pre_validacion',$idCurso)}}");
+            $('#creacion').submit();
+        });
+        $("#generarMemoBtn").click(function() {
+            $('#creacion').attr('action', "{{route('generar.memo.soli.validacion',$idCurso)}}");
+            $('#creacion').attr('target', "_blank");
+            $('#creacion').submit();
+        });
+        $("#turnarDta").click(function() {
+            $('#creacion').attr('action', "{{route('turnar.soli.dta',$idCurso)}}");
+            $('#creacion').submit();
+        });
+        
         $("#botonCARTADESCPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $('#creacion').submit();
         });
         $("#botonEVALALUMNPDF").click(function() {
-            $('#creacion').attr('action', "{{route('DescargarEvalAlumno',$idCurso)}}");
+            $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $('#creacion').submit();
         });
         $("#botonEVALINSTRUCTORPDF").click(function() {
-            $('#creacion').attr('action', "{{route('DescargarEvalInstructor')}}");
+            $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $('#creacion').submit();
         });
         $("#botonMANUALDIDPDF").click(function() {
-            $('#creacion').attr('action', "{{route('DescargarManualDidactico',$idCurso)}}");
+            $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $('#creacion').submit();
             // $('#alert-files').css('display', 'block');
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
         });
 
+       
 
     });
+
+
+    function guardarSoli() {
+
+        $('#guardarSoli').remove();
+        document.getElementById('creacion').submit();
+
+    }
+
+    function pre_validar_respuesta(idCurso) {
+        console.log(idCurso);
+        if ($("#observaciones").val() != '' && $("#tipoAccion").val() !== null) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "post",
+                url: "/buzon/pre-validacion/" + idCurso,
+                dataType: "json",
+                data: {
+                    'tipoAccion': $("#tipoAccion").val(),
+                    'observaciones': $("#observaciones").val(),
+                    'idCurso': idCurso,
+                },
+                success: function(data) { // console.log(data); 
+                    console.log(data);
+                }
+            });
+        }
+
+    }
 </script>
 <script src="{{asset('js/catalogos/paqueteriasdidactica/paqueterias.js')}}"></script>
 
