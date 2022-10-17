@@ -670,7 +670,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('subir/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@StoreSoliValidacionPaqueteria')->name('guardar.memo.soli.validacion')->middleware('can:paqueteriasdidacticas.crear');
     Route::get('descargar/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@downloadSoliValidacionPaqueteria')->name('descargar.memo.soli')->middleware('can:paqueteriasdidacticas');
     Route::post('generar/memo_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@GenerarMemoValidacionPaqueteria')->name('generar.memo.validacion')->middleware('can:paqueteriasdidacticas.validar');
-    Route::post('subir/memo_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@StoreMemoValidacionPaqueteria')->name('GuardarMemoValidacionPaqueteria')->middleware('can:paqueteriasdidacticas.validar');
+    Route::post('subir/memo_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@StoreMemoValidacionPaqueteria')->name('guardar.memo.validacion')->middleware('can:paqueteriasdidacticas.validar');
     Route::post('turnar/memo_soli_validacion/{idCurso}', 'webController\PaqueteriaDidacticaController@TurnarDta')->name('turnar.soli.dta')->middleware('can:paqueteriasdidacticas.crear');
 
 

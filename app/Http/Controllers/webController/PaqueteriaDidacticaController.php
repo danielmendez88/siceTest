@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 class PaqueteriaDidacticaController extends Controller
 {
@@ -384,7 +385,7 @@ class PaqueteriaDidacticaController extends Controller
         
         $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
 
-        switch($reaeteria){
+        switch($request->blade){
             case 'eval_alumno':
                 $evalAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
                 if (!isset($evalAlumno) || !isset($paqueteriasDidacticas)) {
@@ -487,13 +488,51 @@ class PaqueteriaDidacticaController extends Controller
             
         } catch (\Throwable $th) {
             DB::rollback();
+            throw $th;
             return redirect()->route('paqueteriasDidacticas',$idCurso)->with('error', 'HA OCURRIDO UN ERRO AL SUBIR EL DOCUMENTO');
-            //throw $th;
+        }
+    }
+    public function StoreMemoValidacionPaqueteria(Request $request, $idCurso){
+        
+        if (!$request->hasFile('doc_memo')) {
+            return ;
+        }
+        Validator::make($request->all(), [
+            'doc_memo' => 'mimes:pdf|max:10240'
+        ]);
+        
+        $file_memo = $request->file('doc_memo'); 
+        DB::beginTransaction();
+        try {
+            DB::table('cursos_temp')
+            ->where('id', $idCurso)
+            ->update([
+                'estatus_paqueteria' => 'AUTORIZADO',
+                'fecha_u_mod' => Carbon::now(),
+                'id_user_updated' => Auth::id()
+            ]);
+            $cursoTemp = CursoTemp::find($idCurso);
+            $cursoHistory = $cursoTemp->replicate();
+            $cursoHistory->setTable('cursos_history');
+            $cursoHistory->id_curso = $idCurso;
+            $cursoHistory->movimiento = 'AUTORIZADO';
+            $cursoHistory->save();
+
+
+            $this->upload_memo_file($file_memo, $idCurso, 'paqueterias','memo_validacion_paqueteria'); 
+            DB::commit();
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('success', 'EL DOCUMENTO SE HA SUBIDO CON EXITO');
+            
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+            return redirect()->route('paqueteriasDidacticas',$idCurso)->with('error', 'HA OCURRIDO UN ERRO AL SUBIR EL DOCUMENTO');
         }
     }
 
     public function GenerarMemoValidacionPaqueteria(Request $request, $idCurso){
 
+        
         $memo = $request->memo;
         $curso = CursoTemp::toBase()->where('id', $idCurso)->first();
         
@@ -506,7 +545,7 @@ class PaqueteriaDidacticaController extends Controller
         $unidad = Unidad::toBase()->where('id',$user_created->unidad)->first();
         
         $carta_descriptiva = json_decode($curso->carta_descriptiva);
-        dd($carta_descriptiva, $curso);
+        
         $pdf = \PDF::loadView('layouts.pages.paqueteriasDidacticas.pdf.memo_validacion_paqueteria', compact('curso','user_created', 'fecha_actual', 'unidad', 'memo', 'carta_descriptiva'));
         return $pdf->stream('Memoramdum Validacion de Paqueterias.pdf');
     }

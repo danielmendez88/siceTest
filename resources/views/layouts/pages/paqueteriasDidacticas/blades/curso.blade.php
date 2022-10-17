@@ -234,6 +234,7 @@
         </div>
     </div>
 </div>
+
 <input hidden name="contenidoT" id="storeContenidoTOld" class="@error('contenidoT')  is-invalid @enderror" value="{{$cartaDescriptiva->contenidoTematico ?? ''}}">
 <input hidden name="contenidoT" id="storeContenidoT" class="@error('contenidoT')  is-invalid @enderror">
 
@@ -305,13 +306,17 @@
     </div>
 </div>
 <!-- Full Height Modal Right -->
+
+<!-- solo los responsables de crear las paqueterias
+pueden guardar, siempre y cuando estatus de paqueteria = 'EN CAPTURA' -->
+@can('paqueteriasdidacticas.crear')
+@if($curso->estatus_paqueteria != 'ENVIADO A PREVALIDACION' && $curso->estatus_paqueteria!= 'AUTORIZADO')
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-right">
-            <!-- @can('cursos.store') -->
-            
             <a onclick="save('carta')" type="submit" class="btn btn-primary">Guardar</a>
-            <!-- @endcan -->
         </div>
     </div>
 </div>
+@endif
+@endcan

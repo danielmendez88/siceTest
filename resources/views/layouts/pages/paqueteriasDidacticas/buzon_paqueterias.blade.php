@@ -147,7 +147,7 @@
                     </thead>
                     <tbody>
                         @foreach($cursos as $curso)
-                        @if($curso->estatus_paqueteria == 'VALIDO')
+                        @if($curso->estatus_paqueteria == 'AUTORIZADO')
                         <tr>
                             <td>{{ $curso->nombre_curso }}</td>
                             <td>{{ $curso->nivel_estudio }}</td>
@@ -157,7 +157,7 @@
                             <td>{{ $curso->estatus_paqueteria }}</td>
                             <td>
                                 @can('paqueteriasdidacticas.validar')
-                                <a href="{{route('buzon.ver.paqueteria',$curso->idcurso)}}" class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Validar Paqueterias Didacticas">
+                                <a href="{{route('paqueteriasDidacticas',$curso->idcurso)}}" class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Validar Paqueterias Didacticas">
                                     <i class="fa fa-folder"></i>
                                 </a>
                                 @endcan
@@ -200,7 +200,7 @@
                 <tfoot>
                     @foreach($cursos as $curso)
                     @if(($rolUser->slug == 'dta' && $curso->estatus_paqueteria != 'EN CAPTURA') || $rolUser->slug != 'dta')
-                    @if( $curso->estatus_paqueteria != 'VALIDO' && $curso->estatus_paqueteria != '')
+                    @if( $curso->estatus_paqueteria != 'AUTORIZADO' && $curso->estatus_paqueteria != '')
                     <tr>
                         <td>{{ $curso->nombre_curso }}</td>
                         <td>{{ $curso->nivel_estudio }}</td>
@@ -209,7 +209,7 @@
                         <td>{{ $curso->estatus_paqueteria }}</td>
                         <td>
                             @can('paqueteriasdidacticas.validar')
-                            <a href="{{route('buzon.ver.paqueteria',$curso->idcurso)}}" class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Validar Paqueterias Didacticas">
+                            <a href="{{route('paqueteriasDidacticas',$curso->idcurso)}}" class="btn btn-warning btn-circle m-1 btn-circle-sm" title="Validar Paqueterias Didacticas">
                                 <i class="fa fa-folder"></i>
                             </a>
                             @endcan

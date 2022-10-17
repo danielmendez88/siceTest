@@ -94,7 +94,7 @@
     </table><br>
     <br><p class="text-left"><p>Sin más por el momento, aprovecho la ocasión para enviarle un cordial saludo.</p></p>
     <p class="text-left"><p>Atentamente.</p></p><br><br><br><br>
-    <label style="font-size:14px;"><b>Lic. {{ $unidad->dunidad }}</b></label>
+    <label style="font-size:14px;"><b>{{ $unidad->dunidad }}</b></label>
     <br><label style="font-size:14px;"><b>{{ $unidad->pdunidad }}</b></label>
 
     <br><br><br>
