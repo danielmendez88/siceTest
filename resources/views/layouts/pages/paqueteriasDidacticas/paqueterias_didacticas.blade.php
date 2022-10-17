@@ -208,13 +208,6 @@
         </div><br />
         @endif
 
-
-        <div style="text-align: right;width:65%">
-            <label for="tituloformulariocubuzon_paqueteriasrso">
-
-            </label>
-        </div>
-
         <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="pills-tecnico-tab" data-toggle="pill" href="#pills-tecnico" role="tab" aria-controls="pills-tecnico" aria-selected="true">Informacion Curso</a>
@@ -234,7 +227,7 @@
                 @include('layouts.pages.paqueteriasDidacticas.blades.curso')
             </div>
             <div class="tab-pane fade " id="pills-evalalum" role="tabpanel" aria-labelledby="pills-evalalum-tab">
-                @if($evaluacionAlumno === '[]' || $evaluacionAlumno === "")
+                @if($evaluacionAlumno === '[]' || $evaluacionAlumno == "")
                 @include('layouts.pages.paqueteriasDidacticas.blades.evaluacionAlumno')
                 @else
                 @include('layouts.pages.paqueteriasDidacticas.blades.editarEvaluacionAlumno')
@@ -499,16 +492,19 @@
         $("#botonEVALALUMNPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $form.append("<input type='hidden' name='paqueteria' value='eval_alumno'/>");
+            $('#creacion').attr('target', "_blank");
             $('#creacion').submit();
         });
         $("#botonEVALINSTRUCTORPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $form.append("<input type='hidden' name='paqueteria' value='eval_instructor'/>");
+            $('#creacion').attr('target', "_blank");
             $('#creacion').submit();
         });
         $("#botonMANUALDIDPDF").click(function() {
             $('#creacion').attr('action', "{{route('DescargarPaqueteria',$idCurso)}}");
             $form.append("<input type='hidden' name='paqueteria' value='manual_didactico'/>");
+            $('#creacion').attr('target', "_blank");
             $('#creacion').submit();
             // $('#alert-files').css('display', 'block');
             // $('#files-msg').text("La generacion de este archivo estara disponible pronto!");
@@ -528,28 +524,13 @@
 
             idCurso = $('#idCurso').val();
             console.log(idCurso, $("#observaciones_vali").val() , $("#tipoAccion").val() !== null);
-            if (($("#observaciones").val() != '' && $("#tipoAccion").val() !== null) || ($("#tipoAccion").val() == 'PREVALIDACION ACEPTADA')) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "post",
-                    url: "/buzon/pre-validacion/respuesta/" + idCurso,
-                    dataType: "json",
-                    data: {
-                        'accion': $("#tipoAccion").val(),
-                        'observaciones': $("#observaciones").val(),
-                        'idCurso': idCurso,
-                    },
-                    success: function(data) { // console.log(data); 
-                        console.log(data);
-                    },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {
-                        console.log(XMLHttpRequest);
-                    }
-                });
+            if (($("#observaciones_vali").val() != '' && $("#tipoAccion").val() !== null) || ($("#tipoAccion").val() == 'PREVALIDACION ACEPTADA')) {
+                
+                $('#creacion').attr('action', "{{route('buzon.retornar.pre_validacion',$idCurso)}}");
+                $form.append('<input type="hidden" name="accion" value="'+$("#tipoAccion").val()+'"/>');
+                $form.append('<input type="hidden" name="observaciones" value="'+$("#observaciones_vali ").val()+'"/>');
+                $form.append('<input type="hidden" name="idCurso" value="'+idCurso+'"/>');
+                $('#creacion').submit();
             }
         })
 

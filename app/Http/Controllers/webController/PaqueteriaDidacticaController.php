@@ -77,7 +77,7 @@ class PaqueteriaDidacticaController extends Controller
             ->LEFTJOIN('roles', 'roles.id', '=', 'role_user.role_id')
             ->first();
         
-            // dd($cursos, $rolUser);
+            // dd($cursos->toArray(), $rolUser);
         return view('layouts.pages.paqueteriasDidacticas.buzon_paqueterias', compact('cursos','rolUser','data'));
     }
 
@@ -138,7 +138,7 @@ class PaqueteriaDidacticaController extends Controller
             }
             DB::commit();
         } catch (\Exception $e) {
-            throw $e;
+            
             DB::rollback();
             return redirect()->route('curso-inicio')->with('error', 'HUBO UN ERROR INESPERADO!');
         }
@@ -159,7 +159,7 @@ class PaqueteriaDidacticaController extends Controller
         
         $fechaActual = Carbon::now();
         
-
+        
         return view('layouts.pages.paqueteriasDidacticas.paqueterias_didacticas', compact('idCurso', 'curso', 'area', 'paqueteriasDidacticas', 'cartaDescriptiva', 'contenidoT', 'evaluacionAlumno', 'instrucciones', 'fechaActual'));
     }
 
@@ -181,14 +181,16 @@ class PaqueteriaDidacticaController extends Controller
         
         
         $urlImagenes = [];
-        $preguntas = ['instrucciones' => $request->instrucciones];
+        $preguntas = [];
 
         $curso = new CursoTemp();
+        
         $curso = $curso::SELECT('cursos_temp.id','cursos_temp.estado','cursos_temp.nombre_curso','cursos_temp.modalidad','cursos_temp.horas','cursos_temp.clasificacion','cursos_temp.costo','cursos_temp.duracion','cursos_temp.tipo_curso','cursos_temp.documento_memo_validacion','cursos_temp.documento_memo_actualizacion','cursos_temp.documento_solicitud_autorizacion','cursos_temp.objetivo','cursos_temp.perfil','cursos_temp.solicitud_autorizacion','cursos_temp.fecha_validacion','cursos_temp.memo_validacion','cursos_temp.memo_actualizacion','cursos_temp.fecha_actualizacion','cursos_temp.unidad_amovil','cursos_temp.descripcion','cursos_temp.no_convenio','especialidades.nombre AS especialidad','cursos_temp.id_especialidad','cursos_temp.area','cursos_temp.cambios_especialidad','cursos_temp.nivel_estudio','cursos_temp.categoria','cursos_temp.documento_memo_validacion','cursos_temp.documento_memo_actualizacion','cursos_temp.documento_solicitud_autorizacion','cursos_temp.rango_criterio_pago_minimo','rango_criterio_pago_maximo','cursos_temp.observacion','cursos_temp.grupo_vulnerable',  'cursos_temp.dependencia'
         )
             ->WHERE('cursos_temp.id', '=', $idCurso)
             ->LEFTJOIN('especialidades', 'especialidades.id', '=', 'cursos_temp.id_especialidad')
             ->first();
+            
         $area = Area::find($curso->area);
         $cartaDescriptiva = [
             'nombrecurso' => $curso->nombre_curso,
@@ -218,8 +220,9 @@ class PaqueteriaDidacticaController extends Controller
         $i = 0;
         
         
-
-        if($request->blade === 'evaluacion' || $request->blade === 'ambos'){
+        
+        if($request->blade === 'evaluacion' || $request->blade === 'ambos' || $request->numPreguntas>0  ){
+            $preguntas = ['instrucciones' => $request->instrucciones];
             foreach($request->toArray() as $key => $value) {
                 $i++;
                 $numPregunta = 'pregunta' . $i;
@@ -336,6 +339,7 @@ class PaqueteriaDidacticaController extends Controller
     {
         DB::beginTransaction();
         
+        
         try {
             DB::table('cursos_temp')
                 ->where('id', $idCurso)
@@ -384,8 +388,8 @@ class PaqueteriaDidacticaController extends Controller
         }
         
         $cartaDescriptiva = json_decode($paqueteriasDidacticas->carta_descriptiva);
-
-        switch($request->blade){
+        
+        switch($request->paqueteria){
             case 'eval_alumno':
                 $evalAlumno = json_decode($paqueteriasDidacticas->eval_alumno);
                 if (!isset($evalAlumno) || !isset($paqueteriasDidacticas)) {

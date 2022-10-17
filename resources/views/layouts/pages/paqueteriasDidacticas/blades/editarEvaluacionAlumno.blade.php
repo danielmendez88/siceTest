@@ -1,6 +1,6 @@
 <hr style="border-color:dimgray">
 <label>
-    <h2>EVALUACIÓN DE APRENDIZAJE AL ALUMNO</h2>
+    <h2>EEVALUACIÓN DE APRENDIZAJE AL ALUMNO</h2>
 </label>
 
 <hr style="border-color:dimgray">
