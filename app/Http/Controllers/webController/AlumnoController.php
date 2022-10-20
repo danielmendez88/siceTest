@@ -241,6 +241,9 @@ class AlumnoController extends Controller {
                 $AlumnoPreseleccion->correo = $request->correo;
                 $AlumnoPreseleccion->facebook = $request->facebook;
                 $AlumnoPreseleccion->twitter = $request->twitter;
+                $AlumnoPreseleccion->instagram = $request->instagram;
+                $AlumnoPreseleccion->tiktok = $request->tiktok;
+                $AlumnoPreseleccion->ninguna_redsocial = $request->ninguna_redsocial;
                 $AlumnoPreseleccion->recibir_publicaciones = $request->recibir_publicaciones;
                 $AlumnoPreseleccion->domicilio = $request->domicilio;
                 $AlumnoPreseleccion->colonia = $request->colonia;
@@ -277,6 +280,7 @@ class AlumnoController extends Controller {
                     $AlumnoPreseleccion->matricula= $matricula->matricula;
                 }
                 $AlumnoPreseleccion->lgbt = $request->lgbt == 'true' ? true : false;
+                $AlumnoPreseleccion->servidor_publico = $request->funcionario == 'true' ? true : false;
                 //$AlumnoPreseleccion->acta_nacimiento = $request->file('customFile');
                 $AlumnoPreseleccion->save();
                 // generamos url para carga de archivo
@@ -464,6 +468,9 @@ class AlumnoController extends Controller {
                 'correo'=>$request->correo_mod,
                 'facebook'=>$request->facebook_mod,
                 'twitter'=>$request->twitter_mod,
+                'instagram'=>$request->instagram_mod,
+                'tiktok'=>$request->tiktok_mod,
+                'ninguna_redsocial'=>$request->ninguna_redsocial_mod,
                 'recibir_publicaciones'=>$request->recibir_publicaciones_mod,
                 'domicilio' => trim($request->domicilio_mod),
                 'colonia'=>trim($request->colonia_mod),
@@ -495,6 +502,7 @@ class AlumnoController extends Controller {
                 'clave_localidad'=> $request->localidad_mod,
                 'clave_municipio'=> $request->municipios_mod,
                 'lgbt' => $request->lgbt_mod == 'true' ? true : false,
+                'servidor_publico' => $request->funcionario_mod == 'true' ? true : false,
                 'id_gvulnerable' => json_encode($gvulnerable)
             ];
 

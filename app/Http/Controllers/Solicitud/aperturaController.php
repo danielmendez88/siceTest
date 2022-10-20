@@ -399,6 +399,7 @@ class aperturaController extends Controller
                                         'cespecifico' => strtoupper($request->cespecifico),
                                         'fcespe' => $request->fcespe,
                                         'munidad' => $request->munidad,
+                                        'num_revision' => $request->munidad,
                                         'plantel' => $request->plantel,
                                         'comprobante_pago' => $documentUrl,
                                         'folio_pago' => $request->folio_pago,
@@ -669,7 +670,7 @@ class aperturaController extends Controller
             ->where('ar.eliminado',false)
             ->where('ar.folio_grupo','<>',$id_curso)
             ->whereRaw("((date(a.start) >= '$fechaInicio' and date(a.start) <= '$fechaTermino') OR (date(a.end) >= '$fechaInicio' and date(a.end) <= '$fechaTermino'))")
-            ->whereRaw("((cast(a.start as time) >= '$horaInicio' and cast(a.start as time) <= '$horaTermino') OR (cast(a.end as time) >= '$horaInicio' and cast(a.end as time) <= '$horaTermino'))")
+            ->whereRaw("((cast(a.start as time) >= '$horaInicio' and cast(a.start as time) < '$horaTermino') OR (cast(a.end as time) > '$horaInicio' and cast(a.end as time) <= '$horaTermino'))")
             ->whereIn('ar.id_pre', [DB::raw("select id_pre from alumnos_registro where folio_grupo = '$id_curso' and eliminado = false")])
             ->get();    
         if (count($alumnos_ocupados) > 0) {
@@ -939,7 +940,7 @@ class aperturaController extends Controller
             $dias_a = [];
             foreach ($dias_agenda as $key => $value) {
                 if ($key > 0) {
-                    if ((($temp + 1) == $value->dia) && !$temp2) {
+                    if ((($temp + 1) == $value->dia) && ($temp2 == null)) {
                         $temp2 = $value->dia;
                         $save = false;
                     } elseif ($temp2 && (($temp2 + 1) == $value->dia)) {
