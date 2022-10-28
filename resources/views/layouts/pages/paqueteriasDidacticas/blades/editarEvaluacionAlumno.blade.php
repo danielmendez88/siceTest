@@ -1,6 +1,6 @@
 <hr style="border-color:dimgray">
 <label>
-    <h2>EVALUACIÓN DE APRENDIZAJE AL ALUMNO</h2>
+    <h2>EEVALUACIÓN DE APRENDIZAJE AL ALUMNO</h2>
 </label>
 
 <hr style="border-color:dimgray">
@@ -105,19 +105,17 @@
 </div>
 
 
-
-
-
-
-
-
+@can('paqueteriasdidacticas.crear')
+@if($curso->estatus_paqueteria != 'ENVIADO A PREVALIDACION' && $curso->estatus_paqueteria!= 'AUTORIZADO')
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-right">
-            <!-- @can('cursos.store') -->
+            
             
             <a onclick="save('evaluacion')" type="submit" class="btn btn-primary">Guardar</a>
-            <!-- @endcan -->
+            
         </div>
     </div>
 </div>
+@endif
+@endcan

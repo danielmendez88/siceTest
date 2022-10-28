@@ -306,7 +306,7 @@
 
             <label align="center" style="color: #808080; font-size: 36px; text-align: center;">BIBLIOGRAFIA</label> 
             <div class="justify">
-            <?php echo htmlspecialchars_decode(stripslashes($carta_descriptiva->referencias)); ?>
+            <?php echo htmlspecialchars_decode(stripslashes($cartaDescriptiva->referencias)); ?>
             </div>
         </div>
     </div>

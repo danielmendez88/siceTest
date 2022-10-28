@@ -44,8 +44,6 @@
                     </div>
                 </div>
 
-
-
                 <div class="form-row col-md-7 opcion-area-p1" id="pregunta1-opc">
                     <input type="text" hidden id="pregunta1-opc-answer" name="pregunta1-opc-answer">
                     <div class="input-group mb-3 ">
@@ -94,19 +92,17 @@
 </div>
 
 
-
-
-
-
-
-
+@can('paqueteriasdidacticas.crear')
+@if($curso->estatus_paqueteria != 'ENVIADO A PREVALIDACION' && $curso->estatus_paqueteria!= 'AUTORIZADO')
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-right">
-            <!-- @can('cursos.store') -->
+            
             
             <a onclick="save('evaluacion')" type="submit" class="btn btn-primary">Guardar</a>
-            <!-- @endcan -->
+            
         </div>
     </div>
 </div>
+@endif
+@endcan
