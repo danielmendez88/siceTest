@@ -683,8 +683,10 @@ Route::post('/encuesta/save','supervisionController\EncuestaController@encuesta_
 
 /*Reporte Planeación 04012021-14062021*/
 Route::get('/planeacion/reporte', 'webController\supreController@planeacion_reporte')->name('planeacion.reporte');
+Route::get('/planeacion/reporte/costeo', 'webController\supreController@reporte_costeo_supre')->name('planeacion.reporte.costeo');
 Route::get('/planeacion/reporte/cancelados', 'webController\supreController@cancelados_reporte')->name('planeacion.reporte-cancelados');
 Route::post('/planeacion/reporte/pdf','webController\supreController@planeacion_reportepdf')->name('planeacion.reportepdf');
+Route::post('/planeacion/reporte/costeo/xcl','webController\supreController@planeacion_costeo_excel')->name('planeacion.reporte.costeo.xl');
 Route::post('/directorio/getcurso','webController\supreController@get_curso')->name('get-curso');
 Route::post('/directorio/getins','webController\supreController@get_ins')->name('get-ins');
 Route::post('/planeacion/reporte-cancelados/pdf','webController\supreController@planeacion_reporte_canceladospdf')->name('planeacion.reporte-canceladospdf');
@@ -740,6 +742,7 @@ Route::post('/exoneraciones/sid/municipios', 'webController\ExoneracionesControl
 /*Reporte Financieros 03032021*/
 Route::get('/financieros/reporte', 'webController\PagoController@financieros_reporte')->name('financieros.reporte')->middleware('can:financieros.reporte');
 Route::post('/financieros/reporte/pdf','webController\PagoController@financieros_reportepdf')->name('financieros.reportepdf');
+Route::post('/financieros/upload/pago-autorizado','webController\PagoController@upload_pago_autorizado')->name('doc-pago-guardar');
 Route::post('/financieros/reporte/tramites_valrec','webController\PagoController@reporte_validados_recepcionados')->name('reporte_valrecep');
 //Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
 Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
