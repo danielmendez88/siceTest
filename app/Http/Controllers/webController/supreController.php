@@ -1481,9 +1481,11 @@ class supreController extends Controller
         'tbl_localidades.localidad',
         'tbl_cursos.cp',
         'tbl_cursos.inicio')
-        ->WhereNotIn('tbl_cursos.id', DB::Table('folios')->JOIN('tbl_cursos','tbl_cursos.id','=','folios.id_cursos')->whereDate('tbl_cursos.fecha_apertura', '>=', $request->fecha1)->whereDate('tbl_cursos.fecha_apertura', '<=', $request->fecha2)->pluck('folios.id_cursos'))
-        ->whereDate('tbl_cursos.fecha_apertura', '>=', $request->fecha1)
-        ->whereDate('tbl_cursos.fecha_apertura', '<=', $request->fecha2)
+        ->WhereNotIn('tbl_cursos.id', DB::Table('folios')->JOIN('tbl_cursos','tbl_cursos.id','=','folios.id_cursos')->WHERE('folios.status','!=','Rechazado')->pluck('folios.id_cursos'))
+        ->whereDate('tbl_cursos.inicio', '>=', $request->fecha1)
+        ->whereDate('tbl_cursos.inicio', '<=', $request->fecha2)
+        ->WHERE('status_curso','AUTORIZADO')
+        ->WHERE('tbl_cursos.clave','!=','0')
         ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
         ->LEFTJOIN('tbl_localidades', 'tbl_localidades.clave', '=', 'tbl_cursos.clave_localidad')
         ->GROUPBY('tbl_cursos.unidad',
@@ -1579,6 +1581,7 @@ class supreController extends Controller
                            ->whereDate('tabla_supre.fecha', '<=', $fecha2)
                            ->WHERE('folios.status', '!=', 'Cancelado')
                            ->WHERE('folios.status', '!=', 'Rechazado')
+                           ->WHERE('tbl_cursos.status_curso','=','AUTORIZADO')
                            ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                            ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                            ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
