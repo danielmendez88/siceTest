@@ -35,7 +35,7 @@
     <br>
     <table style="width: 80%; text-align: center;">
         <tr>
-            <td style="text-decoration: underline;">{{$date}}</td>
+            <td style="text-decoration: underline;">{{$alumnos->creado}}</td>
             <td>{{str_pad($alumnos->id, 8, "0", STR_PAD_LEFT)}}</td>
         </tr>
         <tr>
@@ -140,7 +140,7 @@
             <td colspan="4"><strong>ESPECIALIDAD A LA QUE DESEAN INSCRIBIRSE:</strong>  {{ strtoupper($alumnos->especialidad) }}</td>
         </tr>
         <tr>
-            <td colspan="2"><strong>CURSO:</strong>  {{ strtoupper($alumnos->nombre_curso) }}</td>
+            <td colspan="2"><strong>CURSO:</strong>  {{ $alumnos->nombre_curso }}</td>
             <td colspan="2"><strong>TIPO:</strong>  {{strtoupper($alumnos->tipocurso)}}</td>
         </tr>
         <tr>
@@ -247,7 +247,7 @@
         <tr>
             <td>
                 <br>
-                <strong>FECHA:</strong> {{$date}}
+                <strong>FECHA:</strong> {{$alumnos->creado}}
             </td>
             <td style="text-align: right;">
                 <strong>COMPROBANTE DEL ASPIRANTE</strong><br>
@@ -263,7 +263,7 @@
         </tr>
         <tr>
             <td><strong>CURSO:</strong></td>
-            <td colspan="3" style="text-transform: uppercase;">{{ strtoupper($alumnos->nombre_curso) }}</td>
+            <td colspan="3" style="text-transform: uppercase;">{{ $alumnos->nombre_curso }}</td>
             <td><strong>HORARIO:</strong> {{$alumnos->horario }}</td>
             <td style="text-transform: uppercase;"><strong>GRUPO:</strong> {{ $alumnos->grupo }}</td>
         </tr>

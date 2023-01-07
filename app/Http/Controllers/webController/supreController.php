@@ -35,6 +35,12 @@ class supreController extends Controller
     public function solicitud_supre_inicio(Request $request) {
         $array_ejercicio =[];
         $año_pointer = CARBON::now()->format('Y');
+        $unidaduser = tbl_unidades::SELECT('ubicacion')->WHERE('id',Auth::user()->unidad)->FIRST();
+        $roles = DB::table('role_user')
+            ->LEFTJOIN('roles', 'roles.id', '=', 'role_user.role_id')
+            ->SELECT('roles.slug AS role_name')
+            ->WHERE('role_user.user_id', '=', Auth::user()->id)
+            ->FIRST();
         /**
          * parametros de busqueda
          */
@@ -66,10 +72,13 @@ class supreController extends Controller
                         ->where('tabla_supre.id', '!=', '0')
                         ->WHERE('tbl_cursos.inicio', '>=', $año_referencia)
                         ->WHERE('tbl_cursos.inicio', '<=', $año_referencia2)
-                        ->WHERE('tabla_supre.status', '!=', 'Cancelado')
-                        ->RIGHTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
+                        ->WHERE('tabla_supre.status', '!=', 'Cancelado');
+        if($roles->role_name != 'admin' && $roles->role_name != 'planeacion')
+        {
+            $data = $data->WHERE('unidad_capacitacion', $unidaduser->ubicacion);
+        }
+        $data = $data->RIGHTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                         ->RIGHTJOIN('tbl_cursos', 'folios.id_cursos', '=', 'tbl_cursos.id')
-                        // ->latest()
                         ->OrderBy('tabla_supre.status','ASC')
                         ->OrderBy('tabla_supre.updated_at','DESC')
                         ->paginate(25, ['tabla_supre.*']);
@@ -80,8 +89,9 @@ class supreController extends Controller
 
     public function frm_formulario() {
         $unidades = tbl_unidades::SELECT('unidad')->WHERE('id', '!=', '0')->GET();
+        $unidad = tbl_unidades::SELECT('ubicacion')->WHERE('id',Auth::user()->unidad)->FIRST();
 
-        return view('layouts.pages.delegacionadmin', compact('unidades'));
+        return view('layouts.pages.delegacionadmin', compact('unidades','unidad'));
     }
 
     public function store(Request $request) {
@@ -207,6 +217,7 @@ class supreController extends Controller
 
     public function solicitud_modificar($id)
     {
+        $id = base64_decode($id);
         $supre = new supre();
         $folio = new folio();
         $getdestino = null;
@@ -319,6 +330,7 @@ class supreController extends Controller
     }
 
     public function validacion($id){
+        $id = base64_decode($id);
         $supre = new supre();
         $data =  $supre::WHERE('id', '=', $id)->FIRST();
         $directorio = supre_directorio::WHERE('id_supre', '=', $id)->FIRST();
@@ -377,6 +389,7 @@ class supreController extends Controller
         ->update(['status' => 'Validado']);
 
         $id = $request->id;
+        $idb64 = base64_encode($id);
         $directorio_id = $request->directorio_id;
 
         // Notificacion!
@@ -390,7 +403,7 @@ class supreController extends Controller
         //$users = User::where('id', 1)->get();
         // dd($users);
         //event((new NotificationEvent($users, $letter)));
-        return view('layouts.pages.valsuprecheck', compact('id', 'directorio_id'));
+        return view('layouts.pages.valsuprecheck', compact('id', 'directorio_id','idb64'));
     }
 
     public function valsupre_checkmod(Request $request){
@@ -407,6 +420,7 @@ class supreController extends Controller
     }
 
     public function valsupre_mod($id){
+        $id = base64_decode($id);
         $data = supre::find($id);
         $directorio = supre_directorio::WHERE('id_supre', '=', $id)->FIRST();
         $getfirmante = directorio::WHERE('id', '=', $directorio->val_firmante)->FIRST();
@@ -424,6 +438,7 @@ class supreController extends Controller
         // supre_directorio::WHERE('id_supre', '=', $id)->DELETE();
         // folio::where('id_supre', '=', $id)->delete();
         // supre::where('id', '=', $id)->delete();
+        $id = base64_decode($id);
         $folio = folio::WHERE('id_supre','=',$id)->FIRST();
         $folio->status = 'Cancelado';
         $folio->save();
@@ -437,6 +452,7 @@ class supreController extends Controller
 
     public function restartSupre($id)
     {
+        $id = base64_decode($id);
         $list = folio::SELECT('id_folios')->WHERE('id_supre', '=', $id)->GET();
         foreach($list as $item)
         {
@@ -673,8 +689,8 @@ class supreController extends Controller
             {
                 // $inicio = date("m-d-Y", strtotime($Cursos->inicio));
                 $inicio = carbon::parse($Cursos->inicio);
-                // $inicio = strtotime($inicio);
-                $date1 = "2021-05-01";
+                // $inicio = strtotime($inicio); 2022-11-28
+                $date1 = "2022-11-01";
                 // $date1 = date("m-d-Y", strtotime($date1));
                 $date1 = carbon::parse($date1);
                 // $date1 = strtotime($date1);
@@ -682,14 +698,14 @@ class supreController extends Controller
 
                 if ($date1 <= $inicio)
                 {
-                    $ze2 = 'ze2_2021 AS monto';
-                    $ze3 = 'ze3_2021 AS monto';
+                    $ze2 = 'ze2_2022 AS monto';
+                    $ze3 = 'ze3_2022 AS monto';
                     // dd(gettype($date1) . ' entro1 ' . gettype($inicio));
                 }
                 else
                 {
-                    $ze2 = 'monto_hora_ze2 AS monto';
-                    $ze3 = 'monto_hora_ze3 AS monto';
+                    $ze2 = 'ze2_2021 AS monto';
+                    $ze3 = 'ze3_2021 AS monto';
                     // dd(gettype($date1) . ' entro2 ' . gettype($inicio));
                 }
 
@@ -819,6 +835,7 @@ class supreController extends Controller
     }
     public function dar_permiso_valsupre($id)
     {
+        $id = base64_decode($id);
         $supre = supre::find($id);
         $supre->permiso_editar = TRUE;
         $supre->save();
@@ -897,8 +914,14 @@ class supreController extends Controller
         return view('layouts.pages.vstareporteplaneacion', compact('unidades'));
     }
 
+    public function reporte_costeo_supre()
+    {
+        return view('layouts.pages.vstareportecosteoplaneacion');
+    }
+
     public function folio_edicion_especial($id)
     {
+        $id = base64_decode($id);
         $getdestino = null;
         $getremitente = null;
         $getvalida = null;
@@ -1015,6 +1038,7 @@ class supreController extends Controller
     }
 
     public function supre_pdf($id){
+        $id = base64_decode($id);
         $supre = new supre();
         $folio = new folio();
         $distintivo = DB::table('tbl_instituto')->pluck('distintivo')->first();
@@ -1102,6 +1126,7 @@ class supreController extends Controller
     }
 
     public function tablasupre_pdf($id){
+        $id = base64_decode($id);
         $supre = new supre;
         $curso = new tbl_curso;
         $distintivo = DB::table('tbl_instituto')->pluck('distintivo')->first();
@@ -1145,6 +1170,7 @@ class supreController extends Controller
     }
 
     public function valsupre_pdf($id){
+        $id = base64_decode($id);
         $notification = DB::table('notifications')
                         ->WHERE('data', 'LIKE', '%"supre_id":'.$id.'%')->WHERE('read_at', '=', NULL)
                         ->UPDATE(['read_at' => Carbon::now()->toDateTimeString()]);
@@ -1438,6 +1464,88 @@ class supreController extends Controller
     /**
      *
      */
+
+    public function planeacion_costeo_excel(Request $request)
+    {
+        // dd($request);
+        $data = DB::TABLE('tbl_cursos')
+        ->SELECT(
+        'tbl_cursos.unidad',
+        'tbl_cursos.curso',
+        'tbl_cursos.clave',
+        'tbl_cursos.nombre',
+        'tbl_cursos.fecha_apertura',
+        'tbl_cursos.ze',
+        'tbl_cursos.dura',
+        'tbl_cursos.muni',
+        'tbl_localidades.localidad',
+        'tbl_cursos.cp',
+        'tbl_cursos.inicio')
+        ->WhereNotIn('tbl_cursos.id', DB::Table('folios')->JOIN('tbl_cursos','tbl_cursos.id','=','folios.id_cursos')->WHERE('folios.status','!=','Rechazado')->pluck('folios.id_cursos'))
+        ->whereDate('tbl_cursos.inicio', '>=', $request->fecha1)
+        ->whereDate('tbl_cursos.inicio', '<=', $request->fecha2)
+        ->WHERE('status_curso','AUTORIZADO')
+        ->WHERE('tbl_cursos.clave','!=','0')
+        ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')
+        ->LEFTJOIN('tbl_localidades', 'tbl_localidades.clave', '=', 'tbl_cursos.clave_localidad')
+        ->GROUPBY('tbl_cursos.unidad',
+        'tbl_cursos.curso',
+        'tbl_cursos.clave',
+        'tbl_cursos.nombre',
+        'tbl_cursos.fecha_apertura',
+        'tbl_cursos.ze',
+        'tbl_cursos.dura',
+        'tbl_cursos.muni',
+        'tbl_localidades.localidad',
+        'tbl_cursos.cp',
+        'tbl_cursos.inicio')
+        ->ORDERBY('fecha_apertura', 'ASC')
+        ->GET();
+
+        foreach($data as $key => $cadwell)
+        {
+            // dd($cadwell);
+            $cp = DB::TABLE('criterio_pago')->WHERE('id',$cadwell->cp)->FIRST();
+            if($cadwell->ze == 'II')
+            {
+                $point = 'ze2_';
+            }
+            else
+            {
+                $point = 'ze3_';
+            }
+
+            if($cadwell->inicio < '01-11-2022')
+            {
+
+                $point = $point.(carbon::now()->year - 1);
+                $data[$key]->importe_hora = $cp->$point;
+            }
+            else
+            {
+                $point = $point.carbon::now()->year;
+                $data[$key]->importe_hora = $cp->$point;
+            }
+            $data[$key]->importe_total = ROUND($cadwell->dura * $cp->$point, 2);
+            $data[$key]->iva = ROUND($data[$key]->importe_total * 0.16, 2);
+            $data[$key]->isr = ROUND($data[$key]->importe_total * 0.10, 2);
+            unset($data[$key]->inicio);
+            unset($data[$key]->cp);
+        }
+
+        $cabecera = [
+            'UNIDAD/A.M DE CAP.', 'CURSO', 'CLAVE DEL GRUPO', 'INSTRUCTOR', 'FECHA DE APERTURA', 'Z.E.',
+            'HSM', 'MUNICIPIO','LOCALIDAD', 'IMPORTE POR HORA', 'IMPORTE TOTAL', 'IVA 16%',
+            'RETENCIÓN IVA', 'RETENCIÓN ISR'
+        ];
+
+        $nombreLayout = "formato de costeo".$request->fecha1 . ' - '. $request->fecha2 . " creado el " . carbon::now() . ".xlsx";
+        $titulo = "formato de costeo ".$request->fecha1 . ' - '. $request->fecha2 . " creado el " . carbon::now();
+        if(count($data)>0)
+        {
+            return Excel::download(new FormatoTReport($data,$cabecera, $titulo), $nombreLayout);
+        }
+    }
     protected function generate_report_supre_xls($filtrotipo, $idcurso, $unidad, $idInstructor, $fecha1, $fecha2){
         $i = 0;
         set_time_limit(0);
@@ -1473,6 +1581,7 @@ class supreController extends Controller
                            ->whereDate('tabla_supre.fecha', '<=', $fecha2)
                            ->WHERE('folios.status', '!=', 'Cancelado')
                            ->WHERE('folios.status', '!=', 'Rechazado')
+                           ->WHERE('tbl_cursos.status_curso','=','AUTORIZADO')
                            ->LEFTJOIN('folios', 'folios.id_supre', '=', 'tabla_supre.id')
                            ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                            ->LEFTJOIN('instructores', 'instructores.id', '=', 'tbl_cursos.id_instructor')

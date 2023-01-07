@@ -156,7 +156,7 @@ class aperturaController extends Controller
                 $exoneracion = $this->exoneracion($this->id_unidad);
                 $exoneracion["NINGUNO"] = "NINGUNO";
                 $efisico = $this->efisico();
-                $exonerado = DB::table('exoneraciones')->where('folio_grupo',$grupo->folio_grupo)->where('status','<>',null)->where('status','<>','CANCELADO')->exists();
+                $exonerado = DB::table('exoneraciones')->where('folio_grupo',$grupo->folio_grupo)->where('status','<>','CAPTURA')->where('status','<>','CANCELADO')->exists();
 
                 $medio_virtual = $this->medio_virtual();
 
@@ -364,7 +364,7 @@ class aperturaController extends Controller
                         } else {
                             $tipo_honorario = 'HONORARIOS';
                         }
-                        $exonerado = DB::table('exoneraciones')->where('folio_grupo', $grupo->folio_grupo)->where('status', '<>', null)->where('status', '<>', 'CANCELADO')->exists();
+                        $exonerado = DB::table('exoneraciones')->where('folio_grupo', $grupo->folio_grupo)->where('status', '<>', 'CAPTURA')->where('status', '<>', 'CANCELADO')->exists();
                         if ($request->hasFile('file_pago')) {
                             $file = $request->file_pago;
                             $tamanio = $file->getSize(); #obtener el tamaño del archivo del cliente

@@ -626,9 +626,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/calendario/guardar','Solicitud\aperturaController@storeCalendar')->name('calendario.store');
     Route::get('/calendario/{id}','Solicitud\aperturaController@destroy')->name('calendario.destroy');
     Route::get('/organismos/inicio', 'organismosController@index')->name('organismos.index')->middleware('can:organismo.inicio');
-    Route::get('/organismos/agregar', 'organismosController@agregar')->name('organismos.agregar');
-    Route::post('/organismos/store', 'organismosController@store')->name('organismos.insert');
-    Route::post('/organismos/update', 'organismosController@update')->name('organismos.update');
+    Route::get('/organismos/agregar', 'organismosController@agregar')->name('organismos.agregar')->middleware('can:organismo.agregar');
+    Route::post('/organismos/store', 'organismosController@store')->name('organismos.insert')->middleware('can:organismo.agregar');
+    Route::post('/organismos/update', 'organismosController@update')->name('organismos.update')->middleware('can:organismo.agregar');
     Route::get('/organismo/municipio','organismosController@muni');
 
     /* Solicitudes exoneración y reducción de cuota AGC*/
@@ -645,17 +645,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/solicitud/exoneracion/edicion','Solicitud\ExoneracionController@edicion')->name('solicitud.exoneracion.edicion')->middleware('can:solicitud.exoneracion');
 
     Route::get('/solicitudes/exoneracion','Solicitudes\ExoneracionesController@index')->name('solicitudes.exoneracion')->middleware('can:solicitudes.exoneracion');
-    Route::get('/solicitudes/exoneracion/busqueda','Solicitudes\ExoneracionesController@search')->name('solicitudes.exoneracion.search')->middleware('can:solicitudes.exoneracion');
     Route::post('/solicitudes/exoneracion','Solicitudes\ExoneracionesController@index')->name('solicitudes.exoneracion')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/busqueda','Solicitudes\ExoneracionesController@search')->name('solicitudes.exoneracion.search')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/regresar','Solicitudes\ExoneracionesController@retornar')->name('solicitudes.exoneracion.retornar')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/validar','Solicitudes\ExoneracionesController@validar')->name('solicitudes.exoneracion.validar')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/generar}','Solicitudes\ExoneracionesController@generar')->name('solicitudes.exoneracion.borrador');
-    Route::post('/solicitudes/exoneracion/autorizar','Solicitudes\ExoneracionesController@autorizar')->name('solicitudes.exoneracion.autorizar')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/cancelar','Solicitudes\ExoneracionesController@cancelar')->name('solicitudes.exoneracion.cancelar')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/regresar_validado','Solicitudes\ExoneracionesController@retornar_validado')->name('solicitudes.exoneracion.rvalidado')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/editar','Solicitudes\ExoneracionesController@editar')->name('solicitudes.exoneracion.editar')->middleware('can:solicitudes.exoneracion');
-    Route::post('/solicitudes/exoneracion/actualizar','Solicitudes\ExoneracionesController@asoporte')->name('solicitudes.exoneracion.asoporte')->middleware('can:solicitudes.exoneracion');
+    Route::get('/solicitudes/exoneracion/busqueda','Solicitudes\ExoneracionesController@search')->name('solicitudes.exoneracion.search')->middleware('can:solicitudes.exoneracion');
+    Route::post('/solicitudes/exoneracion/busqueda','Solicitudes\ExoneracionesController@search')->name('solicitudes.exoneracion.search')->middleware('can:solicitudes.exoneracion');    
+    Route::post('/solicitudes/exoneracion/denegar','Solicitudes\ExoneracionesController@denegar')->name('solicitudes.exoneracion.denegar')->middleware('can:solicitudes.exoneracion');
+    Route::post('/solicitudes/exoneracion/aceptar','Solicitudes\ExoneracionesController@aceptar')->name('solicitudes.exoneracion.aceptar')->middleware('can:solicitudes.exoneracion');
+    Route::post('/solicitudes/exoneracion/generar}','Solicitudes\ExoneracionesController@generar')->name('solicitudes.exoneracion.borrador');    
+    Route::post('/solicitudes/exoneracion/editar','Solicitudes\ExoneracionesController@editar')->name('solicitudes.exoneracion.editar')->middleware('can:solicitudes.exoneracion');    
 
     //paqueterias didacticas
     Route::get('paqueterias/{idCurso}', 'webController\PaqueteriaDidacticaController@index')->name('paqueteriasDidacticas')->middleware('can:paqueteriasdidacticas');
@@ -679,8 +675,10 @@ Route::post('/encuesta/save','supervisionController\EncuestaController@encuesta_
 
 /*Reporte Planeación 04012021-14062021*/
 Route::get('/planeacion/reporte', 'webController\supreController@planeacion_reporte')->name('planeacion.reporte');
+Route::get('/planeacion/reporte/costeo', 'webController\supreController@reporte_costeo_supre')->name('planeacion.reporte.costeo');
 Route::get('/planeacion/reporte/cancelados', 'webController\supreController@cancelados_reporte')->name('planeacion.reporte-cancelados');
 Route::post('/planeacion/reporte/pdf','webController\supreController@planeacion_reportepdf')->name('planeacion.reportepdf');
+Route::post('/planeacion/reporte/costeo/xcl','webController\supreController@planeacion_costeo_excel')->name('planeacion.reporte.costeo.xl');
 Route::post('/directorio/getcurso','webController\supreController@get_curso')->name('get-curso');
 Route::post('/directorio/getins','webController\supreController@get_ins')->name('get-ins');
 Route::post('/planeacion/reporte-cancelados/pdf','webController\supreController@planeacion_reporte_canceladospdf')->name('planeacion.reporte-canceladospdf');
@@ -736,6 +734,7 @@ Route::post('/exoneraciones/sid/municipios', 'webController\ExoneracionesControl
 /*Reporte Financieros 03032021*/
 Route::get('/financieros/reporte', 'webController\PagoController@financieros_reporte')->name('financieros.reporte')->middleware('can:financieros.reporte');
 Route::post('/financieros/reporte/pdf','webController\PagoController@financieros_reportepdf')->name('financieros.reportepdf');
+Route::post('/financieros/upload/pago-autorizado','webController\PagoController@upload_pago_autorizado')->name('doc-pago-guardar');
 Route::post('/financieros/reporte/tramites_valrec','webController\PagoController@reporte_validados_recepcionados')->name('reporte_valrecep');
 //Route::get('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
 Route::post('/reportes/arc01','pdfcontroller@arc')->name('pdf.generar');
