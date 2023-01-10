@@ -1,9 +1,25 @@
 ﻿$(document).ready(function(){
+    if ($("#tipo").val()!='A DISTANCIA') {
+        $("#medio_virtual").attr("disabled", "disabled");
+        $("#link_virtual").attr("disabled", "disabled");
+        $('#medio_virtual').val('');
+        $('#link_virtual').val('');
+    }
     $("#tipo" ).change(function(){
         cmb_curso();
+        if ($("#tipo").val()=='A DISTANCIA') {
+            $("#medio_virtual").removeAttr("disabled"); 
+            $("#link_virtual").removeAttr("disabled");
+        }else{
+            $("#medio_virtual").attr("disabled", "disabled");
+            $("#link_virtual").attr("disabled", "disabled"); 
+            $('#medio_virtual').val('');
+            $('#link_virtual').val('');
+        }
     });
-     $("#unidad" ).change(function(){
+    $("#unidad" ).change(function(){
         cmb_curso();
+        cmb_muni();
     }); 
     $("#modalidad" ).change(function(){
         cmb_curso();
@@ -47,10 +63,63 @@
                 contentType: "application/json",              
                 dataType: "json",
                 success: function (data) {// console.log(data); 
-                    $.each(data, function () {                                    
-                        //$("#id_curso").append('<option value="" selected="selected">SELECCIONAR</option>');                                    
+                    $("#localidad").append('<option value="" selected="selected">SELECCIONAR</option>');  
+                    $.each(data, function () {                                                                
                         $("#localidad").append('<option value="'+this['clave']+'">'+this['localidad']+'</option>');
                     });
+                }
+            });                        
+        }
+                        
+    };
+
+    function cmb_muni(){
+        var uni = $('#unidad').val();
+        $("#id_municipio").empty();
+        if(uni){
+            $.ajax({
+                type: "GET",
+                url: "/preinscripcion/grupo/cmbmuni",
+                data:{uni:uni, _token:"{{csrf_token()}}"},
+                contentType: "application/json",              
+                dataType: "json",
+                success: function (data) {// console.log(data); 
+                    $("#id_municipio").append('<option value="" selected="selected">SELECCIONAR</option>');     
+                    $.each(data, function () {                                                                   
+                        $("#id_municipio").append('<option value="'+this['id']+'">'+this['muni']+'</option>');
+                    });
+                }
+            });                        
+        }
+    };
+
+    $("#id_curso" ).change(function(){
+        cmb_instru();
+    }); 
+    $("#inicio" ).change(function(){
+        cmb_instru();
+    });
+    $("#termino" ).change(function(){
+        cmb_instru();
+    });
+    function cmb_instru(){ 
+        var id =$('#id_curso').val();
+        var inicio =$('#inicio').val();
+        var termino =$('#termino').val();
+        $("#instructor").empty();                            
+        if(id && inicio && termino){
+            $.ajax({
+                type: "GET",
+                url: "/preinscripcion/grupo/cmbinstructor",
+                data:{id:id,inicio:inicio,termino:termino, _token:"{{csrf_token()}}"},
+                contentType: "application/json",              
+                dataType: "json",
+                success: function (data) {// console.log(data); 
+                    $("#instructor").append('<option value="" selected="selected">SELECCIONAR</option>');
+                    $.each(data, function () {                                    
+                        $("#instructor").append('<option value="'+this['id']+'">'+this['instructor']+'</option>');
+                    });
+                    
                 }
             });                        
         }
@@ -152,7 +221,16 @@
             tipo:{
                 required: true
             },
+            tcurso:{
+                required: true
+            },
             unidad:{
+                required: true
+            },
+            modalidad:{
+                required: true
+            },
+            instructor:{
                 required: true
             },
             id_municipio:{
@@ -185,7 +263,16 @@
             tipo:{
                 required: 'Seleccione una opción'
             },
+            tcurso:{
+                required: 'Seleccione una opción'
+            },
             unidad:{
+                required: 'Seleccione una opción'
+            },
+            modalidad:{
+                required: 'Seleccione una opción'
+            },
+            instructor:{
                 required: 'Seleccione una opción'
             },
             id_municipio:{
