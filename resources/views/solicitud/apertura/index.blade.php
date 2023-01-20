@@ -15,9 +15,10 @@
     </div>
     <div class="card card-body" style=" min-height:450px;">
         <?php
-            $modalidad = $valor = $munidad = $mov = $disabled = $hini = $hfin = NULL;
+            $modalidad = $valor = $munidad = $mov = $disabled = $hini = $hfin = $inco = NULL;
             $activar = true;
             if(isset($grupo)){
+                $inco = $grupo->inicio;
                 $valor = $grupo->folio_grupo;
                 $modalidad = $grupo->mod;
                 $hfin = substr($grupo->horario, 8, 5);
@@ -175,6 +176,10 @@
                 </div>
             </div>
             <div class="form-row" >
+                <div class="form-group col-md-12">
+                    <label>Observaciones de vinculación:</label>
+                    <textarea name='obs_vincu' id='obs_vincu'  class="form-control" rows="5" readonly>{{$grupo->nota_vincu}}</textarea>
+                </div>
                 <div class="form-group col-md-12">
                     <label>Observaciones:</label>
                     <textarea name='observaciones' id='observaciones'  class="form-control" rows="5" >{{$grupo->nota}}</textarea>
@@ -438,7 +443,7 @@
                         center: 'title',
                         right: 'dayGridMonth, timeGridWeek, timeGridDay',
                     },
-
+                    defaultDate: '<?php echo $inco; ?>',
                     eventClick: function(info) {
                         $('#btnAgregar').prop('disabled', true);
                         $('#btnModificar').prop('disabled', false);
