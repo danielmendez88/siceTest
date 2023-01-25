@@ -18,6 +18,7 @@ use App\Models\status;
 use App\Models\especialidad_instructor;
 use App\Models\criterio_pago;
 use App\Models\Inscripcion;
+use App\Models\localidad;
 use App\Models\Calificacion;
 use App\Models\tbl_curso;
 use Illuminate\Pagination\Paginator;
@@ -32,11 +33,6 @@ class InstructorController extends Controller
 {
     public function prueba()
     {
-        $id = 8114;
-       $idb64 = base64_encode($id);
-       $iddec = base64_decode($idb64);
-        dd($iddec);
-
         // $idesin = DB::table('especialidad_instructores')->SELECT('id')->OrderBy('id', 'ASC')->GET();
 
         // foreach ($idesin as $key => $cadwell)
