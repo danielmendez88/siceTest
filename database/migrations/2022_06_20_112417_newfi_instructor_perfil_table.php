@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddcolumnsInstructorPerfilTable extends Migration
+class NewfiInstructorPerfilTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,8 @@ class AddcolumnsInstructorPerfilTable extends Migration
     public function up()
     {
         Schema::table('instructor_perfil', function (Blueprint $table) {
-            $table->string('status')->nullable();
+            $table->string('carrera')->nullable();
+            $table->string('periodo')->nullable();
         });
     }
 

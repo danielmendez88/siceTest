@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddcolumnsInstructorPerfilTable extends Migration
+class AddedEspecialidadInstructoresTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddcolumnsInstructorPerfilTable extends Migration
      */
     public function up()
     {
-        Schema::table('instructor_perfil', function (Blueprint $table) {
-            $table->string('status')->nullable();
+        Schema::table('especialidad_instructores', function (Blueprint $table) {
+            $table->jsonb('hvalidacion')->nullable();
         });
     }
 
@@ -25,7 +25,7 @@ class AddcolumnsInstructorPerfilTable extends Migration
      */
     public function down()
     {
-        Schema::table('instructor_perfil', function (Blueprint $table) {
+        Schema::table('especialidad_instructores', function (Blueprint $table) {
             //
         });
     }

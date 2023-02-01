@@ -95,7 +95,7 @@ class supreController extends Controller
     }
 
     public function store(Request $request) {
-        // dd($request);
+        $generalarr = $arrmov = array();
         $memo = supre::SELECT('no_memo')->WHERE('no_memo', '=', $request->memorandum)->FIRST();
         if (is_null($memo))
         {
@@ -183,6 +183,16 @@ class supreController extends Controller
                     $folio->id_cursos = $hora->id;
                     $folio->status = 'En_Proceso';
                     $folio->save();
+
+                    $mvtobanc = tbl_curso::find($hora->id); //
+                    foreach($request->movimiento_bancario_ as $movkey => $ari)
+                    {
+                        $arrmov['movimiento_bancario'] = $ari;
+                        $arrmov['fecha_movimiento_bancario'] = $request->fecha_movimiento_bancario_[$movkey];
+                        array_push($generalarr, $arrmov);
+                    }
+                    $mvtobanc->mov_bancario = $generalarr;
+                    $mvtobanc->save();
                 }
                 else
                 {
@@ -234,14 +244,11 @@ class supreController extends Controller
         $unidadlist = tbl_unidades::SELECT('unidad')->WHERE('unidad', '!=', $getsupre->unidad_capacitacion)->GET();
 
         $getfolios = $folio::SELECT('folios.id_folios','folios.folio_validacion','folios.comentario',
-                                    'folios.importe_total','folios.iva','tbl_cursos.clave')
+                                'folios.importe_total','folios.iva','tbl_cursos.clave',
+                                'tbl_cursos.mov_bancario', 'tbl_cursos.folio_pago')
                             ->WHERE('id_supre','=', $getsupre->id)
                             ->LEFTJOIN('tbl_cursos', 'tbl_cursos.id', '=', 'folios.id_cursos')
                             ->GET();
-        /*if($directorio->supre_dest != NULL)
-        {
-            $getdestino = directorio::WHERE('id', '=', $directorio->supre_dest)->FIRST();
-        }*/
         if($directorio->supre_rem != NULL)
         {
             $getremitente = directorio::WHERE('id', '=', $directorio->supre_rem)->FIRST();
@@ -254,22 +261,15 @@ class supreController extends Controller
         {
             $getelabora = directorio::WHERE('id', '=', $directorio->supre_elabora)->FIRST();
         }
-       /* if($directorio->supre_ccp1 != NULL)
-        {
-            $getccp1 = directorio::WHERE('id', '=', $directorio->supre_ccp1)->FIRST();
-        }
-        if($directorio->supre_ccp2 != NULL)
-        {
-            $getccp2 = directorio::WHERE('id', '=', $directorio->supre_ccp2)->FIRST();
-        }*/
-
-        //dd($getfolios);
+        $getfolios[0]->mov_bancario = json_decode($getfolios[0]->mov_bancario);
+        // dd($getfolios[0]->mov_bancario['0']->movimiento_bancario);
         return view('layouts.pages.modsupre',compact('getsupre','getfolios','getremitente','getvalida','getelabora','directorio', 'unidadsel','unidadlist'));
     }
 
     public function solicitud_mod_guardar(Request $request)
     {
         // dd($request);
+        $generalarr = $arrmov = array();
         $supre = new supre();
         $curso_validado = new tbl_curso();
         $id_directorio = $request->id_directorio;
@@ -319,7 +319,17 @@ class supreController extends Controller
             $folio->id_cursos = $hora->id;
             $folio->status = 'En_Proceso';
             $folio->save();
-        }
+
+            $mvtobanc = tbl_curso::find($hora->id);
+            foreach($request->movimiento_bancario_ as $movkey => $ari)
+            {
+                $arrmov['movimiento_bancario'] = $ari;
+                $arrmov['fecha_movimiento_bancario'] = $request->fecha_movimiento_bancario_[$movkey];
+                array_push($generalarr, $arrmov);
+            }
+            $mvtobanc->mov_bancario = $generalarr;
+            $mvtobanc->save();
+}
         // return redirect()->route('supre-inicio')
         // ->with('success','Solicitud de Suficiencia Presupuestal agregado');
         return view('layouts.pages.suprecheck',compact('id','id_directorio'));
@@ -682,7 +692,10 @@ class supreController extends Controller
             /*Aquí si hace falta habrá que incluir la clase municipios con include*/
             $claveCurso = $request->valor;//$request->valor;
             $Curso = new tbl_curso();
-            $Cursos = $Curso->SELECT('tbl_cursos.ze','tbl_cursos.cp','tbl_cursos.dura', 'tbl_cursos.modinstructor', 'tbl_cursos.inicio', 'tbl_cursos.tipo_curso')
+            $Cursos = $Curso->SELECT('tbl_cursos.ze','tbl_cursos.cp','tbl_cursos.dura',
+                    'tbl_cursos.modinstructor', 'tbl_cursos.inicio', 'tbl_cursos.tipo_curso',
+                    'tbl_cursos.folio_pago','movimiento_bancario','fecha_movimiento_bancario',
+                    'factura','fecha_factura')
                                     ->WHERE('clave', '=', $claveCurso)->FIRST();
 
             if($Cursos != NULL)
@@ -742,6 +755,11 @@ class supreController extends Controller
             {
                 $total = 'N/A';
             }
+            $total['recibo'] = $Cursos->folio_pago;
+            $total['movimiento_bancario'] = $Cursos->movimiento_bancario;
+            $total['fecha_movimiento_bancario'] = $Cursos->fecha_movimiento_bancario;
+            $total['factura'] = $Cursos->factura;
+            $total['fecha_factura'] = $Cursos->fecha_factura;
             $json=json_encode($total); //dura 10 cp 6
         }else{
             $json=json_encode(array('error'=>'No se recibió un valor de id de Especialidad para filtar'));
@@ -873,7 +891,8 @@ class supreController extends Controller
     public function doc_supre_upload(Request $request)
     {
         // dd($request);
-        if ($request->hasFile('doc_supre')) {
+        if ($request->hasFile('doc_supre'))
+        {
 
             if($request->idsupmod != NULL)
             {
@@ -895,6 +914,7 @@ class supreController extends Controller
             }
 
             $supre->save();
+
             return redirect()->route('supre-inicio')
                     ->with('success','Suficiencia Presupuestal Firmada ha sido cargada con Extio');
         }
@@ -994,7 +1014,7 @@ class supreController extends Controller
                   ->update(['cantidad_numero' => round($request->addmore[0]['importe']-$request->addmore[0]['iva'], 2)]);
         }
 
-        return redirect()->route('supre-inicio')
+        return redirect()->route('contrato-inicio')
                         ->with('success','Solicitud de Suficiencia Presupuestal agregado');
     }
 

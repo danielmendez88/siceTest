@@ -82,8 +82,8 @@
                             @can('pagos.inicio')
                                 <a class="dropdown-item" href="{{route('pago-inicio')}}">Pagos</a>
                             @endcan
-                            @can('paqueteriasdidacticas')
-                                <a class="dropdown-item" href="{{route('buzon.paqueterias')}}">Paqueterias Didacticas</a>
+                            @can('prevalidar_index-instructor')
+                                <a class="dropdown-item" href="{{route('prevalidar-ins')}}">Turnar Instructor</a>
                             @endcan
                         </div>
                     </li>
@@ -179,6 +179,9 @@
                             @can('solicitudes.cancelacionfolios')
                                 <a class="dropdown-item" href="{{route('solicitudes.cancelacionfolios')}}">Cancelaci&oacute;n Folios</a>
                             @endcan
+                            @can('prevalidar_index-instructor')
+                                <a class="dropdown-item" href="{{route('prevalidar-ins')}}">Turnar Instructor</a>
+                            @endcan
                         </div>
                     </li>
                 @endcan
@@ -257,6 +260,9 @@
                         @endcan
                         @can('reportes.rcdod11')
                             <a class="dropdown-item" href="{{route('reportes.rcdod11.index')}}">RCDOD-11</a>
+                        @endcan
+                        @can('reportes.rf001')
+                            <a class="dropdown-item" href="{{route('reportes.concentradoingresos')}}">RF-001</a>
                         @endcan
                         @can('financieros.reportevalrec')
                         {{-- <a class="dropdown-item" data-toggle="modal" data-placement="top"
