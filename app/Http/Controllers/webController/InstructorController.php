@@ -95,7 +95,7 @@ class InstructorController extends Controller
         $chk_mod_espec = FALSE;
         $userid = Auth::user()->id;
         $userunidad = DB::TABLE('tbl_unidades')->SELECT('ubicacion')->WHERE('id', '=', Auth::user()->unidad)->FIRST();
-        $rol = DB::TABLE('role_user')->WHEREIN('role_id', ['3','1'])->WHERE('user_id', '=', $userid)->FIRST();
+        $rol = DB::TABLE('role_user')->WHEREIN('role_id', ['3','1', '39'])->WHERE('user_id', '=', $userid)->FIRST();
         $unidades = DB::TABLE('tbl_unidades')->WHERE('cct', 'LIKE', '%07EI%')
                     ->SELECT('unidad')
                     ->ORDERBY('unidad', 'ASC')
@@ -163,7 +163,10 @@ class InstructorController extends Controller
                 {
                     array_push($status, 'BAJA EN PREVALIDACION', 'REACTIVACION EN PREVALIDACION');
                     $unidad_solicita = DB::TABLE('tbl_unidades')
-                            ->SELECT('ubicacion')->WHERE('id', '=', $data->lastUserId)->FIRST();
+                            ->SELECT('ubicacion')
+                            ->JOIN('users', 'users.unidad', '=', 'tbl_unidades.id')
+                            ->WHERE('users.id', '=', $data->lastUserId)
+                            ->FIRST();
                     $data->unidad_solicita = $unidad_solicita->ubicacion;
                     $data->onlyins = TRUE;
                 }
@@ -208,12 +211,13 @@ class InstructorController extends Controller
         {
             if(!isset($rol)) // ANALIZA SI ROL NO ESTA ASIGNADO
             {
-                $nrevisiones = $nrevisiones->WhereJsonContains('data_especialidad', [['unidad_solicita' => $userunidad->ubicacion]])
+                $unirev = $userunidad->ubicacion['0'] . $userunidad->ubicacion['1'];
+                $nrevisiones = $nrevisiones->WHERE('nrevision', 'LIKE', '%' . $unirev . '%')//'data_especialidad', [['unidad_solicita' => $userunidad->ubicacion]])
                                 ->WHEREIN('status', ['EN CAPTURA','EN FIRMA','BAJA EN PREVALIDACION','BAJA EN FIRMA','REACTIVACION EN FIRMA','RETORNO'])
                                 ->WHERE('turnado', '=', 'UNIDAD')
                                 ->GET();
 
-                $unirev = $userunidad->ubicacion['0'] . $userunidad->ubicacion['1'];
+
                 $databuzon = pre_instructor::SELECT('id','nombre', 'apellidoPaterno', 'apellidoMaterno', 'nrevision', 'updated_at','lastUserId','status','turnado')
                                                 ->WHERE('turnado','UNIDAD')
                                                 ->WHERE('nrevision', 'LIKE', '%' . $unirev . '%')
@@ -386,15 +390,18 @@ class InstructorController extends Controller
             $especialidades = $this->make_collection($modInstructor->data_especialidad);
             // se llaman las funciones de string a arrays
             $newa = (array) $modInstructor;
-            $newa["\x00*\x00attributes"]["entrevista"] = $this->basic_array($newa["\x00*\x00attributes"]["entrevista"]);
-            if(isset($modInstructor->exp_laboral))
-            {
-                $newa["\x00*\x00attributes"]["exp_laboral"] = $this->complex_array($newa["\x00*\x00attributes"]["exp_laboral"]);
-            }
-            if(isset($modInstructor->exp_docente))
-            {
-                $newa["\x00*\x00attributes"]["exp_docente"] = $this->complex_array($newa["\x00*\x00attributes"]["exp_docente"]);
-            }
+            // if(isset($newa["\x00*\x00attributes"]["entrevista"]))
+            // {
+            //     $newa["\x00*\x00attributes"]["entrevista"] = $this->basic_array($newa["\x00*\x00attributes"]["entrevista"]);
+            // }
+            // if(isset($modInstructor->exp_laboral))
+            // {
+            //     $newa["\x00*\x00attributes"]["exp_laboral"] = $this->complex_array($newa["\x00*\x00attributes"]["exp_laboral"]);
+            // }
+            // if(isset($modInstructor->exp_docente))
+            // {
+            //     $newa["\x00*\x00attributes"]["exp_docente"] = $this->complex_array($newa["\x00*\x00attributes"]["exp_docente"]);
+            // }
 
             foreach($perfiles as $moist)
             {
@@ -439,6 +446,17 @@ class InstructorController extends Controller
                                 $perfiles[$key]->status = 'BAJA EN PREVALIDACION';
                                 $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ' (BAJA), ';
                             break;
+                            case 'RETORNO':
+                                $perfiles[$key]->status = 'PREVALIDACION';
+                                $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ', ';
+                            break;
+                            case 'REVALIDACION RETORNADA':
+                                $perfiles[$key]->status = 'REVALIDACION EN PREVALIDACION';
+                            break;
+                            case 'BAJA RETORNADA':
+                                $perfiles[$key]->status = 'BAJA EN PREVALIDACION';
+                                $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ' (BAJA), ';
+                            break;
                         }
                     }
                 }
@@ -472,6 +490,19 @@ class InstructorController extends Controller
                                 $movimiento = $movimiento . $especialidad->nombre . ' (BAJA),  ';
                                 $bajachk = TRUE;
                             break;
+                            case 'RETORNO':
+                                $especialidades[$llave]->status = 'PREVALIDACION';
+                                $movimiento = $movimiento . $especialidad->nombre . ',  ';
+                            break;
+                            case 'REVALIDACION RETORNADA':
+                                $especialidades[$llave]->status = 'REVALIDACION EN PREVALIDACION';
+                                $movimiento = $movimiento . $especialidad->nombre . ' (REVALIDACION),  ';
+                            break;
+                            case 'BAJA RETORNADA':
+                                $especialidades[$llave]->status = 'BAJA EN PREVALIDACION';
+                                $movimiento = $movimiento . $especialidad->nombre . ' (BAJA),  ';
+                                $bajachk = TRUE;
+                            break;
                         }
                         $especialidades[$llave]->memorandum_solicitud = NULL;
                     }
@@ -495,9 +526,10 @@ class InstructorController extends Controller
             $historico->movimiento = $movimiento;
             $historico->status = $modInstructor->status;
             $historico->turnado = $modInstructor->turnado;
-            $historico->data_instructor = $newa["\x00*\x00attributes"];
-            $historico->data_perfil = $newb;
-            $historico->data_especialidad = $newc;
+            // dd($newa["\x00*\x00attributes"]);
+            $historico->data_instructor = 'temp'; //$newa["\x00*\x00attributes"];
+            // $historico->data_perfil = $newb;
+            // $historico->data_especialidad = $newc;
             $historico->nrevision = $modInstructor->nrevision;
 
             $insstat = instructor::find($request->idinstructores);
@@ -667,6 +699,7 @@ class InstructorController extends Controller
             $historico->turnado = $modInstructor->turnado;
             $historico->nrevision = $modInstructor->nrevision;
             $historico->save();
+
         }
 
         return redirect('/prevalidacion/instructor')->with('success','REGISTROS PREVALIDADOS CORRECTAMENTE');
@@ -1412,6 +1445,7 @@ class InstructorController extends Controller
             $validado = $this->make_collection($datainstructor->data_especialidad);
             foreach($validado as $key => $ges)
             {
+                $lista = null;
                 if(isset($ges->hvalidacion))
                 {
                     $ges->hvalidacion = json_encode($ges->hvalidacion);
@@ -1425,6 +1459,25 @@ class InstructorController extends Controller
                     $validado[$key]->memorandum_validacion = NULL;
                     $validado[$key]->fecha_validacion = NULL;
                 }
+
+                if(isset($ges->cursos_impartir))
+                {
+                    $cursos = curso::SELECT('nombre_curso')->WHEREIN('id', $ges->cursos_impartir)->GET();
+                    foreach($cursos as $llavesita => $ari)
+                    {
+                        if($llavesita == 0)
+                        {
+                            $lista = '<li>' . $ari->nombre_curso . '</li>';
+                        }
+                        else
+                        {
+                            $lista = $lista . '<li>' . $ari->nombre_curso . '</li>';
+                        }
+                    }
+                    $validado[$key]->cursos_impartir = $lista;
+                }
+
+                // dd($validado[$key]->cursos_impartir);
             }
             // dd($validado);
         }
@@ -1826,6 +1879,14 @@ class InstructorController extends Controller
     {
         // dd($request);
         $instructorupd = pre_instructor::find($request->idInstructorentrevistaupd);
+        if(!isset($instructorupd))
+        {
+            $instructor = instructor::find($request->idInstructorentrevistaupd);
+            // dd($instructor);
+            $pre_instructor = new pre_instructor();
+            $instructorupd  = $this->guardado_ins_model($pre_instructor, $instructor, $request->idInstructorentrevistaupd);
+            $instructorupd->id_oficial = $instructor->id;
+        }
         $entrevista = $instructorupd->entrevista;
         $archivo = $request->file('doc_entrevista'); # obtenemos el archivo
         $urlentrevista = $this->pdf_upload($archivo, $request->idInstructorentrevistaupd, 'entrevista'); # invocamos el método
@@ -2238,6 +2299,7 @@ class InstructorController extends Controller
         $pre_instructor = pre_instructor::WHERE('id',$idins)->FIRST();
         if(isset($pre_instructor->registro_activo) && $pre_instructor->registro_activo == TRUE)
         {
+            // dd($pre_instructor->data_especialidad);
             foreach($pre_instructor->data_especialidad as $cadwell)
             {
                 if($cadwell['id'] == $id)
@@ -2245,6 +2307,21 @@ class InstructorController extends Controller
                     $especvalid = (object) $cadwell;
                 }
 
+            }
+            if(!isset($especvalid->cursos_impartir))
+            {
+                $arrt = array();
+                $listacursos = DB::TABLE('especialidad_instructor_curso')->WHERE('id_especialidad_instructor',$id)->GET();
+
+                foreach($listacursos as $cursos_id)
+                {
+
+                    if($cursos_id->activo == TRUE)
+                    {
+                        array_push($arrt, $cursos_id->curso_id);
+                    }
+                }
+                $especvalid->cursos_impartir = $arrt;
             }
             $data_espec = $this->make_collection($pre_instructor->data_perfil);
             // dd($data_espec);
@@ -2254,7 +2331,17 @@ class InstructorController extends Controller
             $especvalid = especialidad_instructor::WHERE('id', '=', $id)->FIRST();
             if(!isset($especvalid->cursos_impartir))
             {
-                $especvalid->cursos_impartir = array();
+                $arrt = array();
+                $listacursos = DB::TABLE('especialidad_instructor_curso')->WHERE('id_especialidad_instructor',$id)->GET();
+                foreach($listacursos as $cursos_id)
+                {
+
+                    if($cursos_id->activo == TRUE)
+                    {
+                        array_push($arrt, $cursos_id->curso_id);
+                    }
+                }
+                $especvalid->cursos_impartir = $arrt;
             }
             $data_espec = InstructorPerfil::WHERE('numero_control', '=', $idins)->GET();
         }
@@ -2851,6 +2938,8 @@ class InstructorController extends Controller
             $perfiles = $this->make_collection($data->data_perfil);
         }
         $date = strtotime(carbon::now()->toDateString());
+        $data->archivo_fotografia = substr($data->archivo_fotografia,33);
+        // dd($data->archivo_fotografia);
 
         // dd($data);
 
@@ -2870,7 +2959,14 @@ class InstructorController extends Controller
         $tipo_doc = 'VALIDACION';
         $rplc = array('[',']','"');
         $arrtemp = array();
-        $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA');
+        if(!isset($request->borrador))
+        {
+            $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA');
+        }
+        else
+        {
+            $arrstat = array('PREVALIDACION','REVALIDACION EN PREVALIDACION','REACTIVACION EN PREVALIDACION');
+        }
         set_time_limit(0);
 
         $instructor = pre_instructor::WHERE('id', $request->idins)->FIRST();
@@ -2919,6 +3015,13 @@ class InstructorController extends Controller
                 $item->memorandum_solicitud = $request->nomemo;
             }
 
+            foreach($especialidades as $pos => $cadwell)
+            {
+                if($cadwell->id == $item->id)
+                {
+                    $especialidades[$pos] = $item;
+                }
+            }
             switch($item->status)
             {
                 case 'REVALIDACION EN FIRMA';
@@ -2928,29 +3031,38 @@ class InstructorController extends Controller
                     $tipo_doc = 'REACTIVACION';
                 break;
             }
-
-            foreach($especialidades as $pos => $cadwell)
-            {
-                if($cadwell->id == $item->id)
-                {
-                    $especialidades[$pos] = $item;
-                }
-            }
         }
 
+
         $instructor->data_especialidad = $especialidades;
-        $instructor->save();
+        if(!isset($request->borrador))
+        {
+            $instructor->save();
+        }
 
         $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', '=', $data[0]->unidad_solicita)->FIRST();
-        $solicito = DB::TABLE('users')->WHERE('id', '=', $data[0]->solicito)->FIRST();
+        $solicito = DB::TABLE('users')->WHERE('id', '=', Auth::user()->id)->FIRST();
         $D = date('d', $date);
         $MO = date('m',$date);
         $M = $this->monthToString(date('m',$date));//A
         $Y = date("Y",$date);
         $nomemosol = $request->nomemo;
-        $pdf = PDF::loadView('layouts.pdfpages.solicitudinstructor',compact('distintivo','data','cursos','porcentaje','instructor','data_unidad','solicito','D','M','Y','cursosnoav','nomemosol','tipo_doc'));
+        $fecha_letra = $this->obtenerFechaEnLetra($D);
+        $pdf = PDF::loadView('layouts.pdfpages.solicitudinstructor',compact('distintivo','data','cursos','porcentaje','instructor','data_unidad','solicito','D','M','Y','cursosnoav','nomemosol','tipo_doc','fecha_letra'));
         $pdf->setPaper('letter');
         return  $pdf->stream('solicitud_instructor.pdf');
+    }
+
+    function obtenerFechaEnLetra($fecha){
+        $mes_array = ['01'=> 'UN','02' => 'DOS','03' => 'TRÉS','04' => 'CUATRO','05' => 'CINCO',
+                    '06' => 'SEIS','07' => 'SIETE','08' => 'OCHO','09' => 'NUEVE','10' => 'DIEZ',
+                    '11' => 'ONCE','12' => 'DOCE','13' => 'TRECE','14' => 'CATORCE','15' => 'QUINCE',
+                    '16' => 'DIECISEIS','17' => 'DIECISIETE','18' => 'DIECIOCHO','19' => 'DIECINUEVE','20' => 'VEINTE',
+                    '21' => 'VEINTIUNO','22' => 'VEINTIDOS','23' => 'VEINTIRÉS','24' => 'VEINTICUATRO','25' => 'VEINTICINCO',
+                    '26' => 'VEINTISEIS','27' => 'VEINTISIETE','28' => 'VEINTIOCHO','29' => 'VEINTINUEVE','30' => 'TREINTA',
+                    '31' => 'TREINTA Y UN'];
+        $fecha_letra = $mes_array[$fecha];
+        return $fecha_letra;
     }
 
     public function validacion_instructor_pdf(Request $request)
@@ -3202,7 +3314,7 @@ class InstructorController extends Controller
         }
         $saveInstructor->status = "EN CAPTURA";
         $saveInstructor->unidades_disponible = $unidades;
-        $saveInstructor->tipo_honorario = trim($request->honorario);
+        $saveInstructor->tipo_honorario = $request->honorario;
         $saveInstructor->clave_unidad = $unidadregistra->cct;
         $saveInstructor->lastUserId = $userId;
         $saveInstructor->extracurricular = trim($request->extracurricular);
@@ -3669,6 +3781,7 @@ class InstructorController extends Controller
     {
         $lista = NULL;
         $insesp = especialidad_instructor::FIND($request->id);
+
         $perfil = InstructorPerfil::SELECT('area_carrera', 'grado_profesional')->WHERE('id', '=', $insesp->perfilprof_id)->FIRST();
         $especialidad = especialidad::SELECT('nombre')->WHERE('id', '=', $insesp->especialidad_id)->FIRST();
         $cp = DB::TABLE('criterio_pago')->SELECT('perfil_profesional')->WHERE('id', '=', $insesp->criterio_pago_id)->FIRST();
@@ -3812,10 +3925,11 @@ class InstructorController extends Controller
     protected function basic_array($data)
     {
         $entrevista = array();
-        $arrtemp = explode(',',str_replace(['"','{','}',' ','[',']'], '', $data));
+        $arrtemp = explode(',',str_replace(['"','{','}',' ','[',']'], '', $data));dd($data);
         foreach( $arrtemp as $val )
         {
             $tmp = explode( ':', $val );
+
             $entrevista[ $tmp[0] ] = $tmp[1];
             if(isset($tmp[2]))
             {
