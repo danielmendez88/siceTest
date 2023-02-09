@@ -1557,8 +1557,19 @@ class InstructorController extends Controller
         $modInstructor = pre_instructor::find($request->id);
         if(!isset($modInstructor))
         {
+            $extract_inf = instructor::find($request->id);
             $modInstructor = new pre_instructor();
             $modInstructor->id_oficial = $request->id;
+            $modInstructor->archivo_ine = $extract_inf->archivo_ine;
+            $modInstructor->archivo_domicilio = $extract_inf->archivo_domicilio;
+            $modInstructor->archivo_curp = $extract_inf->archivo_curp;
+            $modInstructor->archivo_alta = $extract_inf->archivo_alta;
+            $modInstructor->archivo_bancario = $extract_inf->archivo_bancario;
+            $modInstructor->archivo_fotografia = $extract_inf->archivo_fotografia;
+            $modInstructor->archivo_estudios = $extract_inf->archivo_estudios;
+            $modInstructor->archivo_otraid = $extract_inf->archivo_otraid;
+            $modInstructor->archivo_rfc = $extract_inf->archivo_rfc;
+            $modInstructor->numero_control = $extract_inf->numero_control;
             $modInstructor->registro_activo = TRUE;
         }
         $pre_instructor = $this->guardado_ins($modInstructor, $request, $request->id);
@@ -2492,8 +2503,9 @@ class InstructorController extends Controller
             $instructor = pre_instructor::find($id);
             $userunidad = DB::TABLE('tbl_unidades')->SELECT('ubicacion','cct')->WHERE('id', '=', Auth::user()->unidad)->FIRST();
             $nrevisionlast = pre_instructor::SELECT('nrevision', 'registro_activo')
-                        ->WHERE('clave_unidad', '=', $userunidad->cct)
+                        // ->WHERE('clave_unidad', '=', $userunidad->cct) // quitar cct y poner las primeras letras de ubicacon y likear con nrevision
                         ->WHERE('nrevision', '!=', NULL)
+                        ->WHERE('nrevision', 'LIKE', $userunidad->ubicacion[0].$userunidad->ubicacion[1].'%')
                         ->GROUPBY('nrevision','registro_activo')
                         ->ORDERBY('nrevision','DESC')
                         ->FIRST();
@@ -2971,11 +2983,11 @@ class InstructorController extends Controller
         $arrtemp = array();
         if(!isset($request->borrador))
         {
-            $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA');
+            $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA','BAJA EN FIRMA');
         }
         else
         {
-            $arrstat = array('PREVALIDACION','REVALIDACION EN PREVALIDACION','REACTIVACION EN PREVALIDACION');
+            $arrstat = array('PREVALIDACION','REVALIDACION EN PREVALIDACION','REACTIVACION EN PREVALIDACION','BAJA EN PREVALIDACION');
         }
         set_time_limit(0);
 
@@ -3001,6 +3013,8 @@ class InstructorController extends Controller
         foreach($data as $count => $item)
         {
             // $item->cursos_impartir = explode(',',str_replace($rplc,'',$item->cursos_impartir));
+            if($item->status != 'BAJA EN FIRMA' && $item->status != 'BAJA EN PREVALIDACION')
+            {
             $cursos[$count] = DB::TABLE('cursos')->SELECT('cursos.nombre_curso')
                             ->WHEREIN('id',$item->cursos_impartir)
                             ->GET();
@@ -3012,6 +3026,11 @@ class InstructorController extends Controller
                             ->WHERENOTIN('id',$item->cursos_impartir)->GET();
 
             $porcentaje[$count] = (100*count($cursos[$count]))/$totalcursos->total;
+            }
+            else
+            {
+                $cursos[$count] = array();
+            }
 
             //GUARDADO DE FECHA Y MEMO DE SOLICITUD
             $thalmor = especialidad_instructor::WHERE('id','=',$item->id)->FIRST();
@@ -3042,6 +3061,12 @@ class InstructorController extends Controller
                     $tipo_doc = 'REVALIDACION';
                 break;
                 case 'REACTIVACION EN FIRMA';
+                    $tipo_doc = 'REACTIVACION';
+                break;
+                case 'REVALIDACION EN PREVALIDACION';
+                    $tipo_doc = 'REVALIDACION';
+                break;
+                case 'REACTIVACION EN PREVALIDACION';
                     $tipo_doc = 'REACTIVACION';
                 break;
             }
