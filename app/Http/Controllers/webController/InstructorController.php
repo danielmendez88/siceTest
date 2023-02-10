@@ -855,7 +855,7 @@ class InstructorController extends Controller
         // dd($request);
         $movimientoesp = $movimientoper = $mvalidacion = NULL;
         $saveInstructor = pre_instructor::find($request->idinsvalidar);
-        $arrtemp = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA');
+        $arrtemp = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA','BAJA EN FIRMA');
         $userId = Auth::user()->id;
         $userUnidad = DB::TABLE('tbl_unidades')->SELECT('cct')
                         ->WHERE('id','=',Auth::user()->unidad)
@@ -903,7 +903,7 @@ class InstructorController extends Controller
                     $perfiles[$llave]->status = 'VALIDADO';
                 }
 
-                if($item->new == FALSE)
+                if(!isset($item->new) || $item->new == FALSE)
                 {
                     $perfil = instructorPerfil::find($item->id);
                 }
@@ -954,10 +954,20 @@ class InstructorController extends Controller
                 {
                     $hvalidacion = $cadwell->hvalidacion;
                     $end = count($hvalidacion) - 1;
-                    $hvalidacion[$end]['memo_val'] = $cadwell->memorandum_validacion;
-                    $hvalidacion[$end]['fecha_val'] = $cadwell->fecha_validacion;
-                    $hvalidacion[$end]['arch_val'] = $url;
-                    $especialidades[$key]->hvalidacion = $hvalidacion;
+                    if($cadwell->status == 'BAJA EN FIRMA')
+                    {
+                        $hvalidacion[$end]['memo_baja'] = $cadwell->memorandum_validacion;
+                        $hvalidacion[$end]['fecha_baja'] = $cadwell->fecha_validacion;
+                        $hvalidacion[$end]['arch_baja'] = $url;
+                        $especialidades[$key]->hvalidacion = $hvalidacion;
+                    }
+                    else
+                    {
+                        $hvalidacion[$end]['memo_val'] = $cadwell->memorandum_validacion;
+                        $hvalidacion[$end]['fecha_val'] = $cadwell->fecha_validacion;
+                        $hvalidacion[$end]['arch_val'] = $url;
+                        $especialidades[$key]->hvalidacion = $hvalidacion;
+                    }
 
                     $especialidad = especialidad::WHERE('id', '=', $cadwell->especialidad_id)->SELECT('nombre')->FIRST();
                     switch($cadwell->status)
@@ -971,8 +981,20 @@ class InstructorController extends Controller
                         case 'REACTIVACION EN FIRMA';
                             $movimientoesp = $movimientoesp . $especialidad->nombre . ' (REACTIVACION),  ';
                         break;
+                        case 'BAJA EN FIRMA';
+                            $movimientoesp = $movimientoesp. $especialidad->nombre . ' (BAJA),  ';
+                        break;
                     }
-                    $especialidades[$key]->status = 'VALIDADO';
+
+                    if($cadwell->status == 'BAJA EN FIRMA')
+                    {
+                        $especialidades[$key]->status = 'BAJA';
+                    }
+                    else
+                    {
+                        $especialidades[$key]->status = 'VALIDADO';
+                    }
+
                     $mvalidacion = $cadwell->memorandum_validacion;
 
                     if($cadwell->new == false)
@@ -983,6 +1005,7 @@ class InstructorController extends Controller
                     {
                         $espins = new especialidad_instructor();
                     }
+
                     $espins->especialidad_id = $especialidades[$key]->especialidad_id;
                     $espins->perfilprof_id = $especialidades[$key]->perfilprof_id;
                     $espins->unidad_solicita = $especialidades[$key]->unidad_solicita;
@@ -1000,6 +1023,7 @@ class InstructorController extends Controller
                     $espins->status = $especialidades[$key]->status;
                     $espins->observacion_validacion = $especialidades[$key]->observacion_validacion;
                     $espins->hvalidacion = $especialidades[$key]->hvalidacion;
+
                     if(isset($especialidades[$key]->memorandum_baja))
                     {
                         $espins->memorandum_baja = $especialidades[$key]->memorandum_baja;
@@ -3108,7 +3132,7 @@ class InstructorController extends Controller
     {
         // dd($request);
         $rplc = array('[',']','"');
-        $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA');
+        $arrstat = array('EN FIRMA','REVALIDACION EN FIRMA','REACTIVACION EN FIRMA','BAJA EN FIRMA');
         $especialidades = $arrtemp = array();
         set_time_limit(0);
         $user = auth::user()->id;
@@ -3121,13 +3145,22 @@ class InstructorController extends Controller
             $arrtemp = null;
             if(in_array($cadwell->status, $arrstat))
             {
-                if($cadwell->fecha_validacion == NULL)
+                if($cadwell->status != 'BAJA EN FIRMA' && $cadwell->fecha_validacion == NULL)
                 {
-                   $cadwell->fecha_validacion = $special[$key]->fecha_validacion = carbon::now()->toDateString();
+                    $cadwell->fecha_validacion = $special[$key]->fecha_validacion = carbon::now()->toDateString();
                 }
-                if($cadwell->memorandum_validacion != $request->memovali)
+                elseif($cadwell->status == 'BAJA EN FIRMA' && $cadwell->fecha_baja == NULL)
+                {
+                    $cadwell->fecha_baja = $special[$key]->fecha_baja = carbon::now()->toDateString();
+                }
+
+                if($cadwell->status != 'BAJA EN FIRMA' && $cadwell->memorandum_validacion != $request->memovali)
                 {
                     $cadwell->memorandum_validacion = $special[$key]->memorandum_validacion = $request->memovali;
+                }
+                elseif($cadwell->status == 'BAJA EN FIRMA' && $cadwell->memorandum_baja != $request->memovali)
+                {
+                    $cadwell->memorandum_baja = $special[$key]->memorandum_baja = $request->memovali;
                 }
                 $cadwell->observacion_validacion = $special[$key]->observacion_validacion = $request->observacion_validacion;
 
@@ -3178,7 +3211,14 @@ class InstructorController extends Controller
         $instructor->numero_control = $numero_control;
         $instructor->save();
 
-        $date = strtotime($especialidades[0]->fecha_solicitud);
+        if($especialidades[0]->status != 'BAJA EN FIRMA')
+        {
+            $date = strtotime($especialidades[0]->fecha_validacion);
+        }
+        else
+        {
+            $date = strtotime($especialidades[0]->fecha_baja);
+        }
         $D = date('d', $date);
         $MO = date('m',$date);
         $M = $this->monthToString(date('m',$date));//A
@@ -3201,24 +3241,33 @@ class InstructorController extends Controller
         $special = $this->make_collection($instructor->data_especialidad);
         foreach($special as $key => $moist)
         {
-            if($moist->status == 'BAJA EN FIRMA')
+            if($moist->status == 'BAJA EN FIRMA' || $moist->status == 'BAJA EN PREVALIDACION')
             {
                 if($moist->fecha_solicitud == NULL)
                 {
                     $moist->fecha_solicitud = $special[$key]->fecha_solicitud = carbon::now()->toDateString();
                 }
-                if($moist->memorandum_solicitud != $request->nomemo)
+                if($moist->memorandum_solicitud != $request->nomemo && $moist->status == 'BAJA EN FIRMA')
                 {
                     $moist->memorandum_solicitud = $special[$key]->memorandum_solicitud = $request->nomemo;
                 }
+                else
+                {
+
+                    $moist->memorandum_solicitud = 'BORRADOR';
+                }
+                $moist->especialidad = DB::TABLE('especialidades')->WHERE('id',$moist->especialidad_id)->value('nombre');
                 array_push($especialidades, $moist);
             }
         }
         $instructor->data_especialidad = $special;
-        $instructor->save();
+        if($instructor->status == 'BAJA EN FIRMA')
+        {
+            $instructor->save();
+        }
         $especialidades = $this->make_collection($especialidades);
 
-        $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', '=', $especialidades[0]->unidad_solicita)->FIRST();
+        $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', 'LIKE', $instructor->nrevision[0].$instructor->nrevision[1].'%')->FIRST();
         $date = strtotime($especialidades[0]->fecha_solicitud);
         $D = date('d', $date);
         $MO = date('m',$date);
