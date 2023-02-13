@@ -287,10 +287,13 @@ class InstructorController extends Controller
                 $id = $uid->id + 1;
             }
             $instructor = $this->guardado_ins($saveInstructor, $request, $id);
+            unset($instructor->data_especialidad);
+            unset($instructor->data_perfil);
+
             $pre_instructor  = $this->guardado_ins($save_preinstructor, $request, $id);
             $pre_instructor->id_oficial = $instructor->id;
             $pre_instructor->registro_activo = TRUE;
-
+            // dd($instructor);
             $pre_instructor->save();
             $instructor->save();
 
@@ -1009,8 +1012,11 @@ class InstructorController extends Controller
                     $espins->especialidad_id = $especialidades[$key]->especialidad_id;
                     $espins->perfilprof_id = $especialidades[$key]->perfilprof_id;
                     $espins->unidad_solicita = $especialidades[$key]->unidad_solicita;
-                    $espins->memorandum_validacion = $especialidades[$key]->memorandum_validacion;
-                    $espins->fecha_validacion = $especialidades[$key]->fecha_validacion;
+                    if(isset($especialidades[$key]->memorandum_validacion))
+                    {
+                        $espins->memorandum_validacion = $especialidades[$key]->memorandum_validacion;
+                        $espins->fecha_validacion = $especialidades[$key]->fecha_validacion;
+                    }
                     $espins->memorandum_modificacion = $especialidades[$key]->memorandum_modificacion;
                     $espins->observacion = $especialidades[$key]->observacion;
                     $espins->criterio_pago_id = $especialidades[$key]->criterio_pago_id;
