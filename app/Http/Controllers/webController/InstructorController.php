@@ -36,26 +36,7 @@ class InstructorController extends Controller
 {
     public function prueba()
     {
-        // $idesin = DB::table('especialidad_instructores')->SELECT('id')->OrderBy('id', 'ASC')->GET();
-
-        // foreach ($idesin as $key => $cadwell)
-        // {
-        //     $cursos = DB::table('especialidad_instructor_curso')->SELECT('curso_id')
-        //                   ->WHERE('id_especialidad_instructor', '=', $cadwell->id)
-        //                   ->WHERE('activo', '=', TRUE)
-        //                   ->OrderBy('curso_id', 'ASC')
-        //                   ->GET();
-
-        //     $array = [];
-        //     foreach ($cursos as $data)
-        //     {
-        //         array_push($array, $data->curso_id);
-        //     }
-
-        //     especialidad_instructor::WHERE('id', '=', $cadwell->id)
-        //                         ->update(['cursos_impartir' => $array]);
-        // }
-        // dd('Lock&Load');
+        dd('IDDQD');
     }
 
     public function index(Request $request)
@@ -76,13 +57,13 @@ class InstructorController extends Controller
         {
             $data = instructor::searchinstructor($tipoInstructor, $busquedaInstructor, $tipoStatus)->WHERE('id', '!=', '0')
             ->WHEREIN('estado', [true,false])
-            ->PAGINATE(25, ['nombre', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
+            ->PAGINATE(25, ['nombre', 'curp', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
         }
         else
         {
             $data = instructor::searchinstructor($tipoInstructor, $busquedaInstructor, $tipoStatus)->WHERE('id', '!=', '0')
             ->WHEREIN('estado', [true,false])
-            ->PAGINATE(25, ['nombre', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
+            ->PAGINATE(25, ['nombre', 'curp', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
         }
         return view('layouts.pages.initinstructor', compact('data'));
     }
@@ -1585,9 +1566,9 @@ class InstructorController extends Controller
         $modInstructor = NULL;
         $userId = Auth::user()->id;
         $modInstructor = pre_instructor::find($request->id);
+        $extract_inf = instructor::find($request->id);
         if(!isset($modInstructor))
         {
-            $extract_inf = instructor::find($request->id);
             $modInstructor = new pre_instructor();
             $modInstructor->id_oficial = $request->id;
             $modInstructor->archivo_ine = $extract_inf->archivo_ine;
@@ -1603,14 +1584,17 @@ class InstructorController extends Controller
             $modInstructor->registro_activo = TRUE;
         }
         $pre_instructor = $this->guardado_ins($modInstructor, $request, $request->id);
+        $pre_instructor->registro_activo = TRUE;
         $new = $request->apellido_paterno . ' ' . $request->apellido_materno . ' ' . $request->nombre;
         $old = $pre_instructor->apellidoPaterno . ' ' . $pre_instructor->apellidoMaterno . ' ' . $pre_instructor->nombre;
+
+        $extract_inf->status = 'EN CAPTURA';
+        $extract_inf->save();
 
         if($pre_instructor->status == 'RETORNO' || $pre_instructor->status == 'VALIDADO')
         {
             $pre_instructor->status = 'EN CAPTURA';
         }
-
         //PROCESO DE PREVENCION EN CAMBIO DE NUMERO DE REVISIONES VACIOS
         $pre_instructor->save();
         if($pre_instructor->turnado == 'UNIDAD')
@@ -3008,6 +2992,7 @@ class InstructorController extends Controller
     public function solicitud_instructor_pdf(Request $request)
     {
         // dd($request);
+        $porcentaje = $cursosnoav = NULL;
         $tipo_doc = 'VALIDACION';
         $rplc = array('[',']','"');
         $arrtemp = array();
@@ -3273,7 +3258,8 @@ class InstructorController extends Controller
         }
         $especialidades = $this->make_collection($especialidades);
 
-        $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', 'LIKE', $instructor->nrevision[0].$instructor->nrevision[1].'%')->FIRST();
+        $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', 'LIKE', $instructor->nrevision[0].$instructor->nrevision[1].'%')
+        ->WHERE('unidad', '!=', 'VILLA CORZO')->FIRST();
         $date = strtotime($especialidades[0]->fecha_solicitud);
         $D = date('d', $date);
         $MO = date('m',$date);
@@ -3294,7 +3280,7 @@ class InstructorController extends Controller
         $instructor = pre_instructor::find($request->idinsbajadocval);
         $distintivo = DB::TABLE('tbl_instituto')->PLUCK('distintivo')->FIRST();
         $special = $this->make_collection($instructor->data_especialidad);
-        $idesps = especialidad_instructor::SELECT('id')->WHERE('id_instructor', '=', $request->idinsbajadocval)
+        $idesps = especialidad_instructor::SELECT('id','memorandum_validacion')->WHERE('id_instructor', '=', $request->idinsbajadocval)
                                             ->WHERE('status','=','BAJA EN FIRMA')
                                             ->GET();
         foreach($special as $key => $cadwell)
@@ -3393,18 +3379,35 @@ class InstructorController extends Controller
         {
             $perfil = $saveInstructor->data_perfil;
             $especialidad = $saveInstructor->data_especialidad;
+            $status_array = ['RETORNO','REVALIDACION RETORNADA','BAJA RETORNADA'];
             foreach($perfil as $llave => $luthier)
             {
-                if($luthier['status'] == 'RETORNO')
+                switch($luthier['status'])
                 {
-                    $perfil[$llave]['status'] = 'EN CAPTURA';
+                    case 'RETORNO':
+                        $perfil[$llave]['status'] = 'EN CAPTURA';
+                    break;
+                    case 'REVALIDACION RETORNADA':
+                        $perfil[$llave]['status'] = 'REVALIDACION EN CAPTURA';
+                    break;
+                    case 'BAJA RETORNADA':
+                        $perfil[$llave]['status'] = 'BAJA EN PREVALIDACION';
+                    break;
                 }
             }
             foreach($especialidad as $rl => $tem)
             {
-                if($tem['status'] == 'RETORNO')
+                switch($luthier['status'])
                 {
-                    $especialidad[$rl]['status'] = 'EN CAPTURA';
+                    case 'RETORNO':
+                        $especialidad[$rl]['status'] = 'EN CAPTURA';
+                    break;
+                    case 'REVALIDACION RETORNADA':
+                        $especialidad[$rl]['status'] = 'REVALIDACION EN CAPTURA';
+                    break;
+                    case 'BAJA RETORNADA':
+                        $especialidad[$rl]['status'] = 'BAJA EN PREVALIDACION';
+                    break;
                 }
             }
 
@@ -3557,7 +3560,6 @@ class InstructorController extends Controller
             }
             $saveInstructor->data_especialidad = $arresp;
         }
-
         return $saveInstructor;
     }
 
@@ -4059,6 +4061,61 @@ class InstructorController extends Controller
         }
         // dd($respond);
         return $respond;
+    }
+
+    protected function egg()
+    {
+        // ACTUALIZA HVALIDACION DE NULO A LLENO
+        // $moist = especialidad_instructor::select('especialidad_instructores.id','id_instructor')->get();
+        // foreach ($moist as $cadwell)
+        // {
+        //     $arrtemp = $hvalidacion = array();
+        //     $data = especialidad_instructor::find($cadwell->id);
+        //     $instructor_check = pre_instructor::find($cadwell->id_instructor);
+        //     $arch_alta = instructor::find($cadwell->id_instructor);
+        //     if(!isset($instructor_check))
+        //     {
+        //         // if(!isset($arch_alta->archivo_alta))
+        //         // {
+        //         //     dd($arch_alta);
+        //         // }
+        //         $arrtemp['arch_sol'] = $arch_alta->archivo_alta;
+        //         $arrtemp['arch_val'] = $arch_alta->archivo_alta;
+        //         $arrtemp['memo_sol'] = $data->memorandum_solicitud;
+        //         $arrtemp['memo_val'] = $data->memorandum_validacion;
+        //         $arrtemp['fecha_sol'] = $data->updated_at;
+        //         $arrtemp['fecha_val'] = $data->updated_at;
+
+        //         array_push($hvalidacion, $arrtemp);
+        //         $data->hvalidacion = $hvalidacion;
+        //         $data->save();
+        //     }
+
+        // }
+        // dd('yeaaah boy');
+
+        // UPDATE DE CURSOS_IMPARTIR
+        // set_time_limit(0);
+        // $idesin = DB::table('especialidad_instructores')->SELECT('id')->WHERENULL('cursos_impartir')->OrderBy('id', 'ASC')->GET();
+
+        // foreach ($idesin as $key => $cadwell)
+        // {
+        //     $cursos = DB::table('especialidad_instructor_curso')->SELECT('curso_id')
+        //                   ->WHERE('id_especialidad_instructor', '=', $cadwell->id)
+        //                   ->WHERE('activo', '=', TRUE)
+        //                   ->OrderBy('curso_id', 'ASC')
+        //                   ->GET();
+
+        //     $array = [];
+        //     foreach ($cursos as $data)
+        //     {
+        //         array_push($array, $data->curso_id);
+        //     }
+
+        //     especialidad_instructor::WHERE('id', '=', $cadwell->id)
+        //                         ->update(['cursos_impartir' => $array]);
+        // }
+        // dd('Lock&Load');
     }
 }
 
