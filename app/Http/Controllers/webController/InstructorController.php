@@ -57,12 +57,14 @@ class InstructorController extends Controller
         {
             $data = instructor::searchinstructor($tipoInstructor, $busquedaInstructor, $tipoStatus)->WHERE('id', '!=', '0')
             ->WHEREIN('estado', [true,false])
+            ->WHEREIN('status', ['EN CAPTURA','VALIDADO','BAJA','PREVALIDACION','REACTIVACION EN CAPTURA'])
             ->PAGINATE(25, ['nombre', 'curp', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
         }
         else
         {
             $data = instructor::searchinstructor($tipoInstructor, $busquedaInstructor, $tipoStatus)->WHERE('id', '!=', '0')
             ->WHEREIN('estado', [true,false])
+            ->WHEREIN('status', ['EN CAPTURA','VALIDADO','BAJA','PREVALIDACION','REACTIVACION EN CAPTURA'])
             ->PAGINATE(25, ['nombre', 'curp', 'telefono', 'status', 'apellidoPaterno', 'apellidoMaterno', 'numero_control', 'id', 'archivo_alta']);
         }
         return view('layouts.pages.initinstructor', compact('data'));
@@ -158,7 +160,7 @@ class InstructorController extends Controller
             {
                 foreach($especialidades as $boromir)
                 {
-                    if(isset($boromir->hvalidacion) && $boromir->status != 'VALIDADO')
+                    if(isset($boromir->hvalidacion) && $boromir->status != 'VALIDADO' && $boromir->status != 'INACTIVO')
                     {
                         $arch_sol = end($boromir->hvalidacion)['arch_sol'];
                     }
@@ -313,8 +315,18 @@ class InstructorController extends Controller
                             ->ORDERBY('muni','ASC')->GET();
         }
 
-        $munix = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')->WHERE('muni', '=', $datainstructor->municipio)->FIRST();
-        $munixnac = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')->WHERE('muni', '=', $datainstructor->municipio_nacimiento)->FIRST();
+
+        $munix = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')
+                ->WHERE('muni', '=', $datainstructor->municipio)
+                ->WHERE('estados.nombre',$datainstructor->entidad)
+                ->JOIN('estados',DB::raw('CAST(estados.id AS varchar)'),'tbl_municipios.id_estado')
+                ->FIRST();
+        $munixnac = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')
+                ->WHERE('muni', '=', $datainstructor->municipio_nacimiento)
+                ->WHERE('estados.nombre',$datainstructor->entidad_nacimiento)
+                ->JOIN('estados',DB::raw('CAST(estados.id AS varchar)'),'tbl_municipios.id_estado')
+                ->FIRST();
+
         if($munix != NULL)
         {
             $localidades = DB::TABLE('tbl_localidades')->SELECT('tbl_localidades.clave','localidad')
@@ -375,7 +387,7 @@ class InstructorController extends Controller
         $chk_mod_perfil = $chk_mod_esp = false;
         $movimiento = NULL;
         $newb = $newc = $arrtemp = array();
-        $stat_arr = array('EN CAPTURA','REVALIDACION EN CAPTURA','BAJA EN CAPTURA');
+        $stat_arr = array('EN CAPTURA','REVALIDACION EN CAPTURA','BAJA EN CAPTURA','RETORNO');
 
             $bajachk = FALSE;
             $movimiento = 'Envio a DTA para su prevalidacion ';
@@ -441,8 +453,16 @@ class InstructorController extends Controller
                                 $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ' (BAJA), ';
                             break;
                             case 'RETORNO':
-                                $perfiles[$key]->status = 'PREVALIDACION';
-                                $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ', ';
+                                if($especialidades[$llave]->new == FALSE)
+                                {
+                                    $perfiles[$key]->status = 'REVALIDACION EN PREVALIDACION';
+                                    $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ' (REVALIDACION), ';
+                                }
+                                else
+                                {
+                                    $perfiles[$key]->status = 'PREVALIDACION';
+                                    $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ', ';
+                                }
                             break;
                             case 'REVALIDACION RETORNADA':
                                 $perfiles[$key]->status = 'REVALIDACION EN PREVALIDACION';
@@ -485,8 +505,16 @@ class InstructorController extends Controller
                                 $bajachk = TRUE;
                             break;
                             case 'RETORNO':
-                                $especialidades[$llave]->status = 'PREVALIDACION';
-                                $movimiento = $movimiento . $especialidad->nombre . ',  ';
+                                if($especialidades[$llave]->new == FALSE)
+                                {
+                                    $especialidades[$llave]->status = 'REVALIDACION EN PREVALIDACION';
+                                    $movimiento = $movimiento . $especialidad->nombre . ' (REVALIDACION),  ';
+                                }
+                                else
+                                {
+                                    $especialidades[$llave]->status = 'PREVALIDACION';
+                                    $movimiento = $movimiento . $especialidad->nombre . ',  ';
+                                }
                             break;
                             case 'REVALIDACION RETORNADA':
                                 $especialidades[$llave]->status = 'REVALIDACION EN PREVALIDACION';
@@ -940,7 +968,7 @@ class InstructorController extends Controller
                     $end = count($hvalidacion) - 1;
                     if($cadwell->status == 'BAJA EN FIRMA')
                     {
-                        $hvalidacion[$end]['memo_baja'] = $cadwell->memorandum_validacion;
+                        $hvalidacion[$end]['memo_baja'] = $cadwell->memorandum_baja;
                         $hvalidacion[$end]['fecha_baja'] = $cadwell->fecha_validacion;
                         $hvalidacion[$end]['arch_baja'] = $url;
                         $especialidades[$key]->hvalidacion = $hvalidacion;
@@ -1016,6 +1044,12 @@ class InstructorController extends Controller
                         $espins->memorandum_baja = $especialidades[$key]->memorandum_baja;
                         $espins->fecha_baja = $especialidades[$key]->fecha_baja;
                     }
+
+                    if($espins->status == 'BAJA' && $cadwell->new == TRUE)
+                    {
+                        $espins->memorandum_validacion = $espins->memorandum_baja = $especialidades[$key]->memorandum_baja;
+                        $espins->fecha_validacion = $especialidades[$key]->fecha_baja;
+                    }
                     $espins->save();
                     $especialidades[$key]->new = FALSE;
                     $especialidades[$key]->id = $espins->id;
@@ -1076,21 +1110,15 @@ class InstructorController extends Controller
         $userId = Auth::user()->id;
         $idlist = explode(",", $request->idinstructoresreturn);
         $newb = $newc = $arrtemp = array();
-        $stat_arr = array('PREVALIDACION','REVALIDACION EN PREVALIDACION');
+        $stat_arr = array('PREVALIDACION','REVALIDACION EN PREVALIDACION','BAJA EN PREVALIDACION','BAJA EN FIRMA','EN FIRMA','REVALIDACION EN FIRMA');
 
         foreach($idlist as $bosmer)
         {
-            $chk_mod_perfil = $chk_mod_esp = FALSE;
+            $chk_mod_perfil = $chk_mod_esp = $retorno_firma = FALSE;
             $movimiento = 'Retorno a unidad para su modificacion ';
             $modInstructor = pre_instructor::find($bosmer);
             $modInstructor->turnado = 'UNIDAD';
             $modInstructor->rechazo = $request->observacion_retorno;
-
-
-            if($modInstructor->status != 'VALIDADO')
-            {
-                $modInstructor->status = 'RETORNO';
-            }
 
             $modInstructor->lastUserId = $userId;
 
@@ -1132,6 +1160,21 @@ class InstructorController extends Controller
                                 $perfiles[$key]->status = 'REVALIDACION RETORNADA';
                                 $movimiento = $movimiento . $item->grado_profesional . ' ' . $item->area_carrera . ' (REVALIDACION), ';
                             break;
+                            case 'BAJA EN PREVALIDACION':
+                                $perfiles[$key]->status = 'RETORNO';
+                            break;
+                            case 'REVALIDACION EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (REVALIDACION EN FIRMA), ';
+                                $retorno_firma = TRUE;
+                            break;
+                            case 'BAJA EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (BAJA), ';
+                                $retorno_firma = TRUE;
+                            break;
+                            case 'EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (EN FIRMA), ';
+                                $retorno_firma = TRUE;
+                            break;
                         }
                     }
                 }
@@ -1157,6 +1200,25 @@ class InstructorController extends Controller
                             case 'REVALIDACION EN PREVALIDACION':
                                 $especialidades[$space]->status = 'REVALIDACION RETORNADA';
                                 $movimiento = $movimiento . $especialidad->nombre . ' (REVALIDACION),  ';
+                            case 'BAJA EN PREVALIDACION':
+                                $especialidades[$space]->status = 'RETORNO';
+                                $movimiento = $movimiento. $especialidad->nombre . ' (BAJA), ';
+                            break;
+                            case 'REVALIDACION EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (REVALIDACION EN FIRMA), ';
+                                $retorno_firma = TRUE;
+                                    unset($especialidades[$space]->hvalidacion[count($cadwell->hvalidacion) - 1]);
+                            break;
+                            case 'BAJA EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (BAJA), ';
+                                $retorno_firma = TRUE;
+                                    unset($especialidades[$space]->hvalidacion[count($cadwell->hvalidacion) - 1]);
+                            break;
+                            case 'EN FIRMA':
+                                $movimiento = $movimiento. $especialidad->nombre . ' (EN FIRMA), ';
+                                $retorno_firma = TRUE;
+                                    unset($especialidades[$space]->hvalidacion[count($cadwell->hvalidacion) - 1]);
+                            break;
                         }
                     }
                 }
@@ -1168,6 +1230,10 @@ class InstructorController extends Controller
                 $movimiento = $movimiento . 'de la informacion general del instructor ';
             }
 
+            if($modInstructor->status != 'VALIDADO' && $retorno_firma == FALSE)
+            {
+                $modInstructor->status = 'RETORNO';
+            }
             $movimiento = $movimiento . 'con la observacion: ' . $request->observacion_retorno;
 
             $historico = new instructor_history;
@@ -1210,8 +1276,18 @@ class InstructorController extends Controller
         // dd($request);
         $userId = Auth::user()->id;
         $userunidad = DB::TABLE('tbl_unidades')->SELECT('ubicacion')->WHERE('id', '=', Auth::user()->unidad)->FIRST();
-        $nrev = $this->new_revision($request->idbajains);
         $instructor = pre_instructor::find($request->idbajains);
+        if(!isset($instructor))
+        {
+            $instructorof = instructor::find($request->idbajains);
+            // dd($instructor);
+            $instructor = new pre_instructor();
+            $instructor  = $this->guardado_ins_model($instructor, $instructorof, $request->idbajains);
+            $instructor->id_oficial = $instructor->id;
+            $instructor->registro_activo = TRUE;
+            $instructor->save();
+        }
+        $nrev = $this->new_revision($request->idbajains);
         $perfiles = $this->make_collection($instructor->data_perfil);
         $especialidades = $this->make_collection($instructor->data_especialidad);
         $movimiento = 'Solicitud de baja de instructor con motivo: ' .  $request->motivo_baja;
@@ -1332,6 +1408,27 @@ class InstructorController extends Controller
         $userId = Auth::user()->id;
         $userunidad = DB::TABLE('tbl_unidades')->SELECT('ubicacion')->WHERE('id', '=', Auth::user()->unidad)->FIRST();
         $instructor = pre_instructor::find($request->idreacins);
+
+        $extract_inf = instructor::find($request->idreacins);
+        if(!isset($instructor))
+        {
+            $pre_instructor = new pre_instructor();
+            $instructor  = $this->guardado_ins_model($pre_instructor, $extract_inf, $request->idreacins);
+            $pre_instructor->id_oficial = $request->idreacins;
+            $pre_instructor->archivo_ine = $extract_inf->archivo_ine;
+            $pre_instructor->archivo_domicilio = $extract_inf->archivo_domicilio;
+            $pre_instructor->archivo_curp = $extract_inf->archivo_curp;
+            $pre_instructor->archivo_alta = $extract_inf->archivo_alta;
+            $pre_instructor->archivo_bancario = $extract_inf->archivo_bancario;
+            $pre_instructor->archivo_fotografia = $extract_inf->archivo_fotografia;
+            $pre_instructor->archivo_estudios = $extract_inf->archivo_estudios;
+            $pre_instructor->archivo_otraid = $extract_inf->archivo_otraid;
+            $pre_instructor->archivo_rfc = $extract_inf->archivo_rfc;
+            $pre_instructor->numero_control = $extract_inf->numero_control;
+            $pre_instructor->registro_activo = TRUE;
+            $instructor->save();
+        }
+
         $especialidades = $this->make_collection($instructor->data_especialidad);
         $perfiles = $this->make_collection($instructor->data_perfil);
         $movimiento = 'Solicitud de reactivacion de instructor';
@@ -1339,17 +1436,17 @@ class InstructorController extends Controller
 
         foreach($perfiles AS $key => $cadwell)
         {
-            $perfiles[$key]->status = 'REACTIVACION EN PREVALIDACION';
+            $perfiles[$key]->status = 'REACTIVACION EN CAPTURA';
         }
 
         foreach($especialidades AS $rise => $moist)
         {
-            $especialidades[$rise]->status = 'REACTIVACION EN PREVALIDACION';
+            $especialidades[$rise]->status = 'REACTIVACION EN CAPTURA';
         }
 
         $instructor->data_perfil = $perfiles;
         $instructor->data_especialidad = $especialidades;
-        $instructor->status = 'REACTIVACION EN PREVALIDACION';
+        $instructor->status = 'REACTIVACION EN CAPTURA';
         $instructor->turnado = 'DTA';
         $instructor->registro_activo = TRUE;
         $instructor->motivo = NULL;
@@ -1367,7 +1464,7 @@ class InstructorController extends Controller
         // dd($historico);
 
         return redirect('/instructor/ver/'.$instructor->id)
-            ->with('success','Solicitud de Baja Solicitada con Numero de Revision: ' . $instructor->nrevision);
+            ->with('success','Solicitud de Reactivación Solicitada con Numero de Revision: ' . $instructor->nrevision);
     }
 
     public function solicitud_baja_especialidad(Request $request)
@@ -1513,8 +1610,16 @@ class InstructorController extends Controller
                             ->ORDERBY('muni','ASC')->GET();
         }
 
-        $munix = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')->WHERE('muni', '=', $datainstructor->municipio)->FIRST();
-        $munixnac = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')->WHERE('muni', '=', $datainstructor->municipio_nacimiento)->FIRST();
+        $munix = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')
+                ->WHERE('muni', '=', $datainstructor->municipio)
+                ->WHERE('estados.nombre',$datainstructor->entidad)
+                ->JOIN('estados',DB::raw('CAST(estados.id AS varchar)'),'tbl_municipios.id_estado')
+                ->FIRST();
+        $munixnac = DB::TABLE('tbl_municipios')->SELECT('clave', 'id_estado')
+                ->WHERE('muni', '=', $datainstructor->municipio_nacimiento)
+                ->WHERE('estados.nombre',$datainstructor->entidad_nacimiento)
+                ->JOIN('estados',DB::raw('CAST(estados.id AS varchar)'),'tbl_municipios.id_estado')
+                ->FIRST();
 
         if($munix != NULL)
         {
@@ -1654,7 +1759,14 @@ class InstructorController extends Controller
         }
 
         $instructorupd->exp_docente = $expdoc;
-        $instructorupd->status = 'EN CAPTURA';
+        if($instructorupd->status == 'REACTIVACION EN CAPTURA')
+        {
+            $instructorupd->status = 'REACTIVACION EN CAPTURA';
+        }
+        else
+        {
+            $instructorupd->status = 'EN CAPTURA';
+        }
         $instructorupd->registro_activo = TRUE;
         $instructorupd->save();
 
@@ -1769,7 +1881,14 @@ class InstructorController extends Controller
 
 
         $instructorupd->exp_laboral = $explab;
-        $instructorupd->status = 'EN CAPTURA';
+        if($instructorupd->status == 'REACTIVACION EN CAPTURA')
+        {
+            $instructorupd->status = 'REACTIVACION EN CAPTURA';
+        }
+        else
+        {
+            $instructorupd->status = 'EN CAPTURA';
+        }
         $instructorupd->registro_activo = TRUE;
         $instructorupd->save();
 
@@ -1868,7 +1987,14 @@ class InstructorController extends Controller
                        '10' => $request->Q10, '11' => $request->Q11, '12' => $request->Q12,
                        '13' => $request->Q13, '14' => $request->Q14, 'link' => null];
         $instructorupd->entrevista = $entrevista;
-        $instructorupd->status = 'EN CAPTURA';
+        if($instructorupd->status == 'REACTIVACION EN CAPTURA')
+        {
+            $instructorupd->status = 'REACTIVACION EN CAPTURA';
+        }
+        else
+        {
+            $instructorupd->status = 'EN CAPTURA';
+        }
         $instructorupd->registro_activo = TRUE;
         $instructorupd->save();
 
@@ -2445,15 +2571,18 @@ class InstructorController extends Controller
                     $arrtemp[$key]['status'] = 'REVALIDACION EN CAPTURA';
                 }
 
-                foreach ($request->itemEdit as $keys=>$roshan)
+                if(isset($request->itemEdit))
                 {
-                    if($cursos_impartir[0] == 0)
+                    foreach ($request->itemEdit as $keys=>$roshan)
                     {
-                        $cursos_impartir[0] = $roshan['check_cursos_edit'];
-                    }
-                    else
-                    {
-                        array_push($cursos_impartir,$roshan['check_cursos_edit']);
+                        if($cursos_impartir[0] == 0)
+                        {
+                            $cursos_impartir[0] = $roshan['check_cursos_edit'];
+                        }
+                        else
+                        {
+                            array_push($cursos_impartir,$roshan['check_cursos_edit']);
+                        }
                     }
                 }
 
@@ -2463,7 +2592,7 @@ class InstructorController extends Controller
         }
 
         $instructor->status = 'EN CAPTURA';
-        $instructor->registro_activo = TRUE;
+
         $instructor->lastUserId = Auth::user()->id;
         $instructor->data_especialidad = $arrtemp;
 
@@ -2479,6 +2608,9 @@ class InstructorController extends Controller
         {
             $nrevisiontext = 'Modificaciones agregadas al numero de revisión: ' . $instructor->nrevision;
         }
+
+        $instructor->registro_activo = TRUE;
+        $instructor->save();
 
         if($instructor->numero_control == 'Pendiente')
         {
@@ -3095,6 +3227,8 @@ class InstructorController extends Controller
         }
 
         $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', '=', $daesp)->FIRST();
+        $direccion = $data_unidad->direccion;
+        $direccion = explode("*", $data_unidad->direccion);
         $solicito = DB::TABLE('users')->WHERE('id', '=', Auth::user()->id)->FIRST();
         $D = date('d', $date);
         $MO = date('m',$date);
@@ -3102,7 +3236,7 @@ class InstructorController extends Controller
         $Y = date("Y",$date);
         $nomemosol = $request->nomemo;
         $fecha_letra = $this->obtenerFechaEnLetra($D);
-        $pdf = PDF::loadView('layouts.pdfpages.solicitudinstructor',compact('distintivo','data','cursos','porcentaje','instructor','data_unidad','solicito','D','M','Y','cursosnoav','nomemosol','tipo_doc','fecha_letra','daesp'));
+        $pdf = PDF::loadView('layouts.pdfpages.solicitudinstructor',compact('distintivo','data','cursos','porcentaje','instructor','data_unidad','solicito','D','M','Y','cursosnoav','nomemosol','tipo_doc','fecha_letra','daesp','direccion'));
         $pdf->setPaper('letter');
         return  $pdf->stream('solicitud_instructor.pdf');
     }
@@ -3176,6 +3310,8 @@ class InstructorController extends Controller
         $unidad = DB::TABLE('tbl_unidades')
                         ->WHERE('unidad', '=', $ubicacion)
                         ->FIRST();
+        $direccion = '14 PONIENTE NORTE NO. 239*COLONIA MOCTEZUMA.*TUXTLA GUTIÉRREZ, CP 29030 TELEFONO: 9616121621* EMAIL: ICATECH@ICATECH.CHIAPAS.GOB.MX';
+        $direccion = explode("*", $direccion);
         if($instructor->numero_control == 'Pendiente')
         {
             $uni = substr($unidad->cct, -3, 2) * 1 . substr($unidad->cct, -1);
@@ -3215,7 +3351,7 @@ class InstructorController extends Controller
         $M = $this->monthToString(date('m',$date));//A
         $Y = date("Y",$date);
 
-        $pdf = PDF::loadView('layouts.pdfpages.validacioninstructor',compact('distintivo','elaboro','instructor','especialidades','unidad','D','M','Y'));
+        $pdf = PDF::loadView('layouts.pdfpages.validacioninstructor',compact('distintivo','elaboro','instructor','especialidades','unidad','D','M','Y','direccion'));
         $pdf->setPaper('letter', 'Landscape');
         return  $pdf->stream('validacion_instructor.pdf');
     }
@@ -3260,14 +3396,16 @@ class InstructorController extends Controller
 
         $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', 'LIKE', $instructor->nrevision[0].$instructor->nrevision[1].'%')
         ->WHERE('unidad', '!=', 'VILLA CORZO')->FIRST();
+        $direccion = $data_unidad->direccion;
+        $direccion = explode("*", $data_unidad->direccion);
         $date = strtotime($especialidades[0]->fecha_solicitud);
         $D = date('d', $date);
         $MO = date('m',$date);
         $M = $this->monthToString(date('m',$date));//A
         $Y = date("Y",$date);
-        // dd($data_unidad);
+        // dd($especialidades);
 
-        $pdf = PDF::loadView('layouts.pdfpages.solicitudbajainstructor',compact('distintivo','instructor','data_unidad','D','M','Y','especialidades'));
+        $pdf = PDF::loadView('layouts.pdfpages.solicitudbajainstructor',compact('distintivo','instructor','data_unidad','D','M','Y','especialidades','direccion'));
         $pdf->setPaper('letter');
         return  $pdf->stream('baja_instructor.pdf');
     }
@@ -3303,6 +3441,8 @@ class InstructorController extends Controller
         $instructor->data_especialidad = $special;
         $instructor->save();
         $data_unidad = DB::TABLE('tbl_unidades')->WHERE('unidad', '=', $especialidades[0]->unidad_solicita)->FIRST();
+        $direccion = '14 PONIENTE NORTE NO. 239*COLONIA MOCTEZUMA.*TUXTLA GUTIÉRREZ, CP 29030 TELEFONO: 9616121621* EMAIL: ICATECH@ICATECH.CHIAPAS.GOB.MX';
+        $direccion = explode("*", $direccion);
         $date = strtotime($especialidades[0]->fecha_baja);
         $datesol = strtotime($especialidades[0]->fecha_solicitud);
         $D = date('d', $date);
@@ -3315,14 +3455,14 @@ class InstructorController extends Controller
         $YS = date("Y",$datesol);
         // dd($data_unidad);
 
-        $pdf = PDF::loadView('layouts.pdfpages.validacionbajainstructor',compact('elabora','distintivo','instructor','data_unidad','D','M','Y','especialidades','DS','MS','YS'));
+        $pdf = PDF::loadView('layouts.pdfpages.validacionbajainstructor',compact('elabora','distintivo','instructor','data_unidad','D','M','Y','especialidades','DS','MS','YS','direccion'));
         $pdf->setPaper('letter');
         return  $pdf->stream('baja_instructor_validacion.pdf');
     }
 
     private function guardado_ins($saveInstructor,$request,$id)
     {
-        // dd($request);
+        // dd($saveInstructor);
         $arresp = $arrper = $arrtemp = array();
         $perfiles = InstructorPerfil::WHERE('numero_control',$id)->GET();
         $especialidades = especialidad_instructor::WHERE('id_instructor', '=', $id)->GET();
@@ -3370,7 +3510,10 @@ class InstructorController extends Controller
         $saveInstructor->banco = $request->banco;
         $saveInstructor->interbancaria = $request->clabe;
         $saveInstructor->no_cuenta = $request->numero_cuenta;
-        $saveInstructor->numero_control = $request->numero_control;
+        if(isset($request->numero_control))
+        {
+            $saveInstructor->numero_control = $request->numero_control;
+        }
         if(!isset($saveInstructor->numero_control))
         {
             $saveInstructor->numero_control = "Pendiente";

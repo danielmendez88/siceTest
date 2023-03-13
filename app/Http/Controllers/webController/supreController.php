@@ -448,7 +448,6 @@ class supreController extends Controller
         // supre_directorio::WHERE('id_supre', '=', $id)->DELETE();
         // folio::where('id_supre', '=', $id)->delete();
         // supre::where('id', '=', $id)->delete();
-        $id = base64_decode($id);
         $folio = folio::WHERE('id_supre','=',$id)->FIRST();
         $folio->status = 'Cancelado';
         $folio->save();
@@ -462,7 +461,6 @@ class supreController extends Controller
 
     public function restartSupre($id)
     {
-        $id = base64_decode($id);
         $list = folio::SELECT('id_folios')->WHERE('id_supre', '=', $id)->GET();
         foreach($list as $item)
         {
@@ -853,7 +851,6 @@ class supreController extends Controller
     }
     public function dar_permiso_valsupre($id)
     {
-        $id = base64_decode($id);
         $supre = supre::find($id);
         $supre->permiso_editar = TRUE;
         $supre->save();
@@ -1585,6 +1582,7 @@ class supreController extends Controller
                     'tbl_cursos.unidad',
                     \DB::raw("CASE WHEN tbl_cursos.tipo_curso = 'CURSO' THEN 'CURSO' ELSE 'CERTIFICACION EXTRAORDINARIA' END AS tipo_curso"),
                     'tbl_cursos.curso',
+                    \DB::raw('tbl_cursos.hombre + tbl_cursos.mujer'),
                     'tbl_cursos.clave',
                     'tbl_cursos.ze',
                     'tbl_cursos.dura',
@@ -1623,6 +1621,7 @@ class supreController extends Controller
                     'tbl_cursos.unidad',
                     \DB::raw("CASE WHEN tbl_cursos.tipo_curso = 'CURSO' THEN 'CURSO' ELSE 'CERTIFICACION EXTRAORDINARIA' END AS tipo_curso"),
                     'tbl_cursos.curso',
+                    \DB::raw('tbl_cursos.hombre + tbl_cursos.mujer'),
                     'tbl_cursos.clave',
                     'tbl_cursos.ze',
                     'tbl_cursos.dura',
@@ -1656,7 +1655,9 @@ class supreController extends Controller
                     'tabla_supre.fecha', \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
                     'tbl_cursos.unidad',
                     \DB::raw("CASE WHEN tbl_cursos.tipo_curso = 'CURSO' THEN 'CURSO' ELSE 'CERTIFICACION EXTRAORDINARIA' END AS tipo_curso"),
-                    'tbl_cursos.curso', 'tbl_cursos.clave',
+                    'tbl_cursos.curso',
+                    \DB::raw('tbl_cursos.hombre + tbl_cursos.mujer'),
+                     'tbl_cursos.clave',
                     'tbl_cursos.ze',
                     'tbl_cursos.dura',
                     'tbl_cursos.muni',
@@ -1689,7 +1690,9 @@ class supreController extends Controller
                     'tabla_supre.fecha', \DB::raw('CONCAT(instructores.nombre, '."' '".' ,instructores."apellidoPaterno",'."' '".',instructores."apellidoMaterno")'),
                     'tbl_cursos.unidad',
                     \DB::raw("CASE WHEN tbl_cursos.tipo_curso = 'CURSO' THEN 'CURSO' ELSE 'CERTIFICACION EXTRAORDINARIA' END AS tipo_curso"),
-                    'tbl_cursos.curso', 'tbl_cursos.clave',
+                    'tbl_cursos.curso',
+                    \DB::raw('tbl_cursos.hombre + tbl_cursos.mujer'),
+                     'tbl_cursos.clave',
                     'tbl_cursos.ze',
                     'tbl_cursos.dura',
                     'tbl_cursos.muni',
@@ -1718,8 +1721,8 @@ class supreController extends Controller
 
         $cabecera = [
             'MEMO. SOLICITADO', 'NO. DE SUFICIENCIA', 'FECHA DE CREACION EN EL SISTEMA', 'FECHA',
-            'INSTRUCTOR', 'UNIDAD/A.M DE CAP.', 'SERVICIO', 'CURSO', 'CLAVE DEL GRUPO',
-            'Z.E.','HSM','MUNICIPIO','LOCALIDAD',  'IMPORTE POR HORA', 'IVA 16%', 'PARTIDA/CONCEPTO', 'IMPORTE TOTAL FEDERAL',
+            'INSTRUCTOR', 'UNIDAD/A.M DE CAP.', 'SERVICIO', 'CURSO', 'CUPO', 'CLAVE DEL GRUPO',
+            'Z.E.','HSM','MUNICIPIO','LOCALIDAD', 'IMPORTE POR HORA', 'IVA 16%', 'PARTIDA/CONCEPTO', 'IMPORTE TOTAL FEDERAL',
             'IMPORTE TOTAL ESTATAL', 'RETENCIÓN ISR', 'RETENCIÓN IVA', 'MEMO PRESUPUESTA',
             'FECHA REGISTRO', 'OBSERVACIONES'
         ];
