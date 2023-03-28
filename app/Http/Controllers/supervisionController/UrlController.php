@@ -25,17 +25,10 @@ class UrlController extends Controller
              $curso = DB::table('tbl_cursos')->where('id',$id)->first();
              $id_curso = $curso->id;
              $id_instructor = $curso->id_instructor;
-<<<<<<< HEAD
-             $instructor = DB::table('instructores')->select('telefono','correo')->where('id',$id_instructor)->first();             
-             //var_dump($instructor);
-             $datos = "\n\n** DATOS DEL INSTRUCTOR **\nTELEFONO: ".$instructor->telefono."\n CORREO: ".$instructor->correo;
-             
-=======
              $instructor = DB::table('instructores')->select('telefono','correo')->where('id',$id_instructor)->first();
              //var_dump($instructor);
              $datos = "\n\n** DATOS DEL INSTRUCTOR **\nTELEFONO: ".$instructor->telefono."\n CORREO: ".$instructor->correo;
 
->>>>>>> c693001952b3a9dcb6987fb59509e3dead0d12b5
              $token = DB::table('supervision_tokens')->where('id_supervisor',$id_user)->where('id_curso',$id_curso)->where('id_instructor',$id_instructor)->value('url_token');
        }elseif($tipo=="alumno"){ //comprobar si existe el alumno
             //$inscript = DB::table('tbl_inscripcion')->where('id',$id)->first();
