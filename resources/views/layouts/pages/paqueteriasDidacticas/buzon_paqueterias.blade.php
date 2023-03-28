@@ -145,8 +145,7 @@
                         @foreach($cursos as $curso)
                         @if($curso->estatus_paqueteria == 'AUTORIZADO')
                         <tr>
-                            <td>{{ $curso->nombre_curso }}</td>
-                            <td>{{ $curso->nivel_estudio }}</td>
+                            <td>{{ $curso->nombre_curso }}</td>                            
                             <td>{{ $curso->modalidad }}</td>
                             <td>{{ $curso->fecha }}</td>
                             <td>{{ $curso->fechaumod }}</td>
@@ -198,8 +197,7 @@
                     @if(($rolUser->slug == 'dta' && $curso->estatus_paqueteria != 'EN CAPTURA') || $rolUser->slug != 'dta')
                     @if( $curso->estatus_paqueteria != 'AUTORIZADO' && $curso->estatus_paqueteria != '')
                     <tr>
-                        <td>{{ $curso->nombre_curso }}</td>
-                        <td>{{ $curso->nivel_estudio }}</td>
+                        <td>{{ $curso->nombre_curso }}</td>                        
                         <td>{{ $curso->fecha }}</td>
                         <td>{{ $curso->fechaumod }}</td>
                         <td>{{ $curso->estatus_paqueteria }}</td>
