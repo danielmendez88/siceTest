@@ -66,7 +66,7 @@
                     <select class="form-control" name="honorario" id="honorario">
                         <option value="sin especificar">Sin Especificar</option>
                         <option value="HONORARIOS" @if($datainstructor->tipo_honorario == 'HONORARIOS') selected @endif >Honorarios</option>
-                        <option value="ASIMILADOS A SALARIO" @if($datainstructor->tipo_honorario == 'ASIMILADOS A SALARIO') selected @endif>Asimilados a Salarios</option>
+                        {{-- <option value="ASIMILADOS A SALARIO" @if($datainstructor->tipo_honorario == 'ASIMILADOS A SALARIO') selected @endif>Asimilados a Salarios</option> --}}
                         <option value="HONORARIOS Y ASIMILADOS A SALARIO" @if($datainstructor->tipo_honorario == 'HONORARIOS Y ASIMILADOS A SALARIO') selected @endif>Honorarios y Asimilado a Salarios</option>
                     </select>
                 </div>
@@ -110,7 +110,7 @@
                                 </td>
                                 <td></td>
                                 <td id="center">
-                                    <label class='onpoint' for="arch_domicilio">
+                                    <label class='onpoint' for="arch_ine">
                                         <a class="btn mr-sm-4 mt-3 btn-sm">
                                             Subir &nbsp; <i class="fa fa-2x fa-cloud-upload"></i>
                                         </a>
