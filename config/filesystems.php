@@ -46,6 +46,16 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
+            'permissions' => [
+                'file' => [
+                    'public' => 0664,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0775,
+                    'private' => 0700,
+                ],
+            ],
         ],
 
         'public' => [
@@ -53,11 +63,22 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
-        ],        
+        ],
         'custom_folder_1' => [
             'driver' => 'local',
             'root' => storage_path('app/uploadFiles'),
-            'url' => env('APP_URL').'/storage',            
+            'permissions' => [
+                'file' => [
+                    'public' => 0664,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0775,
+                    'private' => 0700,
+                ],
+            ],
+            'url' => env('APP_URL').'/uploadFiles',
+            'visibility' => 'public',
         ],
         's3' => [
             'driver' => 's3',
@@ -71,6 +92,7 @@ return [
     ],
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('uploadFiles') => storage_path('app/uploadFiles'), // se crea un nuevo Enlace y se corre el comando php artisan storage:link
     ],
 
 ];
