@@ -28,8 +28,8 @@
             @else
                 <a class="btn btn-danger" disabled>Comprobante de Domicilio</a><br>
             @endif
-            @if ($data->archivo_alta != NULL)
-                <a class="btn btn-info" href={{$data->archivo_alta}} target="_blank">Validación de Instructor</a><br>
+            @if ($memoval != NULL)
+                <a class="btn btn-info" href={{$memoval}} target="_blank">Validación de Instructor</a><br>
             @else
                 <a class="btn btn-danger" disabled>Validación de Instructor</a><br>
             @endif
@@ -56,13 +56,13 @@
             </div>
             <div class="form-group col-md-5">
                 <label for="clavecurso" class="control-label">Especialidad</label>
-                <input class="form-control" name="perfil_instructor" disabled id="perfil_instructor" value="{{$data->especialidad}}">
+                <input class="form-control" name="perfil_instructor" disabled id="perfil_instructor" value="{{$data->espe}}">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">
                 <label for="clavecurso" class="control-label">Memorándum de Validación</label>
-                <input class="form-control" name="memo_validacion" disabled id="memo_validacion" value="{{$data->memorandum_validacion}}">
+                <input class="form-control" name="memo_validacion" disabled id="memo_validacion" value="{{$data->instructor_mespecialidad}}">
             </div>
             <div class="form-group col-md-3">
                 <label for="clavecurso" class="control-label">Tipo Honorario</label>
@@ -100,7 +100,7 @@
             </div>
             <div class="form-group col-md-5">
                 <label for="clavecurso" class="control-label">Especialidad</label>
-                <input class="form-control" name="perfil_instructor" disabled id="perfil_instructor" value="{{$data->especialidad}}">
+                <input class="form-control" name="perfil_instructor" disabled id="perfil_instructor" value="{{$data->espe}}">
             </div>
         </div>
         <div class="form-row">
